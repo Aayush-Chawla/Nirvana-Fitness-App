@@ -1,0 +1,31 @@
+/local.properties
+
+# Ignore the Firebase configuration file
+app/google-services.json
+
+# Ignore build files
+/build
+.gradle
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+
+# Ignore local configuration files
+*.iml
+*.log
+*.keystore
+
+# Ignore Android Studio files
+.idea/
+.gradle/
+*.hprof
+
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
