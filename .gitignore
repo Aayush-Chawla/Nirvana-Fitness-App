@@ -3,6 +3,9 @@
 # Ignore the Firebase configuration file
 app/google-services.json
 
+# .gitignore
+local.properties
+
 # Ignore build files
 /build
 .gradle
@@ -27,5 +30,4 @@ app/google-services.json
 /captures
 .externalNativeBuild
 .cxx
-local.properties
 

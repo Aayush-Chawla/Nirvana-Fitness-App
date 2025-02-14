@@ -10,7 +10,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -33,13 +32,6 @@ public class MainActivity extends AppCompatActivity {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
-        // Check if Firebase is initialized
-        if (FirebaseApp.getApps(this).isEmpty()) {
-            Log.d(TAG, "Firebase initialization failed");
-        } else {
-            Log.d(TAG, "Firebase initialized successfully");
-        }
-
         // Check if the user is already logged in
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
@@ -48,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             // User is logged in, show a welcome message or redirect to the home screen
             Log.d(TAG, "User is already logged in: " + currentUser.getEmail());
-            // TO DO: Redirect to the home screen or profile screen
+            // TODO: Redirect to the home screen or profile screen
         }
     }
 
