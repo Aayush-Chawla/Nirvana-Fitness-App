@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Initialize Firebase Auth
+        // storing credentials in cache and automatically logging in
         mAuth = FirebaseAuth.getInstance();
 
         // Check if the user is already logged in
@@ -49,4 +50,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish(); // Close MainActivity to prevent going back
     }
+
+
 }

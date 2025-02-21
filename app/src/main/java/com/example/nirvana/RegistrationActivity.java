@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class RegistrationActivity extends AppCompatActivity {
+
     private static final String TAG = "RegistrationActivity";
     private FirebaseAuth mAuth;
     private EditText etEmail, etPassword;
@@ -48,7 +49,7 @@ public class RegistrationActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "User registered successfully");
                         Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                        navigateToProfile();
+                        navigateToLogin();
                     } else {
                         Log.e(TAG, "Registration failed: " + task.getException().getMessage());
                         Toast.makeText(this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -56,15 +57,15 @@ public class RegistrationActivity extends AppCompatActivity {
                 });
     }
 
-    private void navigateToProfile() {
-        Intent intent = new Intent(this, ProfileActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
-    public void navigateToLogin(View view) {
+    private void navigateToLogin() {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
-        finish();
+        finish(); // Close RegistrationActivity to prevent going back
     }
+
+//    public void navigateToLogin(View view) {
+//        Intent intent = new Intent(this, LoginActivity.class);
+//        startActivity(intent);
+//        finish();
+//    }
 }

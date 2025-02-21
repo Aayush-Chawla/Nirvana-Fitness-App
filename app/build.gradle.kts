@@ -1,6 +1,6 @@
 plugins {
     id("com.android.application")
-//    id("com.google.gms.google-services") // Firebase plugin
+    id("com.google.gms.google-services") // Firebase plugin
 //    id("org.jetbrains.kotlin.android") // Kotlin plugin (if you're using Kotlin)
 }
 
@@ -59,7 +59,7 @@ dependencies {
 
     // Firebase dependencies (no version needed, as BoM manages them)
     implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-auth")     // Firebase Authentication
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
 
@@ -67,5 +67,8 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
 
 }
