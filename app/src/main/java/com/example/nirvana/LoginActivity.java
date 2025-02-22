@@ -1,11 +1,13 @@
 package com.example.nirvana;
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,7 +32,9 @@ public class LoginActivity extends AppCompatActivity {
     private GoogleSignInClient googleSignInClient;
 
     private EditText etEmail, etPassword;
-    private Button btnLogin, btnGoogleSignIn;
+    private Button btnLogin;
+
+    private  ImageButton  btnGoogleSignIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
