@@ -3,6 +3,7 @@ package com.example.nirvana;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,7 +44,17 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "User is already logged in: " + currentUser.getEmail());
             // TODO: Redirect to the home screen or profile screen
         }
+        Button btnLogout = findViewById(R.id.btnLogout);//Logout button
+        btnLogout.setOnClickListener(v -> logoutUser());
+
     }
+    private void logoutUser() {
+        FirebaseAuth.getInstance().signOut(); // Sign out from Firebase
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish(); // Close MainActivity so the user can't go back
+    }
+
 
     private void navigateToLogin() {
         Intent intent = new Intent(this, LoginActivity.class);
