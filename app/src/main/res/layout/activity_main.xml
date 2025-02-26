@@ -13,4 +13,16 @@
         android:textSize="24sp"
         android:textColor="@color/black"
         android:layout_centerInParent="true" />
+
+<!--    Logout button-->
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Logout"
+        android:layout_below="@id/tvWelcome"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
+
+
 </RelativeLayout>
