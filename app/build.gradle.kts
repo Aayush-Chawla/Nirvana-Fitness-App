@@ -62,6 +62,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")     // Firebase Authentication
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
+    implementation(libs.activity)
 
     // Testing dependencies
     testImplementation("junit:junit:4.13.2")

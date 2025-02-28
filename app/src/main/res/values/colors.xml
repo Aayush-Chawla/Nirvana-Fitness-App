@@ -2,6 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="gray">#6B6767</color>
+    <color name="gray_light">#E0E0E0</color> <!-- Light gray color -->
     <color name="white">#FFFFFFFF</color>
     <color name="purple_500">#9C27B0</color>
     <color name="red">#FF0000</color><!-- Replace with the correct color value if needed -->
