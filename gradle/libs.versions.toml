@@ -11,6 +11,8 @@ activity = "1.10.0"
 constraintlayout = "2.2.0"
 firebaseFirestore = "25.1.2"
 transportApi = "3.0.0"
+navigationFragment = "2.8.8"
+navigationUi = "2.8.8"
 
 [libraries]
 appcompat-v142 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
@@ -24,6 +26,8 @@ activity = { group = "androidx.activity", name = "activity", version.ref = "acti
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 transport-api = { group = "com.google.android.datatransport", name = "transport-api", version.ref = "transportApi" }
+navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
+navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
