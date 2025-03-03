@@ -44,7 +44,9 @@ android {
     // Enable BuildConfig generation
     buildFeatures {
         buildConfig = true
+        viewBinding = true
     }
+
 }
 
 dependencies {
@@ -64,6 +66,10 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging")
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation(libs.activity)
+    implementation(libs.annotation)
+    implementation(libs.lifecycle.livedata.ktx)
+    implementation(libs.lifecycle.viewmodel.ktx)
 
     // Testing dependencies
     testImplementation("junit:junit:4.13.2")

@@ -80,16 +80,29 @@
         android:textColor="@color/white" />
 
     <!-- Already have an account? Login -->
-    <TextView
-        android:id="@+id/tvLogin"
+    <Button
+        android:id="@+id/btnLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/transparent"
+        android:onClick="navigateToLogin"
         android:text="Already have an account? Login"
         android:textColor="@color/primaryColor"
         android:textSize="14sp"
-        android:layout_marginTop="16dp"
-        android:layout_gravity="center"
-        android:textStyle="bold"
-        android:onClick="navigateToLogin" />
+        android:textStyle="bold" />
+
+<!--    <TextView-->
+<!--        android:id="@+id/tvLogin"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Already have an account? Login"-->
+<!--        android:textColor="@color/primaryColor"-->
+<!--        android:textSize="14sp"-->
+<!--        android:layout_marginTop="16dp"-->
+<!--        android:layout_gravity="center"-->
+<!--        android:textStyle="bold"-->
+<!--        android:onClick="navigateToLogin" />-->
 
 </LinearLayout>

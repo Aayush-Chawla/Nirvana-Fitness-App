@@ -6,6 +6,39 @@
     app:startDestination="@id/homeFragment">
 
     <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.nirvana.Fragments.LoginFragment"
+        android:label="LoginFragment"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_registrationFragment"
+            app:destination="@id/registrationFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registrationFragment"
+        android:name="com.example.nirvana.Fragments.RegistrationFragment"
+        android:label="RegistrationFragment"
+        tools:layout="@layout/fragment_registration">
+
+        <!-- Add navigation actions -->
+        <action
+            android:id="@+id/action_registrationFragment_to_loginFragment"
+            app:destination="@id/loginFragment"/>
+
+        <action
+            android:id="@+id/action_registrationFragment_to_profileSetupFragment"
+            app:destination="@id/profileSetupFragment"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileSetupFragment"
+        android:name="com.example.nirvana.Fragments.ProfileSetupFragment"
+        android:label="Profile Setup"
+        tools:layout="@layout/fragment_profile_setup" />
+
+    <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.nirvana.Fragments.HomeFragment"
         android:label="Home"
@@ -22,4 +55,5 @@
         android:name="com.example.nirvana.Fragments.WorkoutFragment"
         android:label="Workout"
         tools:layout="@layout/fragment_workout" />
+
 </navigation>

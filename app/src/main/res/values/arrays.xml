@@ -1,0 +1,16 @@
+<resources>
+    <string-array name="fitness_goals">
+        <item>Lose Weight</item>
+        <item>Build Muscle</item>
+        <item>Increase Stamina</item>
+        <item>Stay Fit</item>
+    </string-array>
+
+    <string-array name="activity_levels">
+        <item>Sedentary (little or no exercise)</item>
+        <item>Lightly Active (light exercise/sports 1-3 days a week)</item>
+        <item>Moderately Active (moderate exercise/sports 3-5 days a week)</item>
+        <item>Very Active (hard exercise/sports 6-7 days a week)</item>
+        <item>Super Active (very hard exercise/physical job)</item>
+    </string-array>
+</resources>
