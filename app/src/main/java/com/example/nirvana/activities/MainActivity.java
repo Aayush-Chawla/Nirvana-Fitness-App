@@ -3,7 +3,7 @@ package com.example.nirvana.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
+import android.widget.ImageButton;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +11,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
+import com.example.nirvana.Fragments.BottomMenuFragment;
 import com.example.nirvana.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,24 +46,17 @@ public class MainActivity extends AppCompatActivity {
         // Ensure Home is selected by default
         bottomNavigationView.post(() -> bottomNavigationView.setSelectedItemId(R.id.homeFragment));
 
-        // Logout button setup
-        Button btnLogout = findViewById(R.id.btnLogout);
-        btnLogout.setOnClickListener(v -> logoutUser());
+        // Profile Button (Replaces Logout)
+        ImageButton imgProfile = findViewById(R.id.imgProfile);
+        imgProfile.setOnClickListener(v -> {
+            BottomMenuFragment bottomSheetDialog = new BottomMenuFragment();
+            bottomSheetDialog.show(getSupportFragmentManager(), "Test"); // Fixed method call
+        });
     }
-
-    private void logoutUser() {
-        FirebaseAuth.getInstance().signOut();
-        Intent intent = new Intent(MainActivity.this, AuthActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
 
     private void navigateToLogin() {
         Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);
         finish();
     }
-
-
 }

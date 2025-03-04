@@ -101,38 +101,40 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginTop="12dp" />
-
-                <LinearLayout
+                <RadioGroup
+                    android:id="@+id/rgGender"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="8dp">
+                    android:orientation="horizontal">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnMale"
-                        android:layout_width="0dp"
-                        android:layout_height="50dp"
-                        android:layout_weight="1"
+                    <RadioButton
+                        android:id="@+id/rbMale"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text="Male"
                         android:textSize="16sp"
-                        app:cornerRadius="16dp"
-                        android:backgroundTint="@color/gray_light"
                         android:textColor="@color/black"
-                        android:elevation="6dp" />
+                        android:padding="8dp"/>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnFemale"
-                        android:layout_width="0dp"
-                        android:layout_height="50dp"
-                        android:layout_weight="1"
+                    <RadioButton
+                        android:id="@+id/rbFemale"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text="Female"
                         android:textSize="16sp"
-                        app:cornerRadius="16dp"
-                        android:layout_marginStart="8dp"
-                        android:backgroundTint="@color/gray_light"
                         android:textColor="@color/black"
-                        android:elevation="6dp" />
-                </LinearLayout>
+                        android:padding="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/rbOther"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Other"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:padding="8dp"/>
+                </RadioGroup>
+
 
                 <!-- Fitness Goal -->
                 <com.google.android.material.textfield.TextInputLayout

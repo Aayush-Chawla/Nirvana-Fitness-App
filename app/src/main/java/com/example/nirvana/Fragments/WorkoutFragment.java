@@ -1,66 +1,132 @@
 package com.example.nirvana.Fragments;
 
+import android.animation.ObjectAnimator;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
+import com.example.nirvana.WorkoutCategory;
+import com.example.nirvana.WorkoutCategoryAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link WorkoutFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class WorkoutFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private CardView cardHomeWorkout, cardGymWorkout, cardCustomWorkout;
+    private TextView txtWorkoutStreak, txtLastWorkout;
+    private ImageView imgWorkoutStreak;
+    private RecyclerView recyclerWorkoutCategories;
+    private WorkoutCategoryAdapter categoryAdapter;
+    private List<WorkoutCategory> workoutCategories;
+    private Button btnGoToGymWorkout;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public WorkoutFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment WorkoutFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static WorkoutFragment newInstance(String param1, String param2) {
-        WorkoutFragment fragment = new WorkoutFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_workout, container, false);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Initialize UI components
+        initializeViews(view);
+
+        // Setup RecyclerView
+        setupWorkoutCategories();
+
+        // Ensure views are properly laid out before starting animations
+        view.post(this::startAnimations);
+
+        // Setup click listeners
+        setupClickListeners();
+    }
+
+    private void initializeViews(View view) {
+        cardHomeWorkout = view.findViewById(R.id.cardHomeWorkout);
+        cardGymWorkout = view.findViewById(R.id.cardGymWorkout);
+        cardCustomWorkout = view.findViewById(R.id.cardCustomWorkout);
+        txtWorkoutStreak = view.findViewById(R.id.txtWorkoutStreak);
+        txtLastWorkout = view.findViewById(R.id.txtLastWorkout);
+        imgWorkoutStreak = view.findViewById(R.id.imgWorkoutStreak);
+        recyclerWorkoutCategories = view.findViewById(R.id.recyclerWorkoutCategories);
+        btnGoToGymWorkout = view.findViewById(R.id.btn_go_to_gymWorkout);
+
+        if (btnGoToGymWorkout != null) {
+            btnGoToGymWorkout.setOnClickListener(v -> openFragment(new GymWorkoutFragment()));
         }
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_workout, container, false);
+    private void setupWorkoutCategories() {
+        if (getContext() == null) return; // Prevent null pointer crashes
+
+        workoutCategories = new ArrayList<>();
+        workoutCategories.add(new WorkoutCategory("Strength", R.drawable.ic_gym_workout));
+        workoutCategories.add(new WorkoutCategory("Cardio", R.drawable.ic_gym_workout));
+        workoutCategories.add(new WorkoutCategory("Flexibility", R.drawable.ic_gym_workout));
+        workoutCategories.add(new WorkoutCategory("HIIT", R.drawable.ic_gym_workout));
+
+        categoryAdapter = new WorkoutCategoryAdapter(workoutCategories);
+        recyclerWorkoutCategories.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        recyclerWorkoutCategories.setAdapter(categoryAdapter);
+    }
+
+    private void startAnimations() {
+        if (getView() == null || getContext() == null || imgWorkoutStreak == null) return;
+
+        Animation fadeIn = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_in);
+        cardHomeWorkout.startAnimation(fadeIn);
+        cardGymWorkout.startAnimation(fadeIn);
+        cardCustomWorkout.startAnimation(fadeIn);
+        imgWorkoutStreak.startAnimation(fadeIn);
+
+        ObjectAnimator bounce = ObjectAnimator.ofFloat(imgWorkoutStreak, "translationY", 0f, -20f, 0f);
+        bounce.setDuration(800);
+        bounce.setRepeatCount(ObjectAnimator.INFINITE);
+        bounce.start();
+    }
+
+    private void setupClickListeners() {
+        if (cardHomeWorkout != null) {
+            cardHomeWorkout.setOnClickListener(v ->
+                    Toast.makeText(requireContext(), "Navigating to Home Workout", Toast.LENGTH_SHORT).show()
+            );
+        }
+
+        if (cardGymWorkout != null) {
+            cardGymWorkout.setOnClickListener(v -> openFragment(new GymWorkoutFragment()));
+        }
+
+        if (cardCustomWorkout != null) {
+            cardCustomWorkout.setOnClickListener(v ->
+                    Toast.makeText(requireContext(), "Custom Workout Clicked", Toast.LENGTH_SHORT).show()
+            );
+        }
+    }
+
+    private void openFragment(Fragment fragment) {
+        if (isAdded() && getActivity() != null) {
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            transaction.replace(R.id.nav_host_fragment, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        } else {
+            Toast.makeText(requireContext(), "Error: Fragment not attached!", Toast.LENGTH_SHORT).show();
+        }
     }
 }

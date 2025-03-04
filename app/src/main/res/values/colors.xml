@@ -8,5 +8,6 @@
     <color name="red">#FF0000</color><!-- Replace with the correct color value if needed -->
     <color name="primaryColor">#FF512F</color>  <!-- Orange shade -->
     <color name="primaryDarkColor">#DD2476</color>  <!-- Pinkish shade -->
+    <color name="colorAccent">#FF7474</color>
 
 </resources>

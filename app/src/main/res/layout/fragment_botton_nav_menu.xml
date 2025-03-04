@@ -1,0 +1,99 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/white">
+
+    <!-- Header -->
+    <TextView
+        android:id="@+id/menuTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Menu"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_gravity="center"
+        android:paddingBottom="16dp" />
+
+    <!-- Privacy Policy -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPrivacyPolicy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Privacy Policy"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        app:cornerRadius="8dp"
+        android:backgroundTint="@color/primaryColor"
+        android:textColor="@color/white" />
+
+    <!-- App Status -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAppStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="App Status"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:layout_marginTop="12dp"
+        app:cornerRadius="8dp"
+        android:backgroundTint="@color/primaryColor"
+        android:textColor="@color/white" />
+
+    <!-- Settings -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Settings"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:layout_marginTop="12dp"
+        app:cornerRadius="8dp"
+        android:backgroundTint="@color/primaryColor"
+        android:textColor="@color/white" />
+
+    <!-- Google Fit API Connector -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGoogleFit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Connect Google Fit"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:layout_marginTop="12dp"
+        app:cornerRadius="8dp"
+        android:backgroundTint="@color/primaryColor"
+        android:textColor="@color/white" />
+
+    <!-- Permissions -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPermissions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Manage Permissions"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:layout_marginTop="12dp"
+        app:cornerRadius="8dp"
+        android:backgroundTint="@color/primaryColor"
+        android:textColor="@color/white" />
+
+    <!-- Logout -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLogout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Logout"
+        android:icon="@drawable/logout"
+        android:textSize="16sp"
+        android:backgroundTint="@color/primaryColor"
+        android:textAllCaps="false"
+        android:layout_marginTop="20dp"
+        app:cornerRadius="8dp"
+        android:textColor="@color/white" />
+
+</LinearLayout>
