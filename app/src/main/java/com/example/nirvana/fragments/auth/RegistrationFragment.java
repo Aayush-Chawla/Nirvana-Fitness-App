@@ -128,13 +128,19 @@ public class RegistrationFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
 
         // Button to go to the login fragment
-        binding.btnLogin.setOnClickListener(v -> {
-            // Using Navigation component to navigate to LoginFragment
-            Navigation.findNavController(view).navigate(R.id.action_registrationFragment_to_loginFragment);
-        });
+//        binding.btnLogin.setOnClickListener(v -> {
+//            // Using Navigation component to navigate to LoginFragment
+//            Navigation.findNavController(view).navigate(R.id.action_registrationFragment_to_loginFragment);
+//        });
+        binding.btnLogin.setOnClickListener(v -> navigateToLogin());
 
         // Register user
         binding.btnRegister.setOnClickListener(v -> registerUser());
+    }
+
+    // Add this method to handle the onClick event
+    private void navigateToLogin() {
+        Navigation.findNavController(requireView()).navigate(R.id.action_registrationFragment_to_loginFragment);
     }
 
     private void registerUser() {

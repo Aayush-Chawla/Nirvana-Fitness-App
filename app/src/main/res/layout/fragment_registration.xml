@@ -87,7 +87,6 @@
         android:layout_gravity="center"
         android:layout_marginTop="16dp"
         android:background="@android:color/transparent"
-        android:onClick="navigateToLogin"
         android:text="Already have an account? Login"
         android:textColor="@color/primaryColor"
         android:textSize="14sp"
