@@ -1,4 +1,4 @@
-package com.example.nirvana.Fragments;
+package com.example.nirvana.fragments.home;
 
 import android.content.Intent;
 import android.os.Bundle;

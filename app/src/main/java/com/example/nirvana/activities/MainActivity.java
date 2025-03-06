@@ -11,7 +11,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
-import com.example.nirvana.Fragments.BottomMenuFragment;
+import com.example.nirvana.fragments.home.BottomMenuFragment;
 import com.example.nirvana.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;

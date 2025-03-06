@@ -1,4 +1,4 @@
-package com.example.nirvana;
+package com.example.nirvana.ui.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
+import com.example.nirvana.data.models.WorkoutCategory;
+
 import java.util.List;
 
 public class WorkoutCategoryAdapter extends RecyclerView.Adapter<WorkoutCategoryAdapter.ViewHolder> {

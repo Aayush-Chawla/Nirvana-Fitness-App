@@ -1,4 +1,4 @@
-package com.example.nirvana.Fragments;
+package com.example.nirvana.fragments.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,10 +17,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+
 import com.example.nirvana.R;
 import com.example.nirvana.activities.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class LoginFragment extends Fragment {
 
@@ -50,18 +49,7 @@ public class LoginFragment extends Fragment {
         tvRegister = view.findViewById(R.id.tvRegister);
 
         btnLogin.setOnClickListener(v -> loginUser());
-        tvRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                RegistrationFragment secondFragment = new RegistrationFragment();
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.auth_container, secondFragment);
-                transaction.addToBackStack(null); // Enables back navigation
-                transaction.commit();
-
-            }
-        });
+        tvRegister.setOnClickListener(v -> navigateToRegister());
 
         return view;
     }
@@ -94,10 +82,26 @@ public class LoginFragment extends Fragment {
         requireActivity().finish();
     }
 
-//    private void navigateToRegister(View view) {
-////        NavController navController = Navigation.findNavController(view);
-////        navController.navigate(R.id.action_loginFragment_to_registrationFragment);
+
+//        ------- Navigation Component using NavController -------
+    private void navigateToRegister() {
+        // Add your navigation logic here
+//        // NavController navController = Navigation.findNavController(view);
+//        // navController.navigate(R.id.action_loginFragment_to_registrationFragment);
+        Navigation.findNavController(tvRegister).navigate(R.id.action_loginFragment_to_registrationFragment);
+    }
+
+
+//    ---------------------- uncomment if NavController does not work -----------------------
+//    private void navigateToRegister() {
 //
-//
+//        RegistrationFragment secondFragment = new RegistrationFragment();
+//        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+//        FragmentTransaction transaction = fragmentManager.beginTransaction();
+//        transaction.replace(R.id.auth_container, secondFragment);
+//        transaction.addToBackStack(null); // Enables back navigation
+//        transaction.commit();
 //    }
+
+
 }

@@ -1,4 +1,4 @@
-package com.example.nirvana;
+package com.example.nirvana.data.models;
 
 public class WorkoutCategory {
     private String name;
