@@ -1,4 +1,4 @@
-package com.example.nirvana.Fragments;
+package com.example.nirvana.fragments.workout;
 
 import android.animation.ObjectAnimator;
 import android.os.Bundle;
@@ -19,8 +19,9 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
-import com.example.nirvana.WorkoutCategory;
-import com.example.nirvana.WorkoutCategoryAdapter;
+import com.example.nirvana.data.models.WorkoutCategory;
+import com.example.nirvana.ui.adapters.WorkoutCategoryAdapter;
+
 import java.util.ArrayList;
 import java.util.List;
 

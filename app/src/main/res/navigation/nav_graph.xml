@@ -3,21 +3,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation"
-    app:startDestination="@id/homeFragment">
+    app:startDestination="@id/loginFragment">
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.nirvana.Fragments.LoginFragment"
+        android:name="com.example.nirvana.fragments.auth.LoginFragment"
         android:label="LoginFragment"
         tools:layout="@layout/fragment_login" >
         <action
             android:id="@+id/action_loginFragment_to_registrationFragment"
-            app:destination="@id/registrationFragment" />
+            app:destination="@id/registrationFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="false" />
+            <!-- Retain LoginFragment in the back stack -->
+            <!-- Do not remove LoginFragment from the back stack -->
     </fragment>
 
     <fragment
         android:id="@+id/registrationFragment"
-        android:name="com.example.nirvana.Fragments.RegistrationFragment"
+        android:name="com.example.nirvana.fragments.auth.RegistrationFragment"
         android:label="RegistrationFragment"
         tools:layout="@layout/fragment_registration">
 
@@ -44,25 +48,25 @@
 
     <fragment
         android:id="@+id/profileSetupFragment"
-        android:name="com.example.nirvana.Fragments.ProfileSetupFragment"
+        android:name="com.example.nirvana.fragments.auth.ProfileSetupFragment"
         android:label="Profile Setup"
         tools:layout="@layout/fragment_profile_setup" />
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.nirvana.Fragments.HomeFragment"
+        android:name="com.example.nirvana.fragments.home.HomeFragment"
         android:label="Home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/dietFragment"
-        android:name="com.example.nirvana.Fragments.DietFragment"
+        android:name="com.example.nirvana.fragments.diet.DietFragment"
         android:label="Diet"
         tools:layout="@layout/fragment_diet" />
 
     <fragment
         android:id="@+id/workoutFragment"
-        android:name="com.example.nirvana.Fragments.WorkoutFragment"
+        android:name="com.example.nirvana.fragments.workout.WorkoutFragment"
         android:label="Workout"
         tools:layout="@layout/fragment_workout" />
 

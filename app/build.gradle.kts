@@ -64,8 +64,14 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")     // Firebase Authentication
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
-    implementation(libs.navigation.fragment)
-    implementation(libs.navigation.ui)
+
+    // Navigation Component
+    implementation("androidx.navigation:navigation-fragment-ktx:2.6.0")  // or the latest version
+    implementation("androidx.navigation:navigation-ui-ktx:2.6.0")        // or the latest version
+
+//    implementation(libs.navigation.fragment)
+//    implementation(libs.navigation.ui)
+
     implementation(libs.activity)
     implementation(libs.annotation)
     implementation(libs.lifecycle.livedata.ktx)
