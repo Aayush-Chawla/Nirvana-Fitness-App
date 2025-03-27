@@ -1,66 +1,80 @@
 package com.example.nirvana.fragments.diet;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.nirvana.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link DietFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 public class DietFragment extends Fragment {
+    private TextView remainingCaloriesText;
+    private TextView baseGoalText;
+    private TextView foodCaloriesText;
+    private TextView exerciseCaloriesText;
+    private TextView proteinText;
+    private TextView carbsText;
+    private TextView fatText;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public DietFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment DietFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static DietFragment newInstance(String param1, String param2) {
-        DietFragment fragment = new DietFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_diet, container, false);
+        View view = inflater.inflate(R.layout.fragment_diet, container, false);
+
+        // Initialize views
+        remainingCaloriesText = view.findViewById(R.id.remainingCaloriesText);
+        baseGoalText = view.findViewById(R.id.baseGoalText);
+        foodCaloriesText = view.findViewById(R.id.foodCaloriesText);
+        exerciseCaloriesText = view.findViewById(R.id.exerciseCaloriesText);
+        proteinText = view.findViewById(R.id.proteinText);
+        carbsText = view.findViewById(R.id.carbsText);
+        fatText = view.findViewById(R.id.fatText);
+
+        // Update UI with sample data
+        updateCalorieData();
+        updateMacronutrientsData();
+
+        return view;
+    }
+
+    private void updateCalorieData() {
+        // Example data - replace with your actual calorie tracking logic
+        int baseGoal = 1500;
+        int foodCalories = 650;
+        int exerciseCalories = 400;
+        int remainingCalories = baseGoal - foodCalories + exerciseCalories;
+
+        baseGoalText.setText(String.format("Base Goal: %d", baseGoal));
+        foodCaloriesText.setText(String.format("Food: %d", foodCalories));
+        exerciseCaloriesText.setText(String.format("Exercise: %d", exerciseCalories));
+        remainingCaloriesText.setText(String.valueOf(remainingCalories));
+    }
+
+    private void updateMacronutrientsData() {
+        // Example data - replace with your actual macronutrient tracking logic
+        proteinText.setText("120g");
+        carbsText.setText("180g");
+        fatText.setText("50g");
+    }
+
+    // Method to update data from your tracking system
+    public void updateDietData(int baseGoal, int foodCalories, int exerciseCalories,
+                               String protein, String carbs, String fat) {
+        int remainingCalories = baseGoal - foodCalories + exerciseCalories;
+
+        baseGoalText.setText(String.format("Base Goal: %d", baseGoal));
+        foodCaloriesText.setText(String.format("Food: %d", foodCalories));
+        exerciseCaloriesText.setText(String.format("Exercise: %d", exerciseCalories));
+        remainingCaloriesText.setText(String.valueOf(remainingCalories));
+
+        proteinText.setText(protein);
+        carbsText.setText(carbs);
+        fatText.setText(fat);
     }
 }

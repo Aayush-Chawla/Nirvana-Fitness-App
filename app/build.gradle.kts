@@ -27,6 +27,10 @@ android {
     }
 
     buildTypes {
+//        debug {
+//            isDebuggable = true
+//            isMinifyEnabled = false
+//        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -52,9 +56,9 @@ android {
 dependencies {
     // AndroidX libraries
     implementation(libs.appcompat.v161)
-    implementation("com.google.android.material:material:1.9.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.activity:activity-ktx:1.10.0") // Use -ktx for Kotlin extensions
+    implementation(libs.material.v190)
+    implementation(libs.constraintlayout.v214)
+    implementation(libs.activity.ktx) // Use -ktx for Kotlin extensions
 
     // Firebase BoM (Bill of Materials)
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
