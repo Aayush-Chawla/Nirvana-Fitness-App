@@ -74,11 +74,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:padding="8dp"
-            app:itemIconTint="@color/nav_item_color"
-            app:itemTextColor="@color/nav_item_color"
+            android:elevation="8dp"
+            android:padding="4dp"
+            app:elevation="8dp"
+            app:itemBackground="?attr/colorSurface"
+            app:itemIconSize="24dp"
+            app:itemRippleColor="?attr/colorPrimaryContainer"
+            app:itemIconTint="@color/bottom_nav_icon_color"
+            app:itemTextColor="@color/bottom_nav_text_color"
             app:labelVisibilityMode="labeled"
-            app:menu="@menu/menu" />
+            app:menu="@menu/menu"/>
+
+
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
