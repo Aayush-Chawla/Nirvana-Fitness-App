@@ -69,5 +69,13 @@
         android:name="com.example.nirvana.fragments.workout.WorkoutFragment"
         android:label="Workout"
         tools:layout="@layout/fragment_workout" />
+    <fragment
+        android:id="@+id/homeWorkoutFragment"
+        android:name="com.example.nirvana.fragments.workout.HomeWorkoutFragment"
+        android:label="HomeWorkoutFragment" />
+    <fragment
+        android:id="@+id/gymWorkoutFragment"
+        android:name="com.example.nirvana.fragments.workout.GymWorkoutFragment"
+        android:label="GymWorkoutFragment" />
 
 </navigation>

@@ -16,6 +16,8 @@ import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
@@ -33,7 +35,7 @@ public class WorkoutFragment extends Fragment {
     private RecyclerView recyclerWorkoutCategories;
     private WorkoutCategoryAdapter categoryAdapter;
     private List<WorkoutCategory> workoutCategories;
-    private Button btnGoToGymWorkout;
+
 
     @Nullable
     @Override
@@ -66,11 +68,8 @@ public class WorkoutFragment extends Fragment {
         txtLastWorkout = view.findViewById(R.id.txtLastWorkout);
         imgWorkoutStreak = view.findViewById(R.id.imgWorkoutStreak);
         recyclerWorkoutCategories = view.findViewById(R.id.recyclerWorkoutCategories);
-        btnGoToGymWorkout = view.findViewById(R.id.btn_go_to_gymWorkout);
 
-        if (btnGoToGymWorkout != null) {
-            btnGoToGymWorkout.setOnClickListener(v -> openFragment(new GymWorkoutFragment()));
-        }
+
     }
 
     private void setupWorkoutCategories() {
@@ -104,13 +103,17 @@ public class WorkoutFragment extends Fragment {
 
     private void setupClickListeners() {
         if (cardHomeWorkout != null) {
-            cardHomeWorkout.setOnClickListener(v ->
-                    Toast.makeText(requireContext(), "Navigating to Home Workout", Toast.LENGTH_SHORT).show()
-            );
+            cardHomeWorkout.setOnClickListener(v -> {
+                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+                navController.navigate(R.id.homeWorkoutFragment);
+            });
         }
 
         if (cardGymWorkout != null) {
-            cardGymWorkout.setOnClickListener(v -> openFragment(new GymWorkoutFragment()));
+            cardGymWorkout.setOnClickListener(v -> {
+                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+                navController.navigate(R.id.gymWorkoutFragment);
+            });
         }
 
         if (cardCustomWorkout != null) {

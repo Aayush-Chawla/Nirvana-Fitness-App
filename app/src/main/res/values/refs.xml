@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="ic_upper_body" />
+    <drawable name="ic_full_body" />
+    <drawable name="ic_glutes_abs" />
+    <drawable name="ic_cardio" />
+    <drawable name="img_full_body" />
+    <drawable name="img_strength" />
+    <drawable name="img_hiit" />
+</resources>
