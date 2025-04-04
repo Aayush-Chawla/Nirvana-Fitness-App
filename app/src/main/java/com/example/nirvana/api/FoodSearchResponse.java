@@ -1,53 +1,39 @@
 package com.example.nirvana.api;
 
-import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class FoodSearchResponse {
-    @SerializedName("foods")
     public List<FoodItem> foods;
 
     public static class FoodItem {
-        @SerializedName("food_id")
-        public String food_id;
+        private String id;
+        private String name;
+        private int calories;
+        private String servingSize;
+        private double protein;
+        private double carbs;
+        private double fat;
 
-        @SerializedName("food_name")
-        public String food_name;
+        // Getters and Setters
+        public String getId() { return id; }
+        public void setId(String id) { this.id = id; }
 
-        @SerializedName("food_description")
-        public String food_description;
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
 
-        @SerializedName("calories")
-        public int calories;
+        public int getCalories() { return calories; }
+        public void setCalories(int calories) { this.calories = calories; }
 
-        @SerializedName("protein")
-        public float protein;
+        public String getServingSize() { return servingSize; }
+        public void setServingSize(String servingSize) { this.servingSize = servingSize; }
 
-        @SerializedName("carbohydrate")
-        public float carbs;
+        public double getProtein() { return protein; }
+        public void setProtein(double protein) { this.protein = protein; }
 
-        @SerializedName("fat")
-        public float fat;
+        public double getCarbs() { return carbs; }
+        public void setCarbs(double carbs) { this.carbs = carbs; }
 
-        // Getter methods
-        public String getName() {
-            return food_name;
-        }
-
-        public int getCalories() {
-            return calories;
-        }
-
-        public float getProtein() {
-            return protein;
-        }
-
-        public float getCarbs() {
-            return carbs;
-        }
-
-        public float getFat() {
-            return fat;
-        }
+        public double getFat() { return fat; }
+        public void setFat(double fat) { this.fat = fat; }
     }
 }

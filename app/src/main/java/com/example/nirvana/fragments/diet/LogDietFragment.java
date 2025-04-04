@@ -4,7 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -12,31 +15,33 @@ import com.example.nirvana.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.example.nirvana.models.FoodItem;
 
-public class LogDietFragment extends Fragment {
+public class LogDietFragment extends Fragment implements FoodSearchDialog.OnFoodSelectedListener {
 
     private ViewPager2 viewPager;
     private TabLayout tabLayout;
     private FloatingActionButton fabSearchFood;
+    private Button btnAddFood;
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_log_diet, container, false);
-
+        
         // Initialize views
         viewPager = view.findViewById(R.id.viewPager);
         tabLayout = view.findViewById(R.id.tabLayout);
         fabSearchFood = view.findViewById(R.id.fabSearchFood);
+//        btnAddFood = view.findViewById(R.id.btnAddFood);
 
         // Setup ViewPager with tabs
         setupViewPager();
 
         // Setup FAB click listener
-        fabSearchFood.setOnClickListener(v -> {
-            // Open food search dialog
-            showFoodSearchDialog();
-        });
+        fabSearchFood.setOnClickListener(v -> showFoodSearchDialog());
+
+//        btnAddFood.setOnClickListener(v -> showFoodSearchDialog());
 
         return view;
     }
@@ -73,12 +78,20 @@ public class LogDietFragment extends Fragment {
     }
 
     private void showFoodSearchDialog() {
-        // Get current meal fragment
-        int currentPosition = viewPager.getCurrentItem();
-        MealFragment currentFragment = (MealFragment) getChildFragmentManager()
-                .findFragmentByTag("f" + viewPager.getId() + ":" + currentPosition);
+        FoodSearchDialog dialog = FoodSearchDialog.newInstance(this);
+        dialog.show(getChildFragmentManager(), "food_search");
+    }
 
-        FoodSearchDialog dialog = FoodSearchDialog.newInstance(currentFragment);
-        dialog.show(getChildFragmentManager(), "FoodSearchDialog");
+    @Override
+    public void onFoodSelected(FoodItem foodItem, String servingSize) {
+        // Handle the selected food item here
+        String message = String.format("%s (%s): %d calories", 
+            foodItem.getName(), 
+            servingSize, 
+            foodItem.getCalories());
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+        
+        // TODO: Add the food item to your diet log
+        // You can implement the database operation here
     }
 }

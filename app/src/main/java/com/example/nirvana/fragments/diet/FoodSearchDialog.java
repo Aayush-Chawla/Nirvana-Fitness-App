@@ -4,160 +4,175 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.Toast;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
 import com.example.nirvana.adapters.FoodSearchAdapter;
-import com.example.nirvana.api.ApiClient;
-import com.example.nirvana.api.FatSecretApi;
 import com.example.nirvana.api.FoodSearchResponse;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import java.io.IOException;
+import com.example.nirvana.models.FoodItem;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FoodSearchDialog extends DialogFragment {
-
-    private EditText etSearch;
-    private RecyclerView rvSearchResults;
-    private ProgressBar progressBar;
-    private FatSecretApi fatSecretApi;
-    private List<FoodSearchResponse.FoodItem> searchResults = new ArrayList<>();
+    private EditText editSearch;
+    private RecyclerView recyclerResults;
     private FoodSearchAdapter adapter;
-    private MealFragment parentFragment;
+    private OnFoodSelectedListener listener;
 
-    public FoodSearchDialog() {}
-
-    public static FoodSearchDialog newInstance(MealFragment fragment) {
+    public static FoodSearchDialog newInstance(Fragment fragment) {
         FoodSearchDialog dialog = new FoodSearchDialog();
-        dialog.parentFragment = fragment;
+        if (fragment instanceof OnFoodSelectedListener) {
+            dialog.setOnFoodSelectedListener((OnFoodSelectedListener) fragment);
+        }
         return dialog;
     }
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return super.onCreateDialog(savedInstanceState);
+    public interface OnFoodSelectedListener {
+        void onFoodSelected(FoodItem foodItem, String servingSize);
+    }
+
+    public void setOnFoodSelectedListener(OnFoodSelectedListener listener) {
+        this.listener = listener;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.dialog_food_search, container, false);
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_food_search, null);
 
-        etSearch = view.findViewById(R.id.etSearch);
-        rvSearchResults = view.findViewById(R.id.rvSearchResults);
-        progressBar = view.findViewById(R.id.progressBar);
+        editSearch = view.findViewById(R.id.editSearch);
+        recyclerResults = view.findViewById(R.id.recyclerResults);
+        recyclerResults.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        rvSearchResults.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new FoodSearchAdapter(searchResults, foodItem -> {
-            showServingSelectionDialog(foodItem);
-        });
-        rvSearchResults.setAdapter(adapter);
+        adapter = new FoodSearchAdapter(new ArrayList<>(), this::showServingSelectionDialog);
+        recyclerResults.setAdapter(adapter);
 
-        fatSecretApi = ApiClient.getFatSecretApi(requireContext());
+        builder.setView(view)
+               .setTitle("Search Food")
+               .setPositiveButton("Close", null);
 
-        etSearch.addTextChangedListener(new TextWatcher() {
+        // Setup search functionality with TextWatcher for real-time search
+        editSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() >= 2) {
-                    searchFoods(s.toString());
-                } else if (s.length() == 0) {
-                    searchResults.clear();
-                    adapter.notifyDataSetChanged();
-                }
+                performSearch(s.toString());
             }
 
             @Override
             public void afterTextChanged(Editable s) {}
         });
 
-        return view;
+        // Load initial data
+        performSearch("");
+
+        return builder.create();
     }
 
-    private void searchFoods(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            Toast.makeText(getContext(), "Please enter a search term", Toast.LENGTH_SHORT).show();
-            return;
+    private void performSearch(String query) {
+        List<FoodSearchResponse.FoodItem> apiResults = getDummySearchResults();
+        // Filter results based on search query
+        if (!query.isEmpty()) {
+            apiResults = apiResults.stream()
+                    .filter(item -> item.getName().toLowerCase().contains(query.toLowerCase()))
+                    .collect(Collectors.toList());
         }
-
-        if (query.length() < 2) {
-            Toast.makeText(getContext(), "Please enter at least 2 characters", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        progressBar.setVisibility(View.VISIBLE);
-        rvSearchResults.setVisibility(View.GONE);
-
-        fatSecretApi.searchFoods("foods.search", query, 0, 20, "json")
-            .enqueue(new Callback<FoodSearchResponse>() {
-                @Override
-                public void onResponse(Call<FoodSearchResponse> call, Response<FoodSearchResponse> response) {
-                    progressBar.setVisibility(View.GONE);
-                    rvSearchResults.setVisibility(View.VISIBLE);
-
-                    if (response.isSuccessful() && response.body() != null) {
-                        searchResults.clear();
-                        if (response.body().foods != null && !response.body().foods.isEmpty()) {
-                            searchResults.addAll(response.body().foods);
-                            adapter.notifyDataSetChanged();
-                        } else {
-                            Toast.makeText(getContext(), "No food items found", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        String errorMessage = "Failed to search food items";
-                        if (response.errorBody() != null) {
-                            try {
-                                String errorBody = response.errorBody().string();
-                                Log.e("FoodSearch", "Error response: " + errorBody);
-                                // Check if it's an XML error response
-                                if (errorBody.contains("<error>") && errorBody.contains("<message>")) {
-                                    int start = errorBody.indexOf("<message>") + 9;
-                                    int end = errorBody.indexOf("</message>");
-                                    if (start > 8 && end > start) {
-                                        errorMessage = errorBody.substring(start, end);
-                                    }
-                                }
-                            } catch (IOException e) {
-                                Log.e("FoodSearch", "Error parsing response", e);
-                            }
-                        }
-                        Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<FoodSearchResponse> call, Throwable t) {
-                    progressBar.setVisibility(View.GONE);
-                    rvSearchResults.setVisibility(View.VISIBLE);
-                    String errorMessage = "Network error: " + t.getMessage();
-                    Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
-                    Log.e("FoodSearch", "Search failed", t);
-                }
-            });
+        List<FoodItem> modelResults = convertApiResultsToModelItems(apiResults);
+        adapter.updateFoodItems(modelResults);
     }
 
-    private void showServingSelectionDialog(FoodSearchResponse.FoodItem foodItem) {
-        ServingSelectionDialog dialog = ServingSelectionDialog.newInstance(
-                foodItem.food_id,
-                foodItem.food_name,
-                parentFragment
-        );
-        dialog.show(getChildFragmentManager(), "ServingSelectionDialog");
+    private List<FoodItem> convertApiResultsToModelItems(List<FoodSearchResponse.FoodItem> apiResults) {
+        return apiResults.stream()
+                .map(apiItem -> new FoodItem(
+                    apiItem.getId(),
+                    apiItem.getName(),
+                    apiItem.getCalories(),
+                    apiItem.getServingSize(),
+                    apiItem.getProtein(),
+                    apiItem.getCarbs(),
+                    apiItem.getFat()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private void showServingSelectionDialog(FoodItem foodItem) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Select Serving Size")
+               .setItems(new String[]{"100g", "200g", "300g"}, (dialog, which) -> {
+                   String servingSize = (which + 1) * 100 + "g";
+                   if (listener != null) {
+                       listener.onFoodSelected(foodItem, servingSize);
+                   }
+                   dismiss();
+               })
+               .setNegativeButton("Cancel", null)
+               .show();
+    }
+
+    private List<FoodSearchResponse.FoodItem> getDummySearchResults() {
+        List<FoodSearchResponse.FoodItem> results = new ArrayList<>();
+        
+        // Add dummy food items
+        FoodSearchResponse.FoodItem item1 = new FoodSearchResponse.FoodItem();
+        item1.setId("1");
+        item1.setName("Chicken Breast");
+        item1.setCalories(165);
+        item1.setServingSize("100g");
+        item1.setProtein(31);
+        item1.setCarbs(0);
+        item1.setFat(3.6);
+        results.add(item1);
+
+        FoodSearchResponse.FoodItem item2 = new FoodSearchResponse.FoodItem();
+        item2.setId("2");
+        item2.setName("Brown Rice");
+        item2.setCalories(111);
+        item2.setServingSize("100g");
+        item2.setProtein(2.6);
+        item2.setCarbs(23);
+        item2.setFat(0.9);
+        results.add(item2);
+
+        FoodSearchResponse.FoodItem item3 = new FoodSearchResponse.FoodItem();
+        item3.setId("3");
+        item3.setName("Broccoli");
+        item3.setCalories(55);
+        item3.setServingSize("100g");
+        item3.setProtein(3.7);
+        item3.setCarbs(11.2);
+        item3.setFat(0.6);
+        results.add(item3);
+
+        FoodSearchResponse.FoodItem item4 = new FoodSearchResponse.FoodItem();
+        item4.setId("4");
+        item4.setName("Salmon");
+        item4.setCalories(208);
+        item4.setServingSize("100g");
+        item4.setProtein(22);
+        item4.setCarbs(0);
+        item4.setFat(13);
+        results.add(item4);
+
+        FoodSearchResponse.FoodItem item5 = new FoodSearchResponse.FoodItem();
+        item5.setId("5");
+        item5.setName("Sweet Potato");
+        item5.setCalories(86);
+        item5.setServingSize("100g");
+        item5.setProtein(1.6);
+        item5.setCarbs(20);
+        item5.setFat(0.1);
+        results.add(item5);
+
+        return results;
     }
 }
