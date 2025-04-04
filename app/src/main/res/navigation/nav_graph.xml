@@ -15,8 +15,6 @@
             app:destination="@id/registrationFragment"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="false" />
-            <!-- Retain LoginFragment in the back stack -->
-            <!-- Do not remove LoginFragment from the back stack -->
     </fragment>
 
     <fragment
@@ -24,16 +22,12 @@
         android:name="com.example.nirvana.fragments.auth.RegistrationFragment"
         android:label="RegistrationFragment"
         tools:layout="@layout/fragment_registration">
-
-        <!-- Add navigation actions -->
         <action
             android:id="@+id/action_registrationFragment_to_loginFragment"
             app:destination="@id/loginFragment"/>
-
         <action
             android:id="@+id/action_registrationFragment_to_profileSetupFragment"
             app:destination="@id/profileSetupFragment"/>
-
     </fragment>
     <fragment
         android:id="@+id/forgotPasswordFragment"
@@ -50,7 +44,11 @@
         android:id="@+id/profileSetupFragment"
         android:name="com.example.nirvana.fragments.auth.ProfileSetupFragment"
         android:label="Profile Setup"
-        tools:layout="@layout/fragment_profile_setup" />
+        tools:layout="@layout/fragment_profile_setup" >
+        <action
+            android:id="@+id/action_profileSetupFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/homeFragment"
@@ -81,8 +79,21 @@
     <fragment
         android:id="@+id/dietFragment"
         android:name="com.example.nirvana.fragments.diet.DietFragment"
-        android:label="Diet"
-        tools:layout="@layout/fragment_diet" />
+        android:label="Diet Dashboard"
+        tools:layout="@layout/fragment_diet">
+
+        <action
+            android:id="@+id/action_dietFragment_to_logDietFragment"
+            app:destination="@id/logDietFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/logDietFragment"
+        android:name="com.example.nirvana.fragments.diet.LogDietFragment"
+        android:label="Log Diet"
+        tools:layout="@layout/fragment_log_diet" />
+
 
     <fragment
         android:id="@+id/workoutFragment"
