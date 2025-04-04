@@ -3,6 +3,7 @@ package com.example.nirvana.ui.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,7 +30,7 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
     public void onBindViewHolder(@NonNull ExerciseViewHolder holder, int position) {
         Exercise exercise = exerciseList.get(position);
         holder.txtExerciseName.setText(exercise.getName());
-        holder.txtExerciseDescription.setText(exercise.getDescription());
+        holder.imgExercise.setImageResource(exercise.getImageResource());
     }
 
     @Override
@@ -38,12 +39,13 @@ public class ExerciseAdapter extends RecyclerView.Adapter<ExerciseAdapter.Exerci
     }
 
     public static class ExerciseViewHolder extends RecyclerView.ViewHolder {
-        TextView txtExerciseName, txtExerciseDescription;
+        TextView txtExerciseName;
+        ImageView imgExercise;
 
         public ExerciseViewHolder(@NonNull View itemView) {
             super(itemView);
             txtExerciseName = itemView.findViewById(R.id.txtExerciseName);
-            txtExerciseDescription = itemView.findViewById(R.id.txtExerciseDescription);
+            imgExercise = itemView.findViewById(R.id.imgExercise);
         }
     }
 }

@@ -1,34 +1,19 @@
 package com.example.nirvana.fragments.workout;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.navigation.Navigation;
 import com.example.nirvana.R;
-import com.example.nirvana.data.models.Exercise;
-import com.example.nirvana.data.models.ExerciseResponse;
-import com.example.nirvana.network.ApiClient;
-import com.example.nirvana.network.ExerciseApiService;
-import com.example.nirvana.ui.adapters.ExerciseAdapter;
-import java.util.List;
-import retrofit2.Call;
-import com.google.gson.Gson;
-
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class HomeWorkoutFragment extends Fragment {
 
-    private RecyclerView recyclerExerciseList;
-    private ExerciseAdapter exerciseAdapter;
+    private CardView cardUpperBody, cardLowerBody, cardAbs, cardLegs, cardCalisthenics;
 
     @Nullable
     @Override
@@ -39,52 +24,29 @@ public class HomeWorkoutFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        recyclerExerciseList = view.findViewById(R.id.recyclerExerciseList);
-        recyclerExerciseList.setLayoutManager(new LinearLayoutManager(requireContext()));
-
-        fetchExercises(); // Fetch exercises from API
+        initializeViews(view);
+        setupClickListeners();
     }
 
-    private void fetchExercises() {
-        Retrofit retrofit = ApiClient.getClient();
-        ExerciseApiService apiService = retrofit.create(ExerciseApiService.class);
+    private void initializeViews(View view) {
+        cardUpperBody = view.findViewById(R.id.cardUpperBody);
+        cardLowerBody = view.findViewById(R.id.cardLowerBody);
+        cardAbs = view.findViewById(R.id.cardAbs);
+        cardLegs = view.findViewById(R.id.cardLegs);
+        cardCalisthenics = view.findViewById(R.id.cardCalisthenics);
+    } 
 
-        Call<ExerciseResponse> call = apiService.getExercises();
-        call.enqueue(new Callback<ExerciseResponse>() {
-            @Override
-//            public void onResponse(Call<ExerciseResponse> call, Response<ExerciseResponse> response) {
-//                if (response.isSuccessful() && response.body() != null) {
-//                    List<Exercise> exerciseList = response.body().getResults();
-//                    exerciseAdapter = new ExerciseAdapter(exerciseList);
-//                    recyclerExerciseList.setAdapter(exerciseAdapter);
-//                } else {
-//                    Toast.makeText(requireContext(), "Failed to load exercises", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-            public void onResponse(Call<ExerciseResponse> call, Response<ExerciseResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Exercise> exerciseList = response.body().getResults();
+    private void setupClickListeners() {
+        cardUpperBody.setOnClickListener(v -> navigateToWorkout("Upper Body"));
+        cardLowerBody.setOnClickListener(v -> navigateToWorkout("Lower Body"));
+        cardAbs.setOnClickListener(v -> navigateToWorkout("Abs"));
+        cardLegs.setOnClickListener(v -> navigateToWorkout("Legs"));
+        cardCalisthenics.setOnClickListener(v -> navigateToWorkout("Calisthenics"));
+    }
 
-                    // Log the response data
-                    Log.d("API_RESPONSE", "Exercises: " + new Gson().toJson(exerciseList));
-
-                    if (exerciseList != null && !exerciseList.isEmpty()) {
-                        exerciseAdapter = new ExerciseAdapter(exerciseList);
-                        recyclerExerciseList.setAdapter(exerciseAdapter);
-                    } else {
-                        Toast.makeText(requireContext(), "No exercises found", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "Failed to load exercises", Toast.LENGTH_SHORT).show();
-                    Log.e("API_ERROR", "Response failed: " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ExerciseResponse> call, Throwable t) {
-                Log.e("API_ERROR", "Error fetching exercises: " + t.getMessage());
-                Toast.makeText(requireContext(), "Error fetching exercises", Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void navigateToWorkout(String category) {
+        Bundle args = new Bundle();
+        args.putString("category", category);
+        Navigation.findNavController(requireView()).navigate(R.id.action_homeWorkoutFragment_to_workoutDetailFragment, args);
     }
 }

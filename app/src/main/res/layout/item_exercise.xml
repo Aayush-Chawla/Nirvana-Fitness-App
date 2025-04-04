@@ -5,12 +5,12 @@
     android:orientation="horizontal"
     android:padding="8dp">
 
-<!--    <ImageView-->
-<!--        android:id="@+id/imgExercise"-->
-<!--        android:layout_width="64dp"-->
-<!--        android:layout_height="64dp"-->
-<!--        android:scaleType="centerCrop"-->
-<!--        android:src="@drawable/ic_exercise" />-->
+    <ImageView
+        android:id="@+id/imgExercise"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_exercise" />
 
     <TextView
         android:id="@+id/txtExerciseName"

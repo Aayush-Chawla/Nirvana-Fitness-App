@@ -2,13 +2,18 @@ package com.example.nirvana.data.models;
 
 public class Exercise {
     private String name;
-    private String description;
+    private int imageResource;
+
+    public Exercise(String name, int imageResource) {
+        this.name = name;
+        this.imageResource = imageResource;
+    }
 
     public String getName() {
         return name;
     }
 
-    public String getDescription() {
-        return description;
+    public int getImageResource() {
+        return imageResource;
     }
 }

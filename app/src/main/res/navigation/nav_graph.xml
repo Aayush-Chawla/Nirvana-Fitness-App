@@ -56,7 +56,27 @@
         android:id="@+id/homeFragment"
         android:name="com.example.nirvana.fragments.home.HomeFragment"
         android:label="Home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_caloriesDetailFragment"
+            app:destination="@id/caloriesDetailFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_heartRateDetailFragment"
+            app:destination="@id/heartRateDetailFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_gymListFragment"
+            app:destination="@id/gymListFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_rewardsFragment"
+            app:destination="@id/rewardsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_blogDetailFragment"
+            app:destination="@id/blogDetailFragment">
+            <argument
+                android:name="blogId"
+                app:argType="string" />
+        </action>
+    </fragment>
 
     <fragment
         android:id="@+id/dietFragment"
@@ -72,10 +92,62 @@
     <fragment
         android:id="@+id/homeWorkoutFragment"
         android:name="com.example.nirvana.fragments.workout.HomeWorkoutFragment"
-        android:label="HomeWorkoutFragment" />
+        android:label="HomeWorkoutFragment">
+        <action
+            android:id="@+id/action_homeWorkoutFragment_to_workoutDetailFragment"
+            app:destination="@id/workoutDetailFragment" />
+    </fragment>
     <fragment
         android:id="@+id/gymWorkoutFragment"
         android:name="com.example.nirvana.fragments.workout.GymWorkoutFragment"
-        android:label="GymWorkoutFragment" />
+        android:label="GymWorkoutFragment">
+        <action
+            android:id="@+id/action_gymWorkoutFragment_to_workoutDetailFragment"
+            app:destination="@id/workoutDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/gymListFragment"
+        android:name="com.example.nirvana.fragments.home.GymListFragment"
+        android:label="Gym List"/>
+
+    <fragment
+        android:id="@+id/workoutDetailFragment"
+        android:name="com.example.nirvana.fragments.workout.WorkoutDetailFragment"
+        android:label="WorkoutDetailFragment"
+        tools:layout="@layout/fragment_workout_detail">
+        <argument
+            android:name="category"
+            app:argType="string"
+            android:defaultValue="Workout" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/caloriesDetailFragment"
+        android:name="com.example.nirvana.fragments.home.CaloriesDetailFragment"
+        android:label="Calories Detail"
+        tools:layout="@layout/fragment_calories_detail" />
+
+    <fragment
+        android:id="@+id/heartRateDetailFragment"
+        android:name="com.example.nirvana.fragments.home.HeartRateDetailFragment"
+        android:label="Heart Rate Detail"
+        tools:layout="@layout/fragment_heart_rate_detail" />
+
+    <fragment
+        android:id="@+id/rewardsFragment"
+        android:name="com.example.nirvana.fragments.home.RewardsFragment"
+        android:label="Rewards"
+        tools:layout="@layout/fragment_rewards" />
+
+    <fragment
+        android:id="@+id/blogDetailFragment"
+        android:name="com.example.nirvana.fragments.home.BlogDetailFragment"
+        android:label="Blog Detail"
+        tools:layout="@layout/fragment_blog_detail">
+        <argument
+            android:name="blogId"
+            app:argType="string" />
+    </fragment>
 
 </navigation>

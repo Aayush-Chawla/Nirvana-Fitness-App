@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="gray">#6B6767</color>
-    <color name="gray_light">#E0E0E0</color> <!-- Light gray color -->
-    <color name="dark_gray">#333333</color>
-
-    <color name="purple_500">#9C27B0</color>
-    <color name="red">#FF0000</color><!-- Replace with the correct color value if needed -->
-    <color name="primaryColor">#FF512F</color>  <!-- Orange shade -->
-    <color name="secondaryColor">#2196F3</color>  <!-- Orange shade -->
-    <color name="errorColor">#FF0000</color>  <!-- Orange shade -->
-    <color name="primaryDarkColor">#DD2476</color>  <!-- Pinkish shade -->
-    <color name="colorAccent">#FF7474</color>
-
+    <!-- Theme Colors -->
+    <color name="colorPrimary">#FF6200EE</color>
+    <color name="colorPrimaryDark">#FF3700B3</color>
+    <color name="colorAccent">#FF03DAC5</color>
+    <color name="primary">#6200EE</color>
+    <color name="primaryColor">#FF512F</color>
+    <color name="primaryDarkColor">#DD2476</color>
+    <color name="secondaryColor">#2196F3</color>
 
     <!-- Basic Colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="gray">#6B6767</color>
+    <color name="gray_light">#E0E0E0</color>
+    <color name="dark_gray">#333333</color>
+    <color name="light_gray">#D3D3D3</color>
+    <color name="red">#FF0000</color>
+    <color name="errorColor">#FF0000</color>
+
+    <!-- Material Colors -->
+    <color name="purple_500">#9C27B0</color>
     <color name="blue_500">#2196F3</color>
     <color name="blue_700">#1976D2</color>
     <color name="teal_200">#80CBC4</color>
     <color name="teal_700">#00897B</color>
-    <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
 
+    <!-- Text Colors -->
     <color name="textColorSecondary">#333333</color>
 
     <!-- Light Theme Colors -->
@@ -35,6 +41,7 @@
     <color name="on_surface_dark">#FFFFFF</color>
     <color name="on_surface_variant_dark">#B0B0B0</color>
 
+    <!-- Nutrition Colors -->
     <color name="protein_color">#FF6B6B</color>
     <color name="carbs_color">#4ECDC4</color>
     <color name="fat_color">#FFA726</color>

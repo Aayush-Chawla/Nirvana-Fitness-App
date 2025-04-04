@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Workout Title -->
+    <TextView
+        android:id="@+id/txtWorkoutTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Workout"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"/>
+
+    <!-- Workout Instructions -->
+    <TextView
+        android:id="@+id/txtWorkoutInstructions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Follow the exercises below to complete your workout."
+        android:textSize="16sp"
+        android:paddingTop="8dp"/>
+
+    <!-- RecyclerView for Exercise List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerExerciseList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Timer & Progress -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/txtTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <ProgressBar
+            android:id="@+id/progressWorkout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            style="?android:attr/progressBarStyleHorizontal"/>
+    </LinearLayout>
+
+    <!-- Start/Stop Button -->
+    <Button
+        android:id="@+id/btnStartWorkout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Workout"/>
+
+    <!-- Navigation Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="8dp">
+
+        <Button
+            android:id="@+id/btnPreviousWorkout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Previous"/>
+
+        <Button
+            android:id="@+id/btnNextWorkout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            android:layout_marginStart="16dp"/>
+    </LinearLayout>
+
+</LinearLayout> 
