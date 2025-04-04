@@ -6,75 +6,144 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.nirvana.R;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+
+import com.example.nirvana.R;
+import com.example.nirvana.data.models.FoodItem;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DietFragment extends Fragment {
-    private TextView remainingCaloriesText;
-    private TextView baseGoalText;
-    private TextView foodCaloriesText;
-    private TextView exerciseCaloriesText;
-    private TextView proteinText;
-    private TextView carbsText;
-    private TextView fatText;
 
-    @Nullable
+    private PieChart macrosChart;
+    private MaterialButton btnLogDiet;
+    private TextView tvCalories, tvRemaining, tvGoal;
+
+    private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
+    private String userId;
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_diet, container, false);
 
-        // Initialize views
-        remainingCaloriesText = view.findViewById(R.id.remainingCaloriesText);
-        baseGoalText = view.findViewById(R.id.baseGoalText);
-        foodCaloriesText = view.findViewById(R.id.foodCaloriesText);
-        exerciseCaloriesText = view.findViewById(R.id.exerciseCaloriesText);
-        proteinText = view.findViewById(R.id.proteinText);
-        carbsText = view.findViewById(R.id.carbsText);
-        fatText = view.findViewById(R.id.fatText);
-
-        // Update UI with sample data
-        updateCalorieData();
-        updateMacronutrientsData();
+        initializeViews(view);
+        initializeFirebase();
+        setupButtonListeners();
+        loadUserDietData();
 
         return view;
     }
 
-    private void updateCalorieData() {
-        // Example data - replace with your actual calorie tracking logic
-        int baseGoal = 1500;
-        int foodCalories = 650;
-        int exerciseCalories = 400;
-        int remainingCalories = baseGoal - foodCalories + exerciseCalories;
-
-        baseGoalText.setText(String.format("Base Goal: %d", baseGoal));
-        foodCaloriesText.setText(String.format("Food: %d", foodCalories));
-        exerciseCaloriesText.setText(String.format("Exercise: %d", exerciseCalories));
-        remainingCaloriesText.setText(String.valueOf(remainingCalories));
+    private void initializeViews(View view) {
+        macrosChart = view.findViewById(R.id.macrosChart);
+        btnLogDiet = view.findViewById(R.id.btnLogDiet);
+        tvCalories = view.findViewById(R.id.tvCalories);
+        tvRemaining = view.findViewById(R.id.tvRemaining);
+        tvGoal = view.findViewById(R.id.tvGoal);
     }
 
-    private void updateMacronutrientsData() {
-        // Example data - replace with your actual macronutrient tracking logic
-        proteinText.setText("120g");
-        carbsText.setText("180g");
-        fatText.setText("50g");
+    private void initializeFirebase() {
+        mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        userId = mAuth.getCurrentUser().getUid();
     }
 
-    // Method to update data from your tracking system
-    public void updateDietData(int baseGoal, int foodCalories, int exerciseCalories,
-                               String protein, String carbs, String fat) {
-        int remainingCalories = baseGoal - foodCalories + exerciseCalories;
+    private void setupButtonListeners() {
+        btnLogDiet.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.action_dietFragment_to_logDietFragment));
+    }
 
-        baseGoalText.setText(String.format("Base Goal: %d", baseGoal));
-        foodCaloriesText.setText(String.format("Food: %d", foodCalories));
-        exerciseCaloriesText.setText(String.format("Exercise: %d", exerciseCalories));
-        remainingCaloriesText.setText(String.valueOf(remainingCalories));
+    private void loadUserDietData() {
+        mDatabase.child("users").child(userId).child("meals").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                calculateNutrientTotals(snapshot);
+                fetchCalorieGoal();
+            }
 
-        proteinText.setText(protein);
-        carbsText.setText(carbs);
-        fatText.setText(fat);
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle error
+            }
+        });
+    }
+
+    private void calculateNutrientTotals(DataSnapshot snapshot) {
+        long totalCalories = 0;
+        long totalProtein = 0;
+        long totalCarbs = 0;
+        long totalFat = 0;
+
+        for (DataSnapshot mealSnapshot : snapshot.getChildren()) {
+            for (DataSnapshot foodSnapshot : mealSnapshot.getChildren()) {
+                FoodItem foodItem = foodSnapshot.getValue(FoodItem.class);
+                if (foodItem != null) {
+                    totalCalories += foodItem.getCalories();
+                    totalProtein += foodItem.getProtein();
+                    totalCarbs += foodItem.getCarbs();
+                    totalFat += foodItem.getFat();
+                }
+            }
+        }
+
+        updateUI(totalCalories, totalProtein, totalCarbs, totalFat);
+    }
+
+    private void fetchCalorieGoal() {
+        mDatabase.child("users").child(userId).child("diet").child("goal").get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        Long goal = task.getResult().getValue(Long.class);
+                        if (goal != null) {
+                            updateCalorieGoal(goal);
+                        }
+                    }
+                });
+    }
+
+    private void updateUI(long calories, long protein, long carbs, long fat) {
+        tvCalories.setText(String.valueOf(calories));
+        setupMacrosChart(protein, carbs, fat);
+    }
+
+    private void updateCalorieGoal(long goal) {
+        tvGoal.setText(String.valueOf(goal));
+        long remaining = goal - Long.parseLong(tvCalories.getText().toString());
+        tvRemaining.setText(String.valueOf(remaining));
+    }
+
+    private void setupMacrosChart(long protein, long carbs, long fat) {
+        List<PieEntry> entries = new ArrayList<>();
+        if (protein > 0) entries.add(new PieEntry(protein, "Protein"));
+        if (carbs > 0) entries.add(new PieEntry(carbs, "Carbs"));
+        if (fat > 0) entries.add(new PieEntry(fat, "Fat"));
+
+        PieDataSet dataSet = new PieDataSet(entries, "Macros Breakdown");
+        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        dataSet.setValueTextSize(12f);
+
+        macrosChart.setData(new PieData(dataSet));
+        macrosChart.getDescription().setEnabled(false);
+        macrosChart.setCenterText("Macros");
+        macrosChart.setEntryLabelColor(getResources().getColor(android.R.color.black));
+        macrosChart.animateY(1000);
+        macrosChart.invalidate();
     }
 }

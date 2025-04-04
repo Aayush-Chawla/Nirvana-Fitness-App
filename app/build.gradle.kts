@@ -61,17 +61,17 @@ dependencies {
     implementation(libs.activity.ktx) // Use -ktx for Kotlin extensions
 
     // Firebase BoM (Bill of Materials)
-    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
+    implementation(platform(libs.firebase.bom))
 
     // Firebase dependencies (no version needed, as BoM manages them)
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth")     // Firebase Authentication
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-messaging")
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)     // Firebase Authentication
+    implementation(libs.google.firebase.firestore)
+    implementation(libs.firebase.messaging)
 
     // Navigation Component
-    implementation("androidx.navigation:navigation-fragment-ktx:2.6.0")  // or the latest version
-    implementation("androidx.navigation:navigation-ui-ktx:2.6.0")        // or the latest version
+    implementation(libs.navigation.fragment.ktx)  // or the latest version
+    implementation(libs.navigation.ui.ktx)        // or the latest version
 
 //    implementation(libs.navigation.fragment)
 //    implementation(libs.navigation.ui)
@@ -80,13 +80,49 @@ dependencies {
     implementation(libs.annotation)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.firebase.database)
 
     // Testing dependencies
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.junit.v115)
+    androidTestImplementation(libs.espresso.core.v351)
 
     // Google Sign-In
-    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation(libs.play.services.auth)
+
+
+//    ----- Retrofit and OkHttp dependencies -----
+
+    // Retrofit for API calls
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+
+    // Converter for JSON parsing
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // OkHttp for networking
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+
+    // Gson for JSON serialization/deserialization
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // For OAuth signing (required by FatSecret API)
+    implementation("oauth.signpost:signpost-core:1.2.1.2")
+    implementation("oauth.signpost:signpost-commonshttp4:1.2.1.2")
+
+
+    // Replace Signpost with these
+    implementation("com.github.scribejava:scribejava-core:8.3.3")
+    implementation("com.github.scribejava:scribejava-httpclient-okhttp:8.3.3")
+
+
+    // Material Design
+    implementation(libs.material.v1110)
+
+    // Chart library (for displaying macros)
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+
+
 
 }
