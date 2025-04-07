@@ -12,6 +12,9 @@ public class FoodItem {
     private double carbs;
     private double fat;
     private String mealType;
+    private String name;
+    private int caloriesInt;
+    private String time;
 
     // Default constructor (required for Firebase)
     public FoodItem() {}
@@ -107,6 +110,30 @@ public class FoodItem {
 
     public void setMealType(@NonNull String mealType) {
         this.mealType = mealType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getCaloriesInt() {
+        return caloriesInt;
+    }
+
+    public void setCaloriesInt(int caloriesInt) {
+        this.caloriesInt = caloriesInt;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 
     // Optional: toString() method for debugging

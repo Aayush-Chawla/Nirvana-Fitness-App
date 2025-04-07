@@ -2,18 +2,36 @@ package com.example.nirvana.data.models;
 
 public class WorkoutCategory {
     private String name;
-    private int iconResId;
+    private int imageResource;
+    private String description;
 
-    public WorkoutCategory(String name, int iconResId) {
+    public WorkoutCategory(String name, int imageResource, String description) {
         this.name = name;
-        this.iconResId = iconResId;
+        this.imageResource = imageResource;
+        this.description = description;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getIconResId() {
-        return iconResId;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getImageResource() {
+        return imageResource;
+    }
+
+    public void setImageResource(int imageResource) {
+        this.imageResource = imageResource;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

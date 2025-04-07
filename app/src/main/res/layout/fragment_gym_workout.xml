@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background_primary">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,215 +17,86 @@
             android:text="Gym Workouts"
             android:textSize="24sp"
             android:textStyle="bold"
+            android:textColor="@color/text_primary"
             android:layout_marginBottom="16dp"/>
 
-        <GridLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:columnCount="2"
-            android:rowCount="4"
-            android:alignmentMode="alignMargins"
-            android:columnOrderPreserved="false"
-            android:useDefaultMargins="true">
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
-            <!-- Chest Card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardChest"
-                android:layout_width="0dp"
-                android:layout_height="150dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="16dp">
+                    android:layout_height="wrap_content"
+                    android:text="Experience Level"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"/>
 
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:src="@drawable/ic_exercise"
-                        android:contentDescription="Chest"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Chest"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Back Card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardBack"
-                android:layout_width="0dp"
-                android:layout_height="150dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
-
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="16dp">
+                    android:layout_height="wrap_content"
+                    android:text="Select your gym experience level"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="8dp"/>
 
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:src="@drawable/ic_exercise"
-                        android:contentDescription="Back"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Back"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Shoulders Card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardShoulders"
-                android:layout_width="0dp"
-                android:layout_height="150dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
-
-                <LinearLayout
+                <RadioGroup
+                    android:id="@+id/radioGroupExperience"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="16dp">
+                    android:layout_marginTop="16dp">
 
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:src="@drawable/ic_exercise"
-                        android:contentDescription="Shoulders"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <RadioButton
+                        android:id="@+id/radioBeginner"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Shoulders"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                        android:text="Beginner (0-6 months)"
+                        android:textColor="@color/text_primary"/>
 
-            <!-- Arms Card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardArms"
-                android:layout_width="0dp"
-                android:layout_height="150dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:src="@drawable/ic_exercise"
-                        android:contentDescription="Arms"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <RadioButton
+                        android:id="@+id/radioIntermediate"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Arms"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                        android:text="Intermediate (6-18 months)"
+                        android:textColor="@color/text_primary"/>
 
-            <!-- Legs Card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardLegs"
-                android:layout_width="0dp"
-                android:layout_height="150dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:src="@drawable/ic_exercise"
-                        android:contentDescription="Legs"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <RadioButton
+                        android:id="@+id/radioAdvanced"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Legs"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                        android:text="Advanced (18+ months)"
+                        android:textColor="@color/text_primary"/>
 
-            <!-- Core Card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardCore"
-                android:layout_width="0dp"
-                android:layout_height="150dp"
-                android:layout_columnWeight="1"
-                android:layout_margin="8dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
+                </RadioGroup>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="16dp">
+            </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:src="@drawable/ic_exercise"
-                        android:contentDescription="Core"/>
+        </com.google.android.material.card.MaterialCardView>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Core"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Equipment-based Workouts"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp"/>
 
-        </GridLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerGymWorkouts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"/>
+
     </LinearLayout>
-</ScrollView>
+
+</androidx.core.widget.NestedScrollView>

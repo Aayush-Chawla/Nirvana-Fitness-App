@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="300dp"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
+    app:cardCornerRadius="8dp"
     app:cardElevation="4dp">
 
     <LinearLayout
@@ -15,9 +15,10 @@
         <ImageView
             android:id="@+id/imgBlog"
             android:layout_width="match_parent"
-            android:layout_height="160dp"
+            android:layout_height="200dp"
+            android:contentDescription="@string/blog_image"
             android:scaleType="centerCrop"
-            android:contentDescription="Blog Image"/>
+            android:src="@drawable/placeholder_blog" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -26,40 +27,43 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/txtBlogTitle"
+                android:id="@+id/tvTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/textPrimary"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                android:maxLines="2"
-                android:ellipsize="end"/>
+                android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/txtBlogDescription"
+                android:id="@+id/tvDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:ellipsize="end"
                 android:maxLines="3"
-                android:ellipsize="end"/>
+                android:textColor="@color/textSecondary"
+                android:textSize="14sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/txtBlogAuthor"
+                    android:id="@+id/tvAuthor"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textStyle="italic"/>
+                    android:textColor="@color/textSecondary"
+                    android:textSize="12sp" />
 
                 <TextView
-                    android:id="@+id/txtBlogDate"
+                    android:id="@+id/tvDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="12sp"/>
+                    android:textColor="@color/textSecondary"
+                    android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

@@ -13,11 +13,17 @@ import com.example.nirvana.data.models.WorkoutCategory;
 import java.util.List;
 
 public class WorkoutCategoryAdapter extends RecyclerView.Adapter<WorkoutCategoryAdapter.ViewHolder> {
-    private List<WorkoutCategory> workoutCategories;  // Use WorkoutCategory list
+    private List<WorkoutCategory> workoutCategories;
+    private OnCategoryClickListener listener;
+
+    public interface OnCategoryClickListener {
+        void onCategoryClick(WorkoutCategory category);
+    }
 
     // Constructor
-    public WorkoutCategoryAdapter(List<WorkoutCategory> workoutCategories) {
+    public WorkoutCategoryAdapter(List<WorkoutCategory> workoutCategories, OnCategoryClickListener listener) {
         this.workoutCategories = workoutCategories;
+        this.listener = listener;
     }
 
     @NonNull
@@ -30,23 +36,40 @@ public class WorkoutCategoryAdapter extends RecyclerView.Adapter<WorkoutCategory
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         WorkoutCategory category = workoutCategories.get(position);
-        holder.txtCategoryName.setText(category.getName());  // Set category name
-        holder.imgCategoryIcon.setImageResource(category.getIconResId());  // Set category icon
+        holder.txtCategoryName.setText(category.getName());
+        holder.imgCategory.setImageResource(category.getImageResource());
+        
+        if (holder.txtCategoryDescription != null && category.getDescription() != null) {
+            holder.txtCategoryDescription.setText(category.getDescription());
+        }
+        
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onCategoryClick(category);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return workoutCategories.size();
+        return workoutCategories != null ? workoutCategories.size() : 0;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtCategoryName;
-        ImageView imgCategoryIcon;
+        TextView txtCategoryDescription;
+        ImageView imgCategory;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             txtCategoryName = itemView.findViewById(R.id.txtCategoryName);
-            imgCategoryIcon = itemView.findViewById(R.id.imgCategoryIcon);
+            txtCategoryDescription = itemView.findViewById(R.id.txtCategoryDescription);
+            imgCategory = itemView.findViewById(R.id.imgCategory);
         }
+    }
+
+    public void updateCategories(List<WorkoutCategory> newCategories) {
+        this.workoutCategories = newCategories;
+        notifyDataSetChanged();
     }
 }

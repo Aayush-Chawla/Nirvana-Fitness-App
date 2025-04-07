@@ -1,0 +1,32 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        // Allow read/write access to a user's own data
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        "daily_stats": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        },
+        "heart_rate": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        },
+        "rewards": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        },
+        "gymMembership": {
+          ".read": "$uid === auth.uid",
+          ".write": "$uid === auth.uid"
+        }
+      }
+    },
+    // Public data can be read by anyone but only written by authenticated users
+    "public": {
+      ".read": true,
+      ".write": "auth != null"
+    }
+  }
+} 

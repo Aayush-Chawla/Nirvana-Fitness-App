@@ -99,22 +99,33 @@
         android:id="@+id/workoutFragment"
         android:name="com.example.nirvana.fragments.workout.WorkoutFragment"
         android:label="Workout"
-        tools:layout="@layout/fragment_workout" />
+        tools:layout="@layout/fragment_workout">
+        <action
+            android:id="@+id/action_workoutFragment_to_homeWorkoutFragment"
+            app:destination="@id/homeWorkoutFragment" />
+        <action
+            android:id="@+id/action_workoutFragment_to_gymWorkoutFragment"
+            app:destination="@id/gymWorkoutFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/homeWorkoutFragment"
         android:name="com.example.nirvana.fragments.workout.HomeWorkoutFragment"
-        android:label="HomeWorkoutFragment">
+        android:label="Home Workouts"
+        tools:layout="@layout/fragment_home_workout">
         <action
-            android:id="@+id/action_homeWorkoutFragment_to_workoutDetailFragment"
-            app:destination="@id/workoutDetailFragment" />
+            android:id="@+id/action_homeWorkoutFragment_to_workoutListFragment"
+            app:destination="@id/workoutListFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/gymWorkoutFragment"
         android:name="com.example.nirvana.fragments.workout.GymWorkoutFragment"
-        android:label="GymWorkoutFragment">
+        android:label="Gym Workouts"
+        tools:layout="@layout/fragment_gym_workout">
         <action
-            android:id="@+id/action_gymWorkoutFragment_to_workoutDetailFragment"
-            app:destination="@id/workoutDetailFragment" />
+            android:id="@+id/action_gymWorkoutFragment_to_workoutListFragment"
+            app:destination="@id/workoutListFragment" />
     </fragment>
 
     <fragment
@@ -159,6 +170,64 @@
         <argument
             android:name="blogId"
             app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/workoutListFragment"
+        android:name="com.example.nirvana.fragments.workout.WorkoutListFragment"
+        android:label="Workout List"
+        tools:layout="@layout/fragment_workout_list">
+        <argument
+            android:name="category"
+            app:argType="string" />
+        <argument
+            android:name="experience"
+            app:argType="string"
+            android:defaultValue="Beginner" />
+        <action
+            android:id="@+id/action_workoutListFragment_to_activeWorkoutFragment"
+            app:destination="@id/activeWorkoutFragment">
+            <argument
+                android:name="category"
+                app:argType="string" />
+            <argument
+                android:name="experience"
+                app:argType="string" />
+        </action>
+        <action
+            android:id="@+id/action_workoutListFragment_to_exerciseDetailFragment"
+            app:destination="@id/exerciseDetailFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/activeWorkoutFragment"
+        android:name="com.example.nirvana.fragments.workout.ActiveWorkoutFragment"
+        android:label="ActiveWorkoutFragment" />
+
+    <fragment
+        android:id="@+id/customWorkoutFragment"
+        android:name="com.example.nirvana.fragments.workout.CustomWorkoutFragment"
+        android:label="Custom Workout">
+        <action
+            android:id="@+id/action_customWorkoutFragment_to_exerciseDetailFragment"
+            app:destination="@id/exerciseDetailFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/exerciseDetailFragment"
+        android:name="com.example.nirvana.fragments.workout.ExerciseDetailFragment"
+        android:label="Exercise Details">
+        <argument
+            android:name="exercise"
+            app:argType="com.example.nirvana.models.Exercise" />
     </fragment>
 
 </navigation>

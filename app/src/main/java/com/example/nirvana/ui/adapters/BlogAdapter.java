@@ -61,7 +61,7 @@ public class BlogAdapter extends RecyclerView.Adapter<BlogAdapter.BlogViewHolder
             super(itemView);
             imgBlog = itemView.findViewById(R.id.imgBlog);
             txtTitle = itemView.findViewById(R.id.txtBlogTitle);
-            txtDescription = itemView.findViewById(R.id.txtBlogDescription);
+//            txtDescription = itemView.findViewById(R.id.txtBlogDescription);
             txtAuthor = itemView.findViewById(R.id.txtBlogAuthor);
             txtDate = itemView.findViewById(R.id.txtBlogDate);
 

@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Theme Colors -->
-    <color name="colorPrimary">#FF6200EE</color>
-    <color name="colorPrimaryDark">#FF3700B3</color>
-    <color name="colorAccent">#FF03DAC5</color>
-    <color name="primary">#6200EE</color>
-    <color name="primaryColor">#FF512F</color>
-    <color name="primaryDarkColor">#DD2476</color>
-    <color name="secondaryColor">#2196F3</color>
+    <color name="colorPrimary">#5C6BC0</color>
+    <color name="colorPrimaryDark">#3949AB</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="primary">@color/colorPrimary</color>
+    <color name="primaryColor">@color/colorPrimary</color>
+    <color name="primaryDarkColor">@color/colorPrimaryDark</color>
+    <color name="secondaryColor">#FF4081</color>
 
     <!-- Basic Colors -->
     <color name="white">#FFFFFF</color>
-    <color name="black">#FF000000</color>
-    <color name="gray">#6B6767</color>
-    <color name="gray_light">#E0E0E0</color>
-    <color name="dark_gray">#333333</color>
-    <color name="light_gray">#D3D3D3</color>
+    <color name="black">#000000</color>
+    <color name="gray">#757575</color>
+    <color name="gray_light">#F5F5F5</color>
+    <color name="dark_gray">#424242</color>
+    <color name="light_gray">#EEEEEE</color>
     <color name="red">#FF0000</color>
-    <color name="errorColor">#FF0000</color>
+    <color name="errorColor">#B00020</color>
 
     <!-- Material Colors -->
     <color name="purple_500">#9C27B0</color>
@@ -25,25 +25,74 @@
     <color name="blue_700">#1976D2</color>
     <color name="teal_200">#80CBC4</color>
     <color name="teal_700">#00897B</color>
+    <color name="red_500">#F44336</color>
+    <color name="green_500">#4CAF50</color>
+    <color name="orange_500">#FF9800</color>
+    <color name="accentColor">@color/colorAccent</color>
 
     <!-- Text Colors -->
     <color name="textColorSecondary">#333333</color>
+    <color name="textPrimary">#212121</color>
+    <color name="textSecondary">#757575</color>
+    <color name="textHint">#9E9E9E</color>
 
     <!-- Light Theme Colors -->
-    <color name="background_light">#F5F5F5</color>
+    <color name="background_light">#FAFAFA</color>
     <color name="surface_light">#FFFFFF</color>
+    <color name="backgroundColor">#FFFFFF</color>
+    <color name="surfaceColor">#FFFFFF</color>
     <color name="on_surface_light">#000000</color>
     <color name="on_surface_variant_light">#757575</color>
+    <color name="error_light">#B00020</color>
 
     <!-- Dark Theme Colors -->
-    <color name="background_dark">#121212</color>
-    <color name="surface_dark">#1E1E1E</color>
+    <color name="backgroundColorDark">#121212</color>
+    <color name="surfaceColorDark">#1E1E1E</color>
     <color name="on_surface_dark">#FFFFFF</color>
     <color name="on_surface_variant_dark">#B0B0B0</color>
+    <color name="errorColorDark">#CF6679</color>
 
     <!-- Nutrition Colors -->
-    <color name="protein_color">#FF6B6B</color>
-    <color name="carbs_color">#4ECDC4</color>
-    <color name="fat_color">#FFA726</color>
+    <color name="caloriesColor">#FF5722</color>
+    <color name="proteinColor">#2196F3</color>
+    <color name="carbsColor">#4CAF50</color>
+    <color name="fatsColor">#FFC107</color>
+
+    <!-- Launcher Colors -->
+    <color name="ic_launcher_background">#2196F3</color>
+
+    <!-- Status Colors -->
+    <color name="statusActive">#4CAF50</color>
+    <color name="statusInactive">#F44336</color>
+    <color name="statusPending">#FFC107</color>
+
+    <!-- Background Colors -->
+    <color name="background_primary">#F8F9FF</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="status_bar">#3949AB</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_tertiary">#9E9E9E</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- Accent Colors -->
+    <color name="accent_success">#4CAF50</color>
+    <color name="accent_warning">#FFC107</color>
+    <color name="accent_error">#F44336</color>
+    <color name="accent_info">#2196F3</color>
+
+    <!-- Stats Colors -->
+    <color name="stats_steps">#5C6BC0</color>
+    <color name="stats_active">#4CAF50</color>
+    <color name="stats_workouts">#FF4081</color>
+    <color name="stats_calories">#FFA726</color>
+    <color name="stats_heart_rate">#EF5350</color>
+
+    <!-- Chart Colors -->
+    <color name="chart_line">#5C6BC0</color>
+    <color name="chart_grid">#E0E0E0</color>
+    <color name="chart_label">#757575</color>
 </resources>
 

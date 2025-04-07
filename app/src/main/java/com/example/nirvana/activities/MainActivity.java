@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,8 @@ import com.example.nirvana.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,12 +49,32 @@ public class MainActivity extends AppCompatActivity {
         // Ensure Home is selected by default
         bottomNavigationView.post(() -> bottomNavigationView.setSelectedItemId(R.id.homeFragment));
 
-        // Profile Button (Replaces Logout)
+        // Profile Button
         ImageButton imgProfile = findViewById(R.id.imgProfile);
         imgProfile.setOnClickListener(v -> {
             BottomMenuFragment bottomSheetDialog = new BottomMenuFragment();
             bottomSheetDialog.show(getSupportFragmentManager(), "Test"); // Fixed method call
         });
+
+
+        Calendar calendar = Calendar.getInstance();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
+        String timeGreeting;
+        if (hour >= 5 && hour < 12) {
+            timeGreeting = "Morning";
+        } else if (hour >= 12 && hour < 17) {
+            timeGreeting = "Afternoon";
+//        } else if (hour >= 17 && hour < 21) {
+//            timeGreeting = "Evening";
+        } else {
+            timeGreeting = "Evening";
+        }
+
+        TextView greeting = findViewById(R.id.text_greeting);
+        String name = currentUser.getEmail().split("@")[0];
+        greeting.setText("Good "+ timeGreeting+ ", "  + name);
+
     }
 
     private void navigateToLogin() {

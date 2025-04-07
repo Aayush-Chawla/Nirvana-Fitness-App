@@ -7,6 +7,8 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -107,13 +109,31 @@ public class FoodSearchDialog extends DialogFragment {
 
     private void showServingSelectionDialog(FoodItem foodItem) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Select Serving Size")
-               .setItems(new String[]{"100g", "200g", "300g"}, (dialog, which) -> {
-                   String servingSize = (which + 1) * 100 + "g";
+        View view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_serving_size, null);
+        
+        TextView tvServingSize = view.findViewById(R.id.tvServingSize);
+        SeekBar seekBarServing = view.findViewById(R.id.seekBarServing);
+        
+        seekBarServing.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tvServingSize.setText(progress + "g");
+                }
+
+                @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        builder.setView(view)
+               .setTitle("Select Serving Size")
+               .setPositiveButton("Confirm", (dialog, which) -> {
+                   String servingSize = seekBarServing.getProgress() + "g";
                    if (listener != null) {
                        listener.onFoodSelected(foodItem, servingSize);
                    }
-                   dismiss();
                })
                .setNegativeButton("Cancel", null)
                .show();

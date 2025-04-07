@@ -16,6 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.example.nirvana.models.FoodItem;
+import com.example.nirvana.utils.FirebaseHelper;
 
 public class LogDietFragment extends Fragment implements FoodSearchDialog.OnFoodSelectedListener {
 
@@ -84,14 +85,43 @@ public class LogDietFragment extends Fragment implements FoodSearchDialog.OnFood
 
     @Override
     public void onFoodSelected(FoodItem foodItem, String servingSize) {
-        // Handle the selected food item here
-        String message = String.format("%s (%s): %d calories", 
-            foodItem.getName(), 
-            servingSize, 
-            foodItem.getCalories());
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+        String mealType = getMealType(viewPager.getCurrentItem());
         
-        // TODO: Add the food item to your diet log
-        // You can implement the database operation here
+        FirebaseHelper.logFood(mealType, foodItem, servingSize, new FirebaseHelper.OnFoodLoggedListener() {
+            @Override
+            public void onSuccess() {
+                String message = String.format("%s (%s) added to %s", 
+                    foodItem.getName(), 
+                    servingSize,
+                    mealType);
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+                
+                // Refresh the current meal fragment
+                refreshCurrentMealFragment();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(requireContext(), "Error: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private String getMealType(int position) {
+        switch (position) {
+            case 0: return "Breakfast";
+            case 1: return "Lunch";
+            case 2: return "Dinner";
+            case 3: return "Snacks";
+            default: return "Other";
+        }
+    }
+
+    private void refreshCurrentMealFragment() {
+        Fragment currentFragment = getChildFragmentManager()
+            .findFragmentByTag("f" + viewPager.getId() + ":" + viewPager.getCurrentItem());
+        if (currentFragment instanceof MealFragment) {
+            ((MealFragment) currentFragment).refreshFoodList();
+        }
     }
 }

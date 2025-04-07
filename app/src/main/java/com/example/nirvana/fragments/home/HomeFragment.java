@@ -2,14 +2,19 @@ package com.example.nirvana.fragments.home;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -17,16 +22,30 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
-import com.example.nirvana.data.models.Blog;
-import com.example.nirvana.ui.adapters.BlogAdapter;
+import com.example.nirvana.adapters.BlogAdapter;
+import com.example.nirvana.models.BlogPost;
+import com.example.nirvana.models.GymMembership;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickListener {
+
+    private static final String TAG = "HomeFragment";
+
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
     private TextView txtWelcome;
     private TextView txtStepCount;
@@ -41,23 +60,37 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     private LineChart chartHeartRate;
     private RecyclerView recyclerBlogs;
     private BlogAdapter blogAdapter;
+    private DatabaseReference userRef;
+    private String currentUserId;
+    private CardView cardGymMembership;
+    private TextView tvGymName, tvMembershipType, tvMembershipStatus;
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+    // Add these variables to keep track of listeners
+    private ValueEventListener dailyStatsListener;
+    private ValueEventListener heartRateListener;
+    private ValueEventListener rewardsListener;
+    private ValueEventListener gymMembershipListener;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
-    }
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         initializeViews(view);
-        setupClickListeners();
+        setupFirebase();
+        setupRecyclerView();
         setupHeartRateChart();
-        setupBlogRecyclerView();
+        
+        // Load all data
         loadDashboardData();
+        loadBlogs();
+        loadGymMembership();
+        
+        if (checkLocationPermission()) {
+            loadNearbyGyms();
+        }
+
+        return view;
     }
 
     private void initializeViews(View view) {
@@ -73,102 +106,209 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
         progressRewards = view.findViewById(R.id.progressRewards);
         chartHeartRate = view.findViewById(R.id.chartHeartRate);
         recyclerBlogs = view.findViewById(R.id.recyclerBlogs);
+        cardGymMembership = view.findViewById(R.id.cardGymMembership);
+        tvGymName = view.findViewById(R.id.tvGymName);
+        tvMembershipType = view.findViewById(R.id.tvMembershipType);
+        tvMembershipStatus = view.findViewById(R.id.tvMembershipStatus);
     }
 
-    private void setupClickListeners() {
-        View view = requireView();
-        // Calories Card Click
-        view.findViewById(R.id.cardCalories).setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_caloriesDetailFragment)
-        );
+    private void setupFirebase() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        if (mAuth.getCurrentUser() != null) {
+            currentUserId = mAuth.getCurrentUser().getUid();
+            userRef = FirebaseDatabase.getInstance().getReference()
+                .child("users")
+                .child(currentUserId);
+        }
+    }
 
-        // Heart Rate Card Click
-        view.findViewById(R.id.cardHeartRate).setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_heartRateDetailFragment)
-        );
-
-        // Gym Membership Card Click
-        view.findViewById(R.id.cardGymMembership).setOnClickListener(v -> {
-            if (checkLocationPermission()) {
-                Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_gymListFragment);
-            }
-        });
-
-        // Rewards Card Click
-        view.findViewById(R.id.cardRewards).setOnClickListener(v -> 
-            Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_rewardsFragment)
-        );
+    private void setupRecyclerView() {
+        LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
+        recyclerBlogs.setLayoutManager(layoutManager);
+        blogAdapter = new BlogAdapter(new ArrayList<>(), this);
+        recyclerBlogs.setAdapter(blogAdapter);
     }
 
     private void setupHeartRateChart() {
-        List<Entry> entries = new ArrayList<>();
-        // Add sample data points (replace with real data)
-        entries.add(new Entry(0f, 75f));
-        entries.add(new Entry(1f, 78f));
-        entries.add(new Entry(2f, 80f));
-        entries.add(new Entry(3f, 77f));
-
-        LineDataSet dataSet = new LineDataSet(entries, "Heart Rate");
-        dataSet.setColor(ContextCompat.getColor(requireContext(), R.color.colorPrimary));
-        dataSet.setValueTextColor(ContextCompat.getColor(requireContext(), R.color.colorPrimary));
-
-        LineData lineData = new LineData(dataSet);
-        chartHeartRate.setData(lineData);
         chartHeartRate.getDescription().setEnabled(false);
-        chartHeartRate.invalidate();
-    }
-
-    private void setupBlogRecyclerView() {
-        recyclerBlogs.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        blogAdapter = new BlogAdapter(new ArrayList<>(), this);
-        recyclerBlogs.setAdapter(blogAdapter);
-        loadBlogs();
+        chartHeartRate.setTouchEnabled(true);
+        chartHeartRate.setDragEnabled(true);
+        chartHeartRate.setScaleEnabled(true);
+        chartHeartRate.setPinchZoom(true);
+        chartHeartRate.setDrawGridBackground(false);
     }
 
     private void loadDashboardData() {
-        // TODO: Load real data from a repository/database
-        txtWelcome.setText("Welcome back, User!");
-        txtStepCount.setText("5,432");
-        txtActiveMinutes.setText("45");
-        txtWorkoutsCompleted.setText("2");
-        txtCaloriesBurned.setText("450 / 2000 kcal");
-        txtCurrentHeartRate.setText("75 BPM");
-        txtRewardPoints.setText("250 Points");
-        txtNextReward.setText("50 more points until next reward!");
+        if (userRef == null) return;
+
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         
-        progressCalories.setProgress(22); // (450/2000) * 100
-        progressRewards.setProgress(83); // (250/300) * 100
+        // Load daily stats
+        dailyStatsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!isAdded()) return; // Skip if fragment is not attached
+                
+                if (snapshot.exists()) {
+                    txtStepCount.setText(String.format(Locale.getDefault(), "%d steps", 
+                        snapshot.child("steps").getValue(Integer.class)));
+                    txtActiveMinutes.setText(String.format(Locale.getDefault(), "%d mins", 
+                        snapshot.child("active_minutes").getValue(Integer.class)));
+                    txtWorkoutsCompleted.setText(String.format(Locale.getDefault(), "%d workouts", 
+                        snapshot.child("workouts").getValue(Integer.class)));
+                    txtCaloriesBurned.setText(String.format(Locale.getDefault(), "%d kcal", 
+                        snapshot.child("calories").getValue(Integer.class)));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                if (!isAdded()) return; // Skip if fragment is not attached
+                Log.e(TAG, "Failed to load daily stats", error.toException());
+            }
+        };
+        userRef.child("daily_stats").child(today).addValueEventListener(dailyStatsListener);
+
+        // Load heart rate data
+        heartRateListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!isAdded()) return; // Skip if fragment is not attached
+                
+                List<Entry> entries = new ArrayList<>();
+                float index = 0;
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Integer heartRate = dataSnapshot.getValue(Integer.class);
+                    if (heartRate != null) {
+                        entries.add(new Entry(index++, heartRate));
+                        if (index == entries.size()) { // Last entry
+                            txtCurrentHeartRate.setText(String.format(Locale.getDefault(), "%d bpm", heartRate));
+                        }
+                    }
+                }
+                updateHeartRateChart(entries);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                if (!isAdded()) return; // Skip if fragment is not attached
+                Log.e(TAG, "Failed to load heart rate data", error.toException());
+            }
+        };
+        userRef.child("heart_rate").limitToLast(7).addValueEventListener(heartRateListener);
+
+        // Load rewards data
+        rewardsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!isAdded()) return; // Skip if fragment is not attached
+                
+                if (snapshot.exists()) {
+                    int points = snapshot.child("points").getValue(Integer.class);
+                    int nextReward = snapshot.child("next_reward").getValue(Integer.class);
+                    txtRewardPoints.setText(String.format(Locale.getDefault(), "%d pts", points));
+                    txtNextReward.setText(String.format(Locale.getDefault(), "%d pts to next reward", nextReward - points));
+                    progressRewards.setProgress((points * 100) / nextReward);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                if (!isAdded()) return; // Skip if fragment is not attached
+                Log.e(TAG, "Failed to load rewards data", error.toException());
+            }
+        };
+        userRef.child("rewards").addValueEventListener(rewardsListener);
+    }
+
+    private void updateHeartRateChart(List<Entry> entries) {
+        // Safety check to prevent crashes
+        if (!isAdded()) return;
+        
+        LineDataSet dataSet = new LineDataSet(entries, "Heart Rate");
+        dataSet.setColor(ContextCompat.getColor(requireContext(), R.color.colorPrimary));
+        dataSet.setLineWidth(2f);
+        dataSet.setCircleColor(ContextCompat.getColor(requireContext(), R.color.colorPrimary));
+        dataSet.setCircleRadius(4f);
+        dataSet.setDrawValues(false);
+
+        LineData lineData = new LineData(dataSet);
+        chartHeartRate.setData(lineData);
+        chartHeartRate.invalidate();
     }
 
     private void loadBlogs() {
-        // TODO: Load real blog data from an API/database
-        List<Blog> blogs = new ArrayList<>();
-        blogs.add(new Blog(
-            "1",
-            "10 Essential Workout Tips",
-            "Maximize your workout efficiency with these proven tips...",
-            "https://example.com/image1.jpg",
-            "John Doe",
-            "2024-04-04",
-            "Full blog content here..."
-        ));
-        blogs.add(new Blog(
-            "2",
-            "Nutrition Guide for Fitness",
-            "Learn about the right nutrition to support your fitness goals...",
-            "https://example.com/image2.jpg",
-            "Jane Smith",
-            "2024-04-03",
-            "Full blog content here..."
-        ));
-        blogAdapter.updateBlogs(blogs);
+        // Using mock data for now
+        List<BlogPost> mockPosts = new ArrayList<>();
+        
+        BlogPost post1 = new BlogPost();
+        post1.setId("1");
+        post1.setTitle("10 Essential Workout Tips for Beginners");
+        post1.setDescription("Starting your fitness journey? Here are the key things you need to know.");
+        post1.setAuthor("John Smith");
+        post1.setImageUrl("https://cdn.pixabay.com/photo/2017/08/07/14/02/man-2604149_960_720.jpg");
+        post1.setPublishedAt(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()));
+        mockPosts.add(post1);
+
+        BlogPost post2 = new BlogPost();
+        post2.setId("2");
+        post2.setTitle("Nutrition Guide: Eating for Muscle Growth");
+        post2.setDescription("Learn about the best foods and timing for optimal muscle development.");
+        post2.setAuthor("Sarah Johnson");
+        post2.setImageUrl("https://cdn.pixabay.com/photo/2017/03/26/11/53/hors-doeuvre-2175326_960_720.jpg");
+        post2.setPublishedAt(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()));
+        mockPosts.add(post2);
+
+        BlogPost post3 = new BlogPost();
+        post3.setId("3");
+        post3.setTitle("The Benefits of Morning Workouts");
+        post3.setDescription("Discover why exercising in the morning can boost your productivity.");
+        post3.setAuthor("Mike Wilson");
+        post3.setImageUrl("https://cdn.pixabay.com/photo/2017/07/02/19/24/dumbbells-2465478_960_720.jpg");
+        post3.setPublishedAt(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()));
+        mockPosts.add(post3);
+
+        blogAdapter.updateBlogs(mockPosts);
     }
 
-    @Override
-    public void onBlogClick(Blog blog) {
-        Bundle args = new Bundle();
-        args.putString("blogId", blog.getId());
-        Navigation.findNavController(requireView()).navigate(R.id.action_homeFragment_to_blogDetailFragment, args);
+    private void loadGymMembership() {
+        if (userRef == null) return;
+
+        gymMembershipListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!isAdded()) return; // Skip if fragment is not attached
+                
+                if (snapshot.exists()) {
+                    GymMembership membership = snapshot.getValue(GymMembership.class);
+                    if (membership != null) {
+                        tvGymName.setText(membership.getGymName());
+                        tvMembershipType.setText(membership.getMembershipType());
+                        tvMembershipStatus.setText(membership.getStatus());
+                        cardGymMembership.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    // No active membership, show nearby gyms option
+                    tvGymName.setText("Find a Gym");
+                    tvMembershipType.setText("Tap to discover nearby gyms");
+                    tvMembershipStatus.setText("No Active Membership");
+                    cardGymMembership.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                if (!isAdded()) return; // Skip if fragment is not attached
+                Log.e(TAG, "Error loading gym membership: " + error.getMessage());
+            }
+        };
+        userRef.child("gymMembership").addValueEventListener(gymMembershipListener);
+
+        // Set click listener for gym membership card
+        cardGymMembership.setOnClickListener(v -> {
+            Navigation.findNavController(requireView())
+                    .navigate(R.id.action_homeFragment_to_gymListFragment);
+        });
     }
 
     private boolean checkLocationPermission() {
@@ -186,7 +326,58 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Navigation.findNavController(requireView()).navigate(R.id.action_homeFragment_to_gymListFragment);
+                // Permission granted, load gym locations
+                loadNearbyGyms();
+            } else {
+                Toast.makeText(requireContext(), "Location permission is required to show nearby gyms", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void loadNearbyGyms() {
+        // TODO: Implement gym location loading
+    }
+
+    @Override
+    public void onBlogClick(BlogPost blogPost) {
+        // Navigate to blog detail screen
+        Bundle args = new Bundle();
+        args.putParcelable("blog_post", (Parcelable) blogPost);
+        Navigation.findNavController(requireView()).navigate(R.id.action_homeFragment_to_blogDetailFragment, args);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Remove listeners to prevent callbacks after fragment is detached
+        removeListeners();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // Remove listeners again for safety
+        removeListeners();
+    }
+
+    private void removeListeners() {
+        if (userRef != null) {
+            if (dailyStatsListener != null) {
+                String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                userRef.child("daily_stats").child(today).removeEventListener(dailyStatsListener);
+                dailyStatsListener = null;
+            }
+            if (heartRateListener != null) {
+                userRef.child("heart_rate").removeEventListener(heartRateListener);
+                heartRateListener = null;
+            }
+            if (rewardsListener != null) {
+                userRef.child("rewards").removeEventListener(rewardsListener);
+                rewardsListener = null;
+            }
+            if (gymMembershipListener != null) {
+                userRef.child("gymMembership").removeEventListener(gymMembershipListener);
+                gymMembershipListener = null;
             }
         }
     }

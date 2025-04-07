@@ -162,7 +162,9 @@ public class MealFragment extends Fragment {
         return mealType;
     }
 
-
+    public void refreshFoodList() {
+        loadMealItems();
+    }
 
     private void deleteFoodItem(FoodItem foodItem, String key) {
         mDatabase.child("users").child(userId).child("meals").child(mealType).child(key).removeValue()
