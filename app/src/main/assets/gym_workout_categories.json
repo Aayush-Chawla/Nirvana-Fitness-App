@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "message": "Categories fetched successfully",
+  "categories": [
+    {
+      "name": "Free Weights",
+      "image_url": "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=600&auto=format",
+      "description": "Dumbbells, barbells, and weight plates"
+    },
+    {
+      "name": "Machines",
+      "image_url": "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=600&auto=format",
+      "description": "Weight machines and cable equipment"
+    },
+    {
+      "name": "Bodyweight",
+      "image_url": "https://images.unsplash.com/photo-1597076545399-91a3ff0e71b3?w=600&auto=format",
+      "description": "Using gym equipment for bodyweight exercises"
+    },
+    {
+      "name": "Cardio Equipment",
+      "image_url": "https://images.unsplash.com/photo-1596357395217-80de13130e92?w=600&auto=format",
+      "description": "Treadmill, bike, elliptical, and more"
+    },
+    {
+      "name": "Resistance Bands",
+      "image_url": "https://images.unsplash.com/photo-1598632640487-6ea4a5e8bf9b?w=600&auto=format",
+      "description": "Band-based strength training"
+    },
+    {
+      "name": "Olympic Lifts",
+      "image_url": "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=600&auto=format",
+      "description": "Advanced compound movements"
+    }
+  ]
+} 

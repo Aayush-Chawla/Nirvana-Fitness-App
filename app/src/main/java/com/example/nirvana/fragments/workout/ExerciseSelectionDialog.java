@@ -35,6 +35,7 @@ public class ExerciseSelectionDialog extends BottomSheetDialogFragment implement
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.d("ExerciseSelection", "onCreateView called");
         View view = inflater.inflate(R.layout.dialog_exercise_selection, container, false);
         setupRecyclerView(view);
         return view;
@@ -42,7 +43,14 @@ public class ExerciseSelectionDialog extends BottomSheetDialogFragment implement
 
     private void setupRecyclerView(View view) {
         try {
+            Log.d("ExerciseSelection", "Setting up RecyclerView");
             RecyclerView recyclerView = view.findViewById(R.id.exerciseSelectionList);
+            
+            if (recyclerView == null) {
+                Log.e("ExerciseSelection", "RecyclerView not found! Check the layout ID.");
+                return;
+            }
+            
             recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
             
             adapter = new ExerciseAdapter(this);
@@ -50,7 +58,9 @@ public class ExerciseSelectionDialog extends BottomSheetDialogFragment implement
             
             List<Exercise> exercises = getDummyExercises();
             Log.d("ExerciseSelection", "Loading " + exercises.size() + " exercises");
-            adapter.submitList(exercises);
+            adapter.setExercises(exercises);
+            
+            Log.d("ExerciseSelection", "RecyclerView setup complete");
         } catch (Exception e) {
             Log.e("ExerciseSelection", "Error setting up RecyclerView", e);
         }
@@ -58,9 +68,12 @@ public class ExerciseSelectionDialog extends BottomSheetDialogFragment implement
 
     @Override
     public void onExerciseClick(Exercise exercise) {
+        Log.d("ExerciseSelection", "Exercise clicked: " + exercise.getName());
         if (listener != null) {
             listener.onExerciseSelected(exercise);
             dismiss();
+        } else {
+            Log.e("ExerciseSelection", "No listener set for exercise selection");
         }
     }
 

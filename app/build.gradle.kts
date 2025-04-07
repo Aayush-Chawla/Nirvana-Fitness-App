@@ -24,6 +24,11 @@ android {
         buildConfigField("String", "FIREBASE_DATABASE_URL", "\"${project.properties["FIREBASE_DATABASE_URL"]}\"")
         buildConfigField("String", "FIREBASE_STORAGE_BUCKET", "\"${project.properties["FIREBASE_STORAGE_BUCKET"]}\"")
         buildConfigField("String", "FIREBASE_SENDER_ID", "\"${project.properties["FIREBASE_SENDER_ID"]}\"")
+
+        //Google Maps
+        buildConfigField("String", "GOOGLE_MAPS_API_KEY", "\"${project.findProperty("MAPS_API_KEY") ?: ""}\"")
+        manifestPlaceholders["MAPS_API_KEY"] = "${project.findProperty("MAPS_API_KEY") ?: ""}"
+
     }
 
     buildTypes {

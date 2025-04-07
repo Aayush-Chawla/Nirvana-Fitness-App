@@ -45,21 +45,22 @@ public class CustomWorkoutFragment extends Fragment implements ExerciseAdapter.O
 
         setupRecyclerView(view);
         setupWeekdayTabs(view);
+        setupFabButton(view);
         setupFirebase();
     }
 
     private void setupRecyclerView(View view) {
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerExercises);
+        RecyclerView recyclerView = view.findViewById(R.id.exerciseList);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new ExerciseAdapter(this);
         recyclerView.setAdapter(adapter);
         
         // Initialize with empty list
-        adapter.submitList(new ArrayList<>());
+        adapter.setExercises(new ArrayList<>());
     }
 
     private void setupWeekdayTabs(View view) {
-        TabLayout tabLayout = view.findViewById(R.id.tabLayout);
+        TabLayout tabLayout = view.findViewById(R.id.weekdayTabs);
         String[] weekdays = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         
         for (String day : weekdays) {
@@ -81,6 +82,45 @@ public class CustomWorkoutFragment extends Fragment implements ExerciseAdapter.O
         });
     }
 
+    private void setupFabButton(View view) {
+        view.findViewById(R.id.fabAddExercise).setOnClickListener(v -> {
+            showExerciseSelectionDialog();
+        });
+    }
+
+    private void showExerciseSelectionDialog() {
+        ExerciseSelectionDialog dialog = ExerciseSelectionDialog.newInstance();
+        dialog.setOnExerciseSelectedListener(exercise -> {
+            // Handle the selected exercise
+            addExerciseToWorkout(exercise);
+        });
+        dialog.show(getChildFragmentManager(), "exercise_selection");
+    }
+    
+    private void addExerciseToWorkout(Exercise exercise) {
+        if (auth.getCurrentUser() == null) {
+            Log.w("CustomWorkout", "No user logged in");
+            return;
+        }
+        
+        String userId = auth.getCurrentUser().getUid();
+        Log.d("CustomWorkout", "Adding exercise to day: " + selectedDay + " for user: " + userId);
+        
+        db.collection("users")
+            .document(userId)
+            .collection("workouts")
+            .document(selectedDay.toLowerCase())
+            .collection("exercises")
+            .add(exercise)
+            .addOnSuccessListener(documentReference -> {
+                Log.d("CustomWorkout", "Exercise added with ID: " + documentReference.getId());
+                loadWorkoutForDay(selectedDay);
+            })
+            .addOnFailureListener(e -> {
+                Log.e("CustomWorkout", "Error adding exercise", e);
+            });
+    }
+
     private void setupFirebase() {
         loadWorkoutForDay(selectedDay);
     }
@@ -88,7 +128,7 @@ public class CustomWorkoutFragment extends Fragment implements ExerciseAdapter.O
     private void loadWorkoutForDay(String day) {
         if (auth.getCurrentUser() == null) {
             Log.w("CustomWorkout", "No user logged in");
-            adapter.submitList(new ArrayList<>());
+            adapter.setExercises(new ArrayList<>());
             return;
         }
         
@@ -109,11 +149,11 @@ public class CustomWorkoutFragment extends Fragment implements ExerciseAdapter.O
                     exercises.add(exercise);
                 });
                 Log.d("CustomWorkout", "Loaded " + exercises.size() + " exercises");
-                adapter.submitList(exercises);
+                adapter.setExercises(exercises);
             })
             .addOnFailureListener(e -> {
                 Log.e("CustomWorkout", "Error loading exercises", e);
-                adapter.submitList(new ArrayList<>());
+                adapter.setExercises(new ArrayList<>());
             });
     }
 

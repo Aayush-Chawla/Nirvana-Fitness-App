@@ -17,14 +17,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
 import com.example.nirvana.adapters.ExerciseAdapter;
 import com.example.nirvana.models.Exercise;
+import com.example.nirvana.network.ApiClient;
+import com.example.nirvana.data.models.ExerciseResponse;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import java.util.ArrayList;
 import java.util.List;
+import android.util.Log;
 
 public class WorkoutListFragment extends Fragment {
+    private static final String TAG = "WorkoutListFragment";
     private static final String ARG_CATEGORY = "category";
     private static final String ARG_EXPERIENCE = "experience";
 
@@ -137,19 +144,92 @@ public class WorkoutListFragment extends Fragment {
 
     private void loadExercises() {
         if (!isAdded()) {
-            android.util.Log.e("WorkoutListFragment", "Fragment not attached to activity");
+            Log.e(TAG, "Fragment not attached to activity");
             return;
         }
 
-        android.util.Log.d("WorkoutListFragment", "Loading exercises for category: " + category);
-        List<Exercise> exercises = new ArrayList<>();
-        String baseImageUrl = "https://firebasestorage.googleapis.com/v0/b/nirvana-fitness-app.appspot.com/o/exercises%2F";
+        Log.d(TAG, "Loading exercises for category: " + category);
         
         // Category null check - default to Full Body if category is null
         if (category == null) {
             category = "Full Body";
-            android.util.Log.d("WorkoutListFragment", "Category was null, defaulting to: " + category);
+            Log.d(TAG, "Category was null, defaulting to: " + category);
         }
+        
+        // First try to load exercises from our mock API
+        ApiClient.getWorkoutApiService().getExercisesByCategory(category).enqueue(new Callback<ExerciseResponse>() {
+            @Override
+            public void onResponse(Call<ExerciseResponse> call, Response<ExerciseResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getExercises() != null) {
+                    Log.d(TAG, "Successfully loaded " + response.body().getExercises().size() + 
+                          " exercises from API for category: " + category);
+                    
+                    // Convert API model to app model
+                    List<Exercise> exercises = new ArrayList<>();
+                    for (ExerciseResponse.ExerciseDetails details : response.body().getExercises()) {
+                        Exercise exercise = new Exercise(
+                            details.getId(),
+                            details.getName(),
+                            details.getDescription(),
+                            details.getCategory(),
+                            details.getDifficulty(),
+                            10, // Default duration of 10 minutes
+                            details.getImageUrl(),
+                            "https://www.youtube.com/watch?v=dQw4w9WgXcQ" // Default video URL
+                        );
+                        exercises.add(exercise);
+                    }
+                    
+                    if (!exercises.isEmpty()) {
+                        exerciseAdapter.submitList(exercises);
+                        verifyRecyclerViewSetup();
+                    } else {
+                        Log.w(TAG, "API returned empty exercises list, falling back to hardcoded data");
+                        loadHardcodedExercises();
+                    }
+                } else {
+                    Log.w(TAG, "API response unsuccessful or empty, falling back to hardcoded data");
+                    loadHardcodedExercises();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ExerciseResponse> call, Throwable t) {
+                Log.e(TAG, "Failed to load exercises from API", t);
+                loadHardcodedExercises();
+            }
+        });
+    }
+    
+    private void loadHardcodedExercises() {
+        Log.d(TAG, "Loading hardcoded exercises for category: " + category);
+        List<Exercise> exercises = getExercisesForCategory();
+        
+        // Update adapter with exercises
+        if (!exercises.isEmpty()) {
+            Log.d(TAG, "Submitting " + exercises.size() + " hardcoded exercises to adapter");
+            exerciseAdapter.submitList(exercises);
+            verifyRecyclerViewSetup();
+        } else {
+            Log.e(TAG, "No hardcoded exercises loaded for category: " + category);
+            // Submit an empty list to avoid null pointer exceptions
+            exerciseAdapter.submitList(new ArrayList<>());
+        }
+    }
+
+    private void setupClickListeners() {
+        btnStartWorkout.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putString("category", category);
+            args.putString("experience", experienceLevel);
+            Navigation.findNavController(requireView())
+                .navigate(R.id.action_workoutListFragment_to_activeWorkoutFragment, args);
+        });
+    }
+
+    private List<Exercise> getExercisesForCategory() {
+        List<Exercise> exercises = new ArrayList<>();
+        String baseImageUrl = "https://firebasestorage.googleapis.com/v0/b/nirvana-fitness-app.appspot.com/o/exercises%2F";
         
         // Chest exercises
         if (category.equalsIgnoreCase("Chest")) {
@@ -347,57 +427,38 @@ public class WorkoutListFragment extends Fragment {
                 "A comprehensive full-body exercise that combines a squat, push-up, and jump. " +
                 "Great for cardio, strength, and endurance in one movement.",
                 "Full Body", experienceLevel, 15,
-                "https://cdn.pixabay.com/photo/2014/11/17/13/17/crossfit-534615_960_720.jpg",
+                "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
                 "https://www.youtube.com/watch?v=dZgVxmf6jkA"));
                 
             exercises.add(new Exercise("26", "Kettlebell Swings", 
                 "A dynamic exercise that works the posterior chain, core, and shoulders. " +
                 "Excellent for power development and cardiovascular fitness.",
                 "Full Body", experienceLevel, 12,
-                "https://cdn.pixabay.com/photo/2018/01/01/01/15/fitness-3053567_960_720.jpg",
+                "https://images.unsplash.com/photo-1517964603305-4d20fb65a10e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
                 "https://www.youtube.com/watch?v=YSxHifyI6s8"));
                 
             exercises.add(new Exercise("27", "Thrusters", 
                 "A compound movement combining a front squat and overhead press. " +
                 "Effectively works multiple muscle groups and elevates heart rate.",
                 "Full Body", experienceLevel, 15,
-                "https://cdn.pixabay.com/photo/2015/07/02/10/23/training-828741_960_720.jpg",
+                "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
                 "https://www.youtube.com/watch?v=L219ltL15zk"));
                 
             exercises.add(new Exercise("28", "Turkish Get-Up", 
                 "A complex movement that improves stability, coordination, and strength. " +
                 "Works practically every muscle in the body through multiple planes of motion.",
                 "Full Body", experienceLevel, 10,
-                "https://cdn.pixabay.com/photo/2017/08/07/14/02/man-2604149_960_720.jpg",
+                "https://images.unsplash.com/photo-1598971639058-a543618b7b62?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
                 "https://www.youtube.com/watch?v=jFK8FOGnXLw"));
                 
-            exercises.add(new Exercise("29", "Battle Ropes", 
-                "A high-intensity exercise that builds upper body and core strength. " +
-                "Great for conditioning and power endurance.",
+            exercises.add(new Exercise("29", "Bear Crawl", 
+                "A quadrupedal movement that builds strength and coordination. " +
+                "Great for core, shoulders, and overall conditioning.",
                 "Full Body", experienceLevel, 12,
-                "https://cdn.pixabay.com/photo/2018/01/01/01/15/fitness-3053567_960_720.jpg",
-                "https://www.youtube.com/watch?v=r2-JXSa8rIM"));
+                "https://images.unsplash.com/photo-1552196563-55cd4e45efb3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+                "https://www.youtube.com/watch?v=bfT5TaRFKQo"));
         }
         
-        // Update adapter with exercises
-        if (!exercises.isEmpty()) {
-            android.util.Log.d("WorkoutListFragment", "Submitting " + exercises.size() + " exercises to adapter");
-            exerciseAdapter.submitList(exercises);
-            verifyRecyclerViewSetup();
-        } else {
-            android.util.Log.e("WorkoutListFragment", "No exercises loaded for category: " + category);
-            // Submit an empty list to avoid null pointer exceptions
-            exerciseAdapter.submitList(new ArrayList<>());
-        }
-    }
-
-    private void setupClickListeners() {
-        btnStartWorkout.setOnClickListener(v -> {
-            Bundle args = new Bundle();
-            args.putString("category", category);
-            args.putString("experience", experienceLevel);
-            Navigation.findNavController(requireView())
-                .navigate(R.id.action_workoutListFragment_to_activeWorkoutFragment, args);
-        });
+        return exercises;
     }
 } 

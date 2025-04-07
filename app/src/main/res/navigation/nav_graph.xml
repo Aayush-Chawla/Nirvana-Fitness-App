@@ -85,6 +85,10 @@
         <action
             android:id="@+id/action_dietFragment_to_logDietFragment"
             app:destination="@id/logDietFragment" />
+            
+        <action
+            android:id="@+id/action_dietFragment_to_logFoodFragment"
+            app:destination="@id/logFoodFragment" />
 
     </fragment>
 
@@ -106,6 +110,9 @@
         <action
             android:id="@+id/action_workoutFragment_to_gymWorkoutFragment"
             app:destination="@id/gymWorkoutFragment" />
+        <action
+            android:id="@+id/action_workoutFragment_to_logFoodFragment"
+            app:destination="@id/logFoodFragment" />
     </fragment>
 
     <fragment
@@ -229,5 +236,11 @@
             android:name="exercise"
             app:argType="com.example.nirvana.models.Exercise" />
     </fragment>
+
+    <fragment
+        android:id="@+id/logFoodFragment"
+        android:name="com.example.nirvana.fragments.workout.LogFoodFragment"
+        android:label="Log Food"
+        tools:layout="@layout/fragment_log_food" />
 
 </navigation>

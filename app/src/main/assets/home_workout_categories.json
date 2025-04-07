@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "message": "Categories fetched successfully",
+  "categories": [
+    {
+      "name": "Full Body",
+      "image_url": "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?w=600&auto=format",
+      "description": "Complete body workout with no equipment"
+    },
+    {
+      "name": "Upper Body",
+      "image_url": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&auto=format",
+      "description": "Focus on chest, shoulders, and arms"
+    },
+    {
+      "name": "Lower Body",
+      "image_url": "https://images.unsplash.com/photo-1434608519344-49d77a699e1d?w=600&auto=format",
+      "description": "Target legs and glutes"
+    },
+    {
+      "name": "Core",
+      "image_url": "https://images.unsplash.com/photo-1616803689943-5601631c7fec?w=600&auto=format",
+      "description": "Strengthen your core and abs"
+    },
+    {
+      "name": "Cardio",
+      "image_url": "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=600&auto=format",
+      "description": "High-intensity cardio workouts"
+    },
+    {
+      "name": "Stretching",
+      "image_url": "https://images.unsplash.com/photo-1552196563-55cd4e45efb3?w=600&auto=format",
+      "description": "Improve flexibility and recovery"
+    }
+  ]
+} 

@@ -1,0 +1,135 @@
+{
+  "success": true,
+  "message": "Full Body exercises retrieved successfully",
+  "exercises": [
+    {
+      "id": "fb001",
+      "name": "Burpees",
+      "description": "A full body exercise that combines a squat, push-up, and jump.",
+      "muscle_groups": ["Chest", "Legs", "Core", "Shoulders"],
+      "difficulty": "Intermediate",
+      "equipment": "None",
+      "category": "Full Body",
+      "image_url": "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+      "instructions": [
+        "Start in a standing position with your feet shoulder-width apart",
+        "Drop into a squat position and place your hands on the floor",
+        "Kick your feet back into a push-up position",
+        "Perform a push-up",
+        "Return your feet to the squat position",
+        "Jump up from the squat position with your arms extended overhead"
+      ]
+    },
+    {
+      "id": "fb002",
+      "name": "Mountain Climbers",
+      "description": "A dynamic exercise that works your entire body while increasing your heart rate.",
+      "muscle_groups": ["Core", "Shoulders", "Arms", "Legs"],
+      "difficulty": "Beginner",
+      "equipment": "None",
+      "category": "Full Body",
+      "image_url": "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+      "instructions": [
+        "Start in a push-up position with your arms straight",
+        "Bring your right knee toward your chest",
+        "Return to the starting position",
+        "Bring your left knee toward your chest",
+        "Return to the starting position",
+        "Continue alternating legs at a fast pace"
+      ]
+    },
+    {
+      "id": "fb003",
+      "name": "Kettlebell Swings",
+      "description": "A powerful exercise that targets multiple muscle groups while providing cardiovascular benefits.",
+      "muscle_groups": ["Hamstrings", "Glutes", "Lower Back", "Shoulders", "Core"],
+      "difficulty": "Intermediate",
+      "equipment": "Kettlebell",
+      "category": "Full Body",
+      "image_url": "https://images.unsplash.com/photo-1517964603305-4d20fb65a10e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+      "instructions": [
+        "Stand with feet shoulder-width apart, holding a kettlebell with both hands",
+        "Keep your back straight and hinge at the hips, swinging the kettlebell between your legs",
+        "Thrust your hips forward to swing the kettlebell up to chest height",
+        "Allow the kettlebell to fall back down between your legs",
+        "Repeat the movement in a continuous motion"
+      ]
+    },
+    {
+      "id": "fb004",
+      "name": "Thrusters",
+      "description": "A compound exercise that combines a front squat with an overhead press.",
+      "muscle_groups": ["Quadriceps", "Glutes", "Shoulders", "Triceps", "Core"],
+      "difficulty": "Intermediate",
+      "equipment": "Dumbbells or Barbell",
+      "category": "Full Body",
+      "image_url": "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+      "instructions": [
+        "Hold a pair of dumbbells at shoulder height, palms facing each other",
+        "Stand with feet shoulder-width apart",
+        "Lower into a squat position, keeping your back straight",
+        "As you stand up, press the dumbbells overhead",
+        "Lower the dumbbells back to shoulder height as you return to the squat position",
+        "Repeat the movement in a continuous motion"
+      ]
+    },
+    {
+      "id": "fb005",
+      "name": "Turkish Get-Up",
+      "description": "A complex movement that improves stability, coordination, and strength.",
+      "muscle_groups": ["Shoulders", "Core", "Legs", "Hips"],
+      "difficulty": "Advanced",
+      "equipment": "Kettlebell or Dumbbell",
+      "category": "Full Body",
+      "image_url": "https://images.unsplash.com/photo-1598971639058-a543618b7b62?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+      "instructions": [
+        "Lie on your back with a kettlebell held in one hand, arm extended",
+        "Bend the knee on the same side as the kettlebell, placing your foot flat on the floor",
+        "Roll onto your elbow on the opposite side from the kettlebell",
+        "Push up onto your hand, lifting your torso",
+        "Sweep your straight leg underneath you and kneel",
+        "Stand up while keeping the kettlebell overhead",
+        "Reverse the movement to return to the starting position"
+      ]
+    },
+    {
+      "id": "fb006",
+      "name": "Bear Crawl",
+      "description": "A quadrupedal movement that builds strength and coordination.",
+      "muscle_groups": ["Shoulders", "Core", "Hip Flexors", "Quads"],
+      "difficulty": "Beginner",
+      "equipment": "None",
+      "category": "Full Body",
+      "image_url": "https://images.unsplash.com/photo-1552196563-55cd4e45efb3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+      "instructions": [
+        "Start on all fours with your hands under your shoulders and knees under your hips",
+        "Lift your knees slightly off the ground",
+        "Move forward by moving your right hand and left foot simultaneously",
+        "Then move your left hand and right foot",
+        "Keep your back flat and core engaged throughout the movement",
+        "Continue crawling forward for the desired distance"
+      ]
+    },
+    {
+      "id": "fb007",
+      "name": "Man Makers",
+      "description": "A challenging full-body exercise that combines several movements.",
+      "muscle_groups": ["Chest", "Back", "Shoulders", "Arms", "Core", "Legs"],
+      "difficulty": "Advanced",
+      "equipment": "Dumbbells",
+      "category": "Full Body",
+      "image_url": "https://images.unsplash.com/photo-1581009137042-c552e485697a?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",
+      "instructions": [
+        "Start in a push-up position with a dumbbell in each hand",
+        "Perform a push-up",
+        "Pull the right dumbbell up into a row",
+        "Return the dumbbell to the floor",
+        "Pull the left dumbbell up into a row",
+        "Return the dumbbell to the floor",
+        "Jump your feet forward to your hands",
+        "Stand up and perform a dumbbell clean and press",
+        "Return to the starting position and repeat"
+      ]
+    }
+  ]
+} 

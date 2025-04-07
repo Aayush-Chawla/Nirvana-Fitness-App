@@ -61,6 +61,15 @@ public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.Exerc
         holder.bind(exercise, listener);
     }
 
+    /**
+     * Sets a new list of exercises and notifies the adapter
+     * @param exercises The new list of exercises to display
+     */
+    public void setExercises(List<Exercise> exercises) {
+        Log.d("ExerciseAdapter", "setExercises called with " + (exercises != null ? exercises.size() : 0) + " exercises");
+        submitList(exercises);
+    }
+
     static class ExerciseViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imgExercise;
         private final TextView txtName;
@@ -89,15 +98,27 @@ public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.Exerc
                 exercise.getDifficulty());
             txtDetails.setText(details);
 
-            // Load image using Glide
+            // Load image using Glide with improved error handling
             String imageUrl = exercise.getImageUrl();
-            if (imageUrl != null && !imageUrl.isEmpty() && !imageUrl.contains("example.com")) {
+            if (imageUrl != null && !imageUrl.isEmpty()) {
                 Log.d("ExerciseAdapter", "Loading image from URL: " + imageUrl);
-                Glide.with(itemView.getContext())
-                    .load(imageUrl)
+                
+                // Add request options to prevent 403 errors
+                com.bumptech.glide.request.RequestOptions requestOptions = new com.bumptech.glide.request.RequestOptions()
+                    .timeout(10000) // 10s timeout
                     .placeholder(R.drawable.ic_exercise_default)
-                    .error(getDefaultDrawableForCategory(exercise.getCategory()))
-                    .fallback(getDefaultDrawableForCategory(exercise.getCategory()))
+                    .error(getDefaultDrawableForCategory(exercise.getCategory()));
+                
+                // Add headers to request to help with some hosting services
+                com.bumptech.glide.load.model.GlideUrl glideUrl = new com.bumptech.glide.load.model.GlideUrl(imageUrl, 
+                    new com.bumptech.glide.load.model.LazyHeaders.Builder()
+                        .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                        .addHeader("Referer", "https://www.example.com/")
+                        .build());
+                
+                Glide.with(itemView.getContext())
+                    .load(glideUrl)
+                    .apply(requestOptions)
                     .into(imgExercise);
             } else {
                 // Set default image based on category
