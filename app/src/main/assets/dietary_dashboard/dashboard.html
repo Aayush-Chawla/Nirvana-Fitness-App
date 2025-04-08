@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dietary Patterns Dashboard</title>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .header h1 {
+            color: #4a6572;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: #6c757d;
+            margin-top: 0;
+        }
+        .placeholder {
+            background-color: #e9ecef;
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .dashboardLink{
+            text-decoration: none;
+            color: black;
+        }
+
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 200px;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #4a6572;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dietary Patterns Dashboard</h1>
+            <p>Advanced analysis based on your dietary data</p>
+        </div>
+
+        <a class="dashboardLink" href="https://aayush-chawla-dietary-patterns-dap-dietary-analysis-p5pa0b.streamlit.app/  ">
+        <div class="placeholder">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>This dashboard will display data from the Dietary-Patterns-DAP repository.</p>
+                <p>The Jupyter notebook data will be processed and displayed here.</p>
+
+            </div>
+        </div>
+        <a/>
+        
+        <div class="placeholder">
+            <h2>Key Insights</h2>
+            <p>Dietary patterns analysis helps identify nutritional trends and make healthier food choices.</p>
+        </div>
+        
+        <div class="placeholder">
+            <h2>Recommendations(Coming Soon.....</h2>
+            <p>Personalized nutrition recommendations will appear here based on your dietary patterns.</p>
+        </div>
+    </div>
+</body>
+</html> 

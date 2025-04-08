@@ -74,6 +74,9 @@
                 android:name="blogId"
                 app:argType="string" />
         </action>
+        <action
+            android:id="@+id/action_homeFragment_to_dietaryDashboardFragment"
+            app:destination="@id/dietaryDashboardFragment" />
     </fragment>
 
     <fragment
@@ -91,6 +94,12 @@
             app:destination="@id/logFoodFragment" />
 
     </fragment>
+
+    <fragment
+        android:id="@+id/dietaryDashboardFragment"
+        android:name="com.example.nirvana.fragments.diet.DietaryDashboardFragment"
+        android:label="Nutrition Dashboard"
+        tools:layout="@layout/fragment_dietary_dashboard" />
 
     <fragment
         android:id="@+id/logDietFragment"

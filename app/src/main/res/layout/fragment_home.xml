@@ -223,6 +223,13 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- Dietary Dashboard Card -->
+        <include
+            layout="@layout/card_dietary_dashboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp" />
+
         <!-- Gym Membership Card -->
         <include
             layout="@layout/card_gym_membership"

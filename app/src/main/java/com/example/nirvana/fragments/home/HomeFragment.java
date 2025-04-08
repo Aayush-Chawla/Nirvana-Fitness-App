@@ -18,6 +18,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -75,13 +76,26 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+        return view;
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        // Initialize all views
         initializeViews(view);
+        
+        // Initialize Firebase
         setupFirebase();
+        
+        // Setup UI components
         setupRecyclerView();
         setupHeartRateChart();
+        setupDietaryDashboardCard(view);
+        setupGymMembershipCard(view);
         
-        // Load all data
+        // Load data
         loadDashboardData();
         loadBlogs();
         loadGymMembership();
@@ -89,8 +103,6 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
         if (checkLocationPermission()) {
             loadNearbyGyms();
         }
-
-        return view;
     }
 
     private void initializeViews(View view) {
@@ -379,6 +391,27 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
                 userRef.child("gymMembership").removeEventListener(gymMembershipListener);
                 gymMembershipListener = null;
             }
+        }
+    }
+
+    private void setupDietaryDashboardCard(View view) {
+        View dietaryDashboardCard = view.findViewById(R.id.cardDietaryDashboard);
+        if (dietaryDashboardCard != null) {
+            dietaryDashboardCard.setOnClickListener(v -> {
+                // Navigate to DietaryDashboardFragment
+                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+                navController.navigate(R.id.action_homeFragment_to_dietaryDashboardFragment);
+            });
+        }
+    }
+
+    private void setupGymMembershipCard(View view) {
+        cardGymMembership = view.findViewById(R.id.cardGymMembership);
+        if (cardGymMembership != null) {
+            cardGymMembership.setOnClickListener(v -> {
+                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+                navController.navigate(R.id.action_homeFragment_to_gymListFragment);
+            });
         }
     }
 }

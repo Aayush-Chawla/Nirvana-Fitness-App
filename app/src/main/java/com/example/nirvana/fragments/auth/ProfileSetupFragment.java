@@ -17,7 +17,7 @@ import com.example.nirvana.R;
 import com.example.nirvana.activities.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore .FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
