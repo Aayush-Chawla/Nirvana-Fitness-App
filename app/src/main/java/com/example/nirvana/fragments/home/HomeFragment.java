@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -453,24 +454,55 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     }
 
     private void setupChatbot(View view) {
-        // Initialize ChatAdapter and set up RecyclerView
+        // Initialize chatbot
+        try {
+            geminiService = new GeminiService(requireContext());
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing Gemini service", e);
+        }
+        
+        // Set up message recycler view
         chatAdapter = new ChatAdapter(chatMessages, requireContext());
         recyclerViewChat.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerViewChat.setAdapter(chatAdapter);
         
-        // Initialize Gemini Service
-        geminiService = new GeminiService(requireContext());
-        
         // Add welcome message
-        addBotMessage("Hello! I'm your Nirvana Fitness assistant. How can I help you today? You can ask me about exercises, nutrition, or any fitness challenges you're facing.");
+        if (chatMessages.isEmpty()) {
+            addBotMessage("Hello! I'm your Nirvana fitness assistant. Ask me about workouts, nutrition, or your progress.");
+        }
         
         // Set up send button
         sendButton.setOnClickListener(v -> {
             String message = messageInput.getText().toString().trim();
             if (!TextUtils.isEmpty(message)) {
                 sendMessage(message);
-                messageInput.setText("");
             }
+        });
+        
+        // Set up Try Me button to demonstrate functionality
+        Button buttonTryMe = view.findViewById(R.id.buttonTryMe);
+        buttonTryMe.setOnClickListener(v -> {
+            // Cycle through demo questions
+            String[] demoQuestions = {
+                "What is my name?",
+                "How old am I?",
+                "What is my weight?",
+                "What are my recent meals?",
+                "Tell me about my workouts"
+            };
+            
+            // Use a tag to cycle through questions
+            int currentQuestion = 0;
+            if (buttonTryMe.getTag() != null) {
+                currentQuestion = (int) buttonTryMe.getTag();
+                currentQuestion = (currentQuestion + 1) % demoQuestions.length;
+            }
+            buttonTryMe.setTag(currentQuestion);
+            
+            // Send the selected demo question
+            String question = demoQuestions[currentQuestion];
+            messageInput.setText(question);
+            sendMessage(question);
         });
     }
 
@@ -555,8 +587,14 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     }
 
     private void sendMessage(String message) {
-        // Add user message to chat
+        // Don't process empty messages
+        if (TextUtils.isEmpty(message)) return;
+        
+        // Add message to chat
         addUserMessage(message);
+        
+        // Clear input
+        messageInput.setText("");
         
         // Build context for Gemini API
         StringBuilder context = new StringBuilder();
@@ -605,7 +643,26 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
                 
                 requireActivity().runOnUiThread(() -> {
                     Log.e(TAG, "Gemini API error: " + errorMessage);
-                    addBotMessage("I'm sorry, I'm having trouble processing your request right now. Please try again later.");
+                    // Instead of showing a generic error message, let the GeminiService handle it with a fallback
+                    // The service will provide a meaningful response based on the message content
+                    addBotMessage("I'll provide you with the best information I can without accessing the AI service.");
+                    
+                    // Call generateContent again - the fallback system will automatically kick in
+                    // since the error has already been logged
+                    geminiService.generateContent(message, new GeminiService.GeminiResponseCallback() {
+                        @Override
+                        public void onResponse(String response) {
+                            if (getActivity() == null || !isAdded()) return;
+                            addBotMessage(response);
+                            saveChatHistory(message, response);
+                        }
+                        
+                        @Override
+                        public void onError(String secondError) {
+                            // This should not happen since we're already using the fallback
+                            Log.e(TAG, "Double error in Gemini service: " + secondError);
+                        }
+                    });
                 });
             }
         });
