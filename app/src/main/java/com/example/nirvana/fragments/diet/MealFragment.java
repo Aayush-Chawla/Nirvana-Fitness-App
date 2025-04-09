@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
-import com.example.nirvana.data.models.FoodItem;
+import com.example.nirvana.models.FoodItem;
 import com.example.nirvana.ui.adapters.FoodItemAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -28,7 +28,6 @@ public class MealFragment extends Fragment {
     private String mealType;
 
     // Views
-    private TextView tvMealHeader;
     private TextView tvTotalCalories;
     private TextView tvTotalProtein;
     private TextView tvTotalCarbs;
@@ -74,7 +73,6 @@ public class MealFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_meal, container, false);
 
         // Initialize views
-        tvMealHeader = view.findViewById(R.id.tvMealHeader);
         tvTotalCalories = view.findViewById(R.id.tvTotalCalories);
         tvTotalProtein = view.findViewById(R.id.tvTotalProtein);
         tvTotalCarbs = view.findViewById(R.id.tvTotalCarbs);
@@ -82,14 +80,19 @@ public class MealFragment extends Fragment {
         rvFoodItems = view.findViewById(R.id.rvFoodItems);
         tvEmptyState = view.findViewById(R.id.tvEmptyState);
 
-        // Set meal header
-        tvMealHeader.setText(mealType);
-
         // Setup RecyclerView
         rvFoodItems.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new FoodItemAdapter(foodItems, foodItem -> {
-            // Handle item click (e.g., edit or delete)
-            showFoodItemOptions(foodItem);
+        adapter = new FoodItemAdapter(foodItems, new FoodItemAdapter.OnFoodItemClickListener() {
+            @Override
+            public void onFoodItemClick(FoodItem foodItem) {
+                // Handle item click (e.g., edit or delete)
+                showFoodItemOptions(foodItem);
+            }
+            
+            @Override
+            public void onDeleteClick(FoodItem foodItem, int position) {
+                deleteFoodItemByPosition(foodItem, position);
+            }
         });
         rvFoodItems.setAdapter(adapter);
 
@@ -166,13 +169,65 @@ public class MealFragment extends Fragment {
         loadMealItems();
     }
 
-    private void deleteFoodItem(FoodItem foodItem, String key) {
-        mDatabase.child("users").child(userId).child("meals").child(mealType).child(key).removeValue()
-                .addOnSuccessListener(aVoid -> {
-                    // Item deleted successfully
-                })
-                .addOnFailureListener(e -> {
+    private void deleteFoodItemByPosition(FoodItem foodItem, int position) {
+        // Get the database reference for the meals
+        DatabaseReference mealsRef = mDatabase.child("users").child(userId).child("meals").child(mealType);
+        
+        // Query for the item
+        mealsRef.orderByChild("name").equalTo(foodItem.getName())
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        // Find and remove the first matching item
+                        for (DataSnapshot itemSnapshot : snapshot.getChildren()) {
+                            mealsRef.child(itemSnapshot.getKey()).removeValue()
+                                .addOnSuccessListener(aVoid -> {
+                                    // Remove from local list 
+                                    if (position >= 0 && position < foodItems.size()) {
+                                        foodItems.remove(position);
+                                        adapter.notifyItemRemoved(position);
+                                        updateNutrientTotals();
+                                    }
+                                });
+                            return; // Only delete first matching item
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
                     // Handle error
-                });
+                }
+            });
+    }
+    
+    private void updateNutrientTotals() {
+        double totalCalories = 0;
+        double totalProtein = 0;
+        double totalCarbs = 0;
+        double totalFat = 0;
+        
+        for (FoodItem foodItem : foodItems) {
+            totalCalories += foodItem.getCalories();
+            totalProtein += foodItem.getProtein();
+            totalCarbs += foodItem.getCarbs();
+            totalFat += foodItem.getFat();
+        }
+        
+        // Update totals
+        tvTotalCalories.setText(String.format("%.0f", totalCalories));
+        tvTotalProtein.setText(String.format("%.0fg", totalProtein));
+        tvTotalCarbs.setText(String.format("%.0fg", totalCarbs));
+        tvTotalFat.setText(String.format("%.0fg", totalFat));
+        
+        // Show empty state if no items
+        if (foodItems.isEmpty()) {
+            tvEmptyState.setVisibility(View.VISIBLE);
+            rvFoodItems.setVisibility(View.GONE);
+        } else {
+            tvEmptyState.setVisibility(View.GONE);
+            rvFoodItems.setVisibility(View.VISIBLE);
+        }
     }
 }

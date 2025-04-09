@@ -36,6 +36,14 @@ public class LogDietFragment extends Fragment implements FoodSearchDialog.OnFood
         fabSearchFood = view.findViewById(R.id.fabSearchFood);
 //        btnAddFood = view.findViewById(R.id.btnAddFood);
 
+        // Setup toolbar back button
+        androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> {
+            if (getActivity() != null) {
+                getActivity().onBackPressed();
+            }
+        });
+
         // Setup ViewPager with tabs
         setupViewPager();
 

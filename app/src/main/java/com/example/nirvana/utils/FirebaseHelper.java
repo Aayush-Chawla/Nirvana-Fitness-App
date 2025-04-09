@@ -21,13 +21,11 @@ public class FirebaseHelper {
         }
 
         String userId = auth.getCurrentUser().getUid();
-        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         
         DatabaseReference mealRef = database
             .child("users")
             .child(userId)
-            .child("food_logs")
-            .child(date)
+            .child("meals")
             .child(mealType)
             .push();
 
@@ -43,7 +41,6 @@ public class FirebaseHelper {
 
         mealRef.setValue(foodLog)
             .addOnSuccessListener(aVoid -> {
-                updateDailyCalories(userId, date, foodItem.getCalories(), servingSize);
                 if (listener != null) listener.onSuccess();
             })
             .addOnFailureListener(e -> {

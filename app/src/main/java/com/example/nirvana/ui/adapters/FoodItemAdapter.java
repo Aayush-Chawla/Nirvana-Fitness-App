@@ -9,7 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
-import com.example.nirvana.data.models.FoodItem;
+import com.example.nirvana.models.FoodItem;
 import java.util.List;
 
 public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.ViewHolder> {
@@ -19,6 +19,7 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.ViewHo
 
     public interface OnFoodItemClickListener {
         void onFoodItemClick(FoodItem foodItem);
+        void onDeleteClick(FoodItem foodItem, int position);
     }
 
     public FoodItemAdapter(List<FoodItem> foodItems, OnFoodItemClickListener listener) {
@@ -38,11 +39,18 @@ public class FoodItemAdapter extends RecyclerView.Adapter<FoodItemAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FoodItem foodItem = foodItems.get(position);
 
-        holder.tvFoodName.setText(foodItem.getFoodName());
-        holder.tvServing.setText(foodItem.getServingDescription());
-        holder.tvCalories.setText(String.format("%.0f kcal", foodItem.getCalories()));
+        holder.tvFoodName.setText(foodItem.getName());
+        holder.tvServing.setText(foodItem.getServingSize());
+        holder.tvCalories.setText(String.format("%d kcal", foodItem.getCalories()));
 
         holder.itemView.setOnClickListener(v -> listener.onFoodItemClick(foodItem));
+        
+        holder.btnDelete.setOnClickListener(v -> {
+            int adapterPosition = holder.getAdapterPosition();
+            if (adapterPosition != RecyclerView.NO_POSITION) {
+                listener.onDeleteClick(foodItem, adapterPosition);
+            }
+        });
     }
 
     @Override

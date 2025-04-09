@@ -17,7 +17,7 @@ import com.example.nirvana.R;
 import com.example.nirvana.api.ApiClient;
 import com.example.nirvana.api.FatSecretApi;
 import com.example.nirvana.api.FoodGetResponse;
-import com.example.nirvana.data.models.FoodItem;
+import com.example.nirvana.models.FoodItem;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -164,13 +164,11 @@ public class ServingSelectionDialog extends DialogFragment {
         FoodItem foodItem = new FoodItem(
                 foodId,
                 foodName,
-                selectedServing.servingId,
+                (int) Double.parseDouble(selectedServing.calories),
                 selectedServing.description,
-                Double.parseDouble(selectedServing.calories),
                 Double.parseDouble(selectedServing.protein),
                 Double.parseDouble(selectedServing.carbs),
-                Double.parseDouble(selectedServing.fat),
-                parentFragment.getMealType()
+                Double.parseDouble(selectedServing.fat)
         );
 
         parentFragment.addFoodItem(foodItem);
