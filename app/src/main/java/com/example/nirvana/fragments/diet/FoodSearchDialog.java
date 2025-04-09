@@ -111,32 +111,64 @@ public class FoodSearchDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_serving_size, null);
         
-        TextView tvServingSize = view.findViewById(R.id.tvServingSize);
-        SeekBar seekBarServing = view.findViewById(R.id.seekBarServing);
+        EditText editServingSize = view.findViewById(R.id.editServingSize);
+        TextView tvNutritionInfo = view.findViewById(R.id.tvNutritionInfo);
         
-        seekBarServing.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tvServingSize.setText(progress + "g");
-                }
-
-                @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+        // Set default serving size
+        editServingSize.setText("100");
+        
+        // Calculate and display initial nutrition info
+        updateNutritionInfo(tvNutritionInfo, foodItem, 100);
+        
+        // Add text change listener to update nutrition info in real time
+        editServingSize.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                try {
+                    int servingSize = s.length() > 0 ? Integer.parseInt(s.toString()) : 0;
+                    updateNutritionInfo(tvNutritionInfo, foodItem, servingSize);
+                } catch (NumberFormatException e) {
+                    // Handle invalid input
+                    tvNutritionInfo.setText("Please enter a valid number");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
 
         builder.setView(view)
                .setTitle("Select Serving Size")
                .setPositiveButton("Confirm", (dialog, which) -> {
-                   String servingSize = seekBarServing.getProgress() + "g";
+                   String servingSizeText = editServingSize.getText().toString();
+                   if (servingSizeText.isEmpty()) {
+                       servingSizeText = "100"; // Default if empty
+                   }
+                   String servingSize = servingSizeText + "g";
                    if (listener != null) {
                        listener.onFoodSelected(foodItem, servingSize);
                    }
                })
                .setNegativeButton("Cancel", null)
                .show();
+    }
+    
+    private void updateNutritionInfo(TextView tvNutritionInfo, FoodItem foodItem, int servingSize) {
+        // Calculate nutrition based on serving size
+        double ratio = servingSize / 100.0; // Base values are for 100g
+        
+        int calories = (int) (foodItem.getCalories() * ratio);
+        double protein = foodItem.getProtein() * ratio;
+        double carbs = foodItem.getCarbs() * ratio;
+        double fat = foodItem.getFat() * ratio;
+        
+        String info = String.format(
+                "Nutrition for %dg:\n\nCalories: %d\nProtein: %.1fg\nCarbs: %.1fg\nFat: %.1fg",
+                servingSize, calories, protein, carbs, fat);
+        tvNutritionInfo.setText(info);
     }
 
     private List<FoodSearchResponse.FoodItem> getDummySearchResults() {
