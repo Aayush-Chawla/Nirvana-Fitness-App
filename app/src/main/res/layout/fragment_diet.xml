@@ -115,24 +115,16 @@
         app:layout_constraintTop_toBottomOf="@id/calorieCard"
         android:layout_marginTop="16dp"/>
 
-    <!-- Quick Food Log Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnQuickLog"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/macrosChart"
-        android:layout_marginTop="16dp"
-        android:text="Quick Food Log"
-        style="@style/Widget.MaterialComponents.Button"/>
-
     <!-- Log Diet Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogDiet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/macrosChart"
         app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="24dp"
         android:layout_marginBottom="16dp"
         android:text="Full Diet Log"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+        style="@style/Widget.MaterialComponents.Button"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

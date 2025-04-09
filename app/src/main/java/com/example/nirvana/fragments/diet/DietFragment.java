@@ -32,7 +32,6 @@ public class DietFragment extends Fragment {
 
     private PieChart macrosChart;
     private MaterialButton btnLogDiet;
-    private MaterialButton btnQuickLog;
     private TextView tvCalories, tvRemaining, tvGoal;
 
     private FirebaseAuth mAuth;
@@ -55,7 +54,6 @@ public class DietFragment extends Fragment {
     private void initializeViews(View view) {
         macrosChart = view.findViewById(R.id.macrosChart);
         btnLogDiet = view.findViewById(R.id.btnLogDiet);
-        btnQuickLog = view.findViewById(R.id.btnQuickLog);
         tvCalories = view.findViewById(R.id.tvCalories);
         tvRemaining = view.findViewById(R.id.tvRemaining);
         tvGoal = view.findViewById(R.id.tvGoal);
@@ -70,9 +68,6 @@ public class DietFragment extends Fragment {
     private void setupButtonListeners() {
         btnLogDiet.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_dietFragment_to_logDietFragment));
-        
-        btnQuickLog.setOnClickListener(v ->
-                Navigation.findNavController(v).navigate(R.id.action_dietFragment_to_logFoodFragment));
     }
 
     private void loadUserDietData() {
