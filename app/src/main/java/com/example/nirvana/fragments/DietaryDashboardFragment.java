@@ -16,13 +16,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nirvana.R;
 import com.example.nirvana.models.NutritionAnalysis;
+import com.example.nirvana.models.PredefinedFoodItem;
 import com.example.nirvana.services.NutritionAnalysisService;
 import com.example.nirvana.ui.adapters.RecommendationAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class DietaryDashboardFragment extends Fragment {
     private static final String TAG = "DietaryDashboardFragment";
@@ -154,10 +157,20 @@ public class DietaryDashboardFragment extends Fragment {
     private void updateRecommendations(NutritionAnalysis analysis) {
         String[] recommendations = analysis.getRecommendations();
         if (recommendations != null && recommendations.length > 0) {
-            recommendationAdapter.setRecommendations(Arrays.asList(recommendations));
+            // Convert String recommendations to PredefinedFoodItem objects
+            List<PredefinedFoodItem> foodItems = new ArrayList<>();
+            for (String recommendation : recommendations) {
+                PredefinedFoodItem foodItem = new PredefinedFoodItem();
+                foodItem.setName(recommendation);
+                foodItem.setCategory("Other"); // Default category
+                foodItem.setServingSize(100); // Default serving size in grams
+                foodItems.add(foodItem);
+            }
+            recommendationAdapter.updateRecommendations(foodItems);
             Log.d(TAG, "Loaded " + recommendations.length + " recommendations");
         } else {
             Log.d(TAG, "No recommendations available");
+            recommendationAdapter.updateRecommendations(new ArrayList<>());
         }
     }
 } 

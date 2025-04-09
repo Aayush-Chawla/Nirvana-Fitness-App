@@ -16,15 +16,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nirvana.R;
 import com.example.nirvana.models.NutritionAnalysis;
+import com.example.nirvana.models.PredefinedFoodItem;
 import com.example.nirvana.services.NutritionAnalysisService;
 import com.example.nirvana.ui.adapters.RecommendationAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
-public class DietaryDashboardFragment extends Fragment {
+public class DietaryDashboardFragment extends Fragment implements RecommendationAdapter.OnRecommendationClickListener {
     private static final String TAG = "DietaryDashboardFragment";
     
     // UI elements
@@ -50,6 +52,22 @@ public class DietaryDashboardFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        // Get current user
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            nutritionAnalysisService = new NutritionAnalysisService(userId);
+            startRealtimeUpdates();
+        } else {
+            Log.e(TAG, "No user is signed in");
+            Toast.makeText(getContext(), "Please sign in to view your nutrition data", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void initializeViews(View view) {
         // Summary values
         tvCalories = view.findViewById(R.id.tvCalories);
@@ -65,25 +83,10 @@ public class DietaryDashboardFragment extends Fragment {
         
         // Recommendations
         rvRecommendations = view.findViewById(R.id.rvRecommendations);
-        recommendationAdapter = new RecommendationAdapter();
-        rvRecommendations.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvRecommendations.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recommendationAdapter = new RecommendationAdapter(); // Use no-arg constructor
+        recommendationAdapter.setOnRecommendationClickListener(this); // Set the listener explicitly
         rvRecommendations.setAdapter(recommendationAdapter);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        
-        // Get current user
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
-            nutritionAnalysisService = new NutritionAnalysisService(userId);
-            startRealtimeUpdates();
-        } else {
-            Log.e(TAG, "No user is signed in");
-            Toast.makeText(getContext(), "Please sign in to view your nutrition data", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
@@ -151,10 +154,31 @@ public class DietaryDashboardFragment extends Fragment {
     private void updateRecommendations(NutritionAnalysis analysis) {
         String[] recommendations = analysis.getRecommendations();
         if (recommendations != null && recommendations.length > 0) {
-            recommendationAdapter.setRecommendations(Arrays.asList(recommendations));
-            Log.d(TAG, "Loaded " + recommendations.length + " recommendations");
+            List<PredefinedFoodItem> foodItems = new ArrayList<>();
+            for (String recommendation : recommendations) {
+                // Create a basic PredefinedFoodItem from the recommendation string
+                PredefinedFoodItem foodItem = new PredefinedFoodItem();
+                foodItem.setName(recommendation);
+                foodItem.setCategory("Other"); // Default category
+                foodItem.setServingSize(100); // Default serving size in grams
+                foodItems.add(foodItem);
+            }
+            recommendationAdapter.updateRecommendations(foodItems);
+            Log.d(TAG, "Loaded " + foodItems.size() + " recommendations");
         } else {
             Log.d(TAG, "No recommendations available");
+            recommendationAdapter.updateRecommendations(new ArrayList<>());
+        }
+    }
+
+    @Override
+    public void onRecommendationClick(PredefinedFoodItem food) {
+        // Handle the food item click
+        if (food != null) {
+            Toast.makeText(requireContext(), 
+                "Selected: " + food.getName(), 
+                Toast.LENGTH_SHORT).show();
+            // TODO: Implement your logic for handling the selected food item
         }
     }
 } 

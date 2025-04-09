@@ -16,20 +16,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nirvana.R;
 import com.example.nirvana.models.NutritionAnalysis;
+import com.example.nirvana.models.PredefinedFoodItem;
 import com.example.nirvana.services.NutritionAnalysisService;
-import com.example.nirvana.ui.adapters.RecommendationAdapter;
+import com.example.nirvana.services.RecommendationService;
+import com.example.nirvana.ui.adapters.RecommendationsAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class RecommendationsFragment extends Fragment {
+public class RecommendationsFragment extends Fragment implements RecommendationsAdapter.OnRecommendationClickListener {
     private static final String TAG = "RecommendationsFragment";
     private RecyclerView rvRecommendations;
     private TextView tvNoRecommendations;
-    private RecommendationAdapter adapter;
+    private RecommendationsAdapter adapter;
     private NutritionAnalysisService nutritionAnalysisService;
 
     @Nullable
@@ -42,7 +43,7 @@ public class RecommendationsFragment extends Fragment {
         tvNoRecommendations = view.findViewById(R.id.tvNoRecommendations);
         
         // Setup RecyclerView
-        adapter = new RecommendationAdapter();
+        adapter = new RecommendationsAdapter(this);
         rvRecommendations.setLayoutManager(new LinearLayoutManager(getContext()));
         rvRecommendations.setAdapter(adapter);
         
@@ -79,23 +80,41 @@ public class RecommendationsFragment extends Fragment {
                 if (getActivity() == null || !isAdded()) return;
                 
                 getActivity().runOnUiThread(() -> {
-                    String[] recommendations = analysis.getRecommendations();
-                    if (recommendations != null && recommendations.length > 0) {
-                        List<String> recommendationList = Arrays.asList(recommendations);
-                        adapter.setRecommendations(recommendationList);
+                    try {
+                        // Get recommendations based on analysis
+                        // Using dummy values if methods are not available
+                        List<String> recentFoodItems = new ArrayList<>(); 
+                        String currentMealType = "Lunch";
+                        double remainingCalories = 500;
                         
-                        // Show the recommendations
-                        tvNoRecommendations.setVisibility(View.GONE);
-                        rvRecommendations.setVisibility(View.VISIBLE);
+                        List<PredefinedFoodItem> recommendations = RecommendationService.getRecommendations(
+                            recentFoodItems, 
+                            currentMealType,
+                            remainingCalories,
+                            getPredefinedFoodItems()
+                        );
                         
-                        Log.d(TAG, "Loaded " + recommendationList.size() + " recommendations");
-                    } else {
-                        // No recommendations available
-                        tvNoRecommendations.setText("No recommendations available");
+                        if (!recommendations.isEmpty()) {
+                            adapter.updateRecommendations(recommendations);
+                            
+                            // Show the recommendations
+                            tvNoRecommendations.setVisibility(View.GONE);
+                            rvRecommendations.setVisibility(View.VISIBLE);
+                            
+                            Log.d(TAG, "Loaded " + recommendations.size() + " recommendations");
+                        } else {
+                            // No recommendations available
+                            tvNoRecommendations.setText("No recommendations available");
+                            tvNoRecommendations.setVisibility(View.VISIBLE);
+                            rvRecommendations.setVisibility(View.GONE);
+                            
+                            Log.d(TAG, "No recommendations available");
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error processing recommendations: " + e.getMessage());
+                        tvNoRecommendations.setText("Error loading recommendations");
                         tvNoRecommendations.setVisibility(View.VISIBLE);
                         rvRecommendations.setVisibility(View.GONE);
-                        
-                        Log.d(TAG, "No recommendations available");
                     }
                 });
             }
@@ -105,21 +124,29 @@ public class RecommendationsFragment extends Fragment {
                 if (getActivity() == null || !isAdded()) return;
                 
                 getActivity().runOnUiThread(() -> {
-                    Log.e(TAG, "Error loading recommendations: " + error);
-                    tvNoRecommendations.setText("Error loading recommendations");
+                    Log.e(TAG, "Error loading nutrition data: " + error);
+                    tvNoRecommendations.setText("Error: " + error);
                     tvNoRecommendations.setVisibility(View.VISIBLE);
                     rvRecommendations.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), "Error loading recommendations", Toast.LENGTH_SHORT).show();
                 });
             }
         });
     }
 
+    private List<PredefinedFoodItem> getPredefinedFoodItems() {
+        // TODO: Load this from Firebase or local database
+        // For now, return a sample list
+        List<PredefinedFoodItem> items = new ArrayList<>();
+        items.add(new PredefinedFoodItem("Oatmeal", 150, 27, 6, 3, 40, "g"));
+        items.add(new PredefinedFoodItem("Greek Yogurt", 130, 6, 22, 0, 170, "g"));
+        items.add(new PredefinedFoodItem("Banana", 105, 27, 1, 0, 118, "g"));
+        items.add(new PredefinedFoodItem("Almonds", 162, 6, 6, 14, 28, "g"));
+        return items;
+    }
+
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (nutritionAnalysisService != null) {
-            nutritionAnalysisService.stopRealtimeUpdates();
-        }
+    public void onRecommendationClick(PredefinedFoodItem food) {
+        // TODO: Handle food selection
+        Toast.makeText(getContext(), "Selected: " + food.getName(), Toast.LENGTH_SHORT).show();
     }
 } 

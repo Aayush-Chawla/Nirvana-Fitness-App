@@ -22,6 +22,8 @@ public class NutritionAnalysisService {
     private ValueEventListener profileListener;
     private NutritionAnalysis currentAnalysis;
     private NutritionAnalysisCallback currentCallback;
+    private static final int MAX_SERVINGS = 10; // Constant for max servings
+    private static final int MIN_SERVINGS = 1;  // Constant for min servings
 
     public NutritionAnalysisService(String userId) {
         this.userId = userId;

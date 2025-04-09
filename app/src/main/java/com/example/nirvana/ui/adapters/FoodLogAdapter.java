@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
 import com.example.nirvana.data.models.FoodItem;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Locale;
 
 public class FoodLogAdapter extends RecyclerView.Adapter<FoodLogAdapter.FoodViewHolder> {
     private static final String TAG = "FoodLogAdapter";
@@ -31,27 +33,52 @@ public class FoodLogAdapter extends RecyclerView.Adapter<FoodLogAdapter.FoodView
 
     @Override
     public void onBindViewHolder(@NonNull FoodViewHolder holder, int position) {
+        if (foodItems == null || position >= foodItems.size()) {
+            Log.e(TAG, "onBindViewHolder: Invalid position " + position + " or null foodItems");
+            return;
+        }
+        
         FoodItem foodItem = foodItems.get(position);
+        if (foodItem == null) {
+            Log.e(TAG, "onBindViewHolder: Null food item at position " + position);
+            return;
+        }
+        
         Log.d(TAG, "onBindViewHolder: binding item at position " + position + 
             " - name: " + foodItem.getName() + 
             ", calories: " + foodItem.getCaloriesInt() + 
-            ", time: " + foodItem.getTime());
+            ", time: " + (foodItem.getTime() != null ? foodItem.getTime() : "null"));
+        
         holder.bind(foodItem);
     }
 
     @Override
     public int getItemCount() {
-        int count = foodItems.size();
+        int count = (foodItems != null) ? foodItems.size() : 0;
         Log.d(TAG, "getItemCount: returning " + count);
         return count;
     }
 
     public void updateFoodItems(List<FoodItem> newFoodItems) {
         Log.d(TAG, "updateFoodItems: received " + (newFoodItems != null ? newFoodItems.size() : "null") + " items");
-        for (FoodItem item : newFoodItems) {
-            Log.d(TAG, "  - Item: " + item.getName() + ", " + item.getCaloriesInt() + " calories, time: " + item.getTime());
+        
+        if (newFoodItems != null) {
+            for (FoodItem item : newFoodItems) {
+                if (item != null) {
+                    Log.d(TAG, "  - Item: " + item.getName() + 
+                        ", " + item.getCaloriesInt() + " calories" + 
+                        ", time: " + (item.getTime() != null ? item.getTime() : "null") + 
+                        ", mealType: " + (item.getMealType() != null ? item.getMealType() : "null"));
+                } else {
+                    Log.e(TAG, "  - Null item in the list");
+                }
+            }
+            this.foodItems = new ArrayList<>(newFoodItems); // Create a new copy
+        } else {
+            this.foodItems = new ArrayList<>(); // Empty list instead of null
+            Log.w(TAG, "updateFoodItems: Null list passed, using empty list instead");
         }
-        this.foodItems = newFoodItems;
+        
         notifyDataSetChanged();
         Log.d(TAG, "updateFoodItems: called notifyDataSetChanged");
     }
@@ -79,11 +106,30 @@ public class FoodLogAdapter extends RecyclerView.Adapter<FoodLogAdapter.FoodView
         }
 
         public void bind(FoodItem foodItem) {
+            if (foodItem == null) {
+                Log.e("FoodViewHolder", "Cannot bind null food item");
+                return;
+            }
+            
             try {
-                txtFoodName.setText(foodItem.getName());
-                txtCalories.setText(foodItem.getCaloriesInt() + " kcal");
-                txtTime.setText(foodItem.getTime());
-                Log.d("FoodViewHolder", "Item bound successfully: " + foodItem.getName());
+                // Check if all views are available before binding
+                if (txtFoodName != null && txtCalories != null && txtTime != null) {
+                    // Safely set food name
+                    String name = foodItem.getName();
+                    txtFoodName.setText(name != null ? name : "Unknown Food");
+                    
+                    // Format calories with locale for proper number formatting
+                    String calories = String.format(Locale.getDefault(), "%d kcal", foodItem.getCaloriesInt());
+                    txtCalories.setText(calories);
+                    
+                    // Safely set time
+                    String time = foodItem.getTime();
+                    txtTime.setText(time != null ? time : "");
+                    
+                    Log.d("FoodViewHolder", "Item bound successfully: " + foodItem.getName());
+                } else {
+                    Log.e("FoodViewHolder", "One or more views are null, cannot bind item");
+                }
             } catch (Exception e) {
                 Log.e("FoodViewHolder", "Error binding item: " + e.getMessage(), e);
             }
