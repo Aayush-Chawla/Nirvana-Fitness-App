@@ -37,6 +37,11 @@
             android:exported="false"
             android:theme="@style/Theme.Nirvana" />
 
+        <activity
+            android:name=".activities.ChatbotActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nirvana" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
