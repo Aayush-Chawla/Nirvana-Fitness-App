@@ -5,10 +5,13 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -24,13 +27,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
 import com.example.nirvana.adapters.BlogAdapter;
+import com.example.nirvana.adapters.ChatAdapter;
 import com.example.nirvana.models.BlogPost;
+import com.example.nirvana.models.ChatMessage;
 import com.example.nirvana.models.GymMembership;
+import com.example.nirvana.services.GeminiService;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -39,8 +46,10 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickListener {
 
@@ -71,6 +80,17 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     private ValueEventListener heartRateListener;
     private ValueEventListener rewardsListener;
     private ValueEventListener gymMembershipListener;
+    
+    // Chatbot related fields
+    private RecyclerView recyclerViewChat;
+    private EditText messageInput;
+    private ImageButton sendButton;
+    private ChatAdapter chatAdapter;
+    private List<ChatMessage> chatMessages = new ArrayList<>();
+    private GeminiService geminiService;
+    private Map<String, Object> userProfile = new HashMap<>();
+    private Map<String, Object> userDietData = new HashMap<>();
+    private Map<String, Object> userExerciseData = new HashMap<>();
 
     @Nullable
     @Override
@@ -94,11 +114,13 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
         setupHeartRateChart();
         setupDietaryDashboardCard(view);
         setupGymMembershipCard(view);
+        setupChatbot(view);
         
         // Load data
         loadDashboardData();
         loadBlogs();
         loadGymMembership();
+        loadUserDataForChatbot();
         
         if (checkLocationPermission()) {
             loadNearbyGyms();
@@ -122,6 +144,11 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
         tvGymName = view.findViewById(R.id.tvGymName);
         tvMembershipType = view.findViewById(R.id.tvMembershipType);
         tvMembershipStatus = view.findViewById(R.id.tvMembershipStatus);
+        
+        // Initialize chatbot views
+        recyclerViewChat = view.findViewById(R.id.recyclerViewChat);
+        messageInput = view.findViewById(R.id.editTextMessage);
+        sendButton = view.findViewById(R.id.buttonSend);
     }
 
     private void setupFirebase() {
@@ -361,8 +388,15 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Remove listeners to prevent callbacks after fragment is detached
+        
+        // Remove all listeners to prevent memory leaks
         removeListeners();
+        
+        // Clear chatbot resources
+        chatMessages.clear();
+        if (chatAdapter != null) {
+            chatAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -374,22 +408,25 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
 
     private void removeListeners() {
         if (userRef != null) {
+            // Remove daily stats listener
             if (dailyStatsListener != null) {
                 String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
                 userRef.child("daily_stats").child(today).removeEventListener(dailyStatsListener);
-                dailyStatsListener = null;
             }
+            
+            // Remove heart rate listener
             if (heartRateListener != null) {
                 userRef.child("heart_rate").removeEventListener(heartRateListener);
-                heartRateListener = null;
             }
+            
+            // Remove rewards listener
             if (rewardsListener != null) {
                 userRef.child("rewards").removeEventListener(rewardsListener);
-                rewardsListener = null;
             }
+            
+            // Remove gym membership listener
             if (gymMembershipListener != null) {
                 userRef.child("gymMembership").removeEventListener(gymMembershipListener);
-                gymMembershipListener = null;
             }
         }
     }
@@ -412,6 +449,197 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
                 NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
                 navController.navigate(R.id.action_homeFragment_to_gymListFragment);
             });
+        }
+    }
+
+    private void setupChatbot(View view) {
+        // Initialize ChatAdapter and set up RecyclerView
+        chatAdapter = new ChatAdapter(chatMessages, requireContext());
+        recyclerViewChat.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerViewChat.setAdapter(chatAdapter);
+        
+        // Initialize Gemini Service
+        geminiService = new GeminiService(requireContext());
+        
+        // Add welcome message
+        addBotMessage("Hello! I'm your Nirvana Fitness assistant. How can I help you today? You can ask me about exercises, nutrition, or any fitness challenges you're facing.");
+        
+        // Set up send button
+        sendButton.setOnClickListener(v -> {
+            String message = messageInput.getText().toString().trim();
+            if (!TextUtils.isEmpty(message)) {
+                sendMessage(message);
+                messageInput.setText("");
+            }
+        });
+    }
+
+    private void loadUserDataForChatbot() {
+        if (userRef == null) return;
+        
+        // Load profile data
+        userRef.child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot child : dataSnapshot.getChildren()) {
+                        userProfile.put(child.getKey(), child.getValue());
+                    }
+                    Log.d(TAG, "User profile loaded for chatbot: " + userProfile.toString());
+                }
+            }
+            
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e(TAG, "Error loading profile data for chatbot: " + databaseError.getMessage());
+            }
+        });
+        
+        // Load food log data
+        userRef.child("food_logs").limitToLast(7).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) {
+                        String date = dateSnapshot.getKey();
+                        List<Map<String, Object>> dailyFoods = new ArrayList<>();
+                        
+                        for (DataSnapshot foodSnapshot : dateSnapshot.getChildren()) {
+                            Map<String, Object> foodItem = new HashMap<>();
+                            for (DataSnapshot foodDetail : foodSnapshot.getChildren()) {
+                                foodItem.put(foodDetail.getKey(), foodDetail.getValue());
+                            }
+                            dailyFoods.add(foodItem);
+                        }
+                        
+                        userDietData.put(date, dailyFoods);
+                    }
+                    Log.d(TAG, "User diet data loaded for chatbot (last 7 days)");
+                }
+            }
+            
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e(TAG, "Error loading diet data for chatbot: " + databaseError.getMessage());
+            }
+        });
+        
+        // Load workout data if available
+        userRef.child("workouts").limitToLast(7).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) {
+                        String date = dateSnapshot.getKey();
+                        List<Map<String, Object>> dailyWorkouts = new ArrayList<>();
+                        
+                        for (DataSnapshot workoutSnapshot : dateSnapshot.getChildren()) {
+                            Map<String, Object> workoutItem = new HashMap<>();
+                            for (DataSnapshot workoutDetail : workoutSnapshot.getChildren()) {
+                                workoutItem.put(workoutDetail.getKey(), workoutDetail.getValue());
+                            }
+                            dailyWorkouts.add(workoutItem);
+                        }
+                        
+                        userExerciseData.put(date, dailyWorkouts);
+                    }
+                    Log.d(TAG, "User workout data loaded for chatbot (last 7 days)");
+                }
+            }
+            
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e(TAG, "Error loading workout data for chatbot: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    private void sendMessage(String message) {
+        // Add user message to chat
+        addUserMessage(message);
+        
+        // Build context for Gemini API
+        StringBuilder context = new StringBuilder();
+        
+        // Add user profile data
+        if (!userProfile.isEmpty()) {
+            context.append("USER PROFILE:\n");
+            for (Map.Entry<String, Object> entry : userProfile.entrySet()) {
+                context.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+            }
+            context.append("\n");
+        }
+        
+        // Add recent diet data summary
+        if (!userDietData.isEmpty()) {
+            context.append("RECENT DIET SUMMARY:\n");
+            context.append("User has logged food for ").append(userDietData.size()).append(" days recently.\n\n");
+        }
+        
+        // Add recent exercise data summary
+        if (!userExerciseData.isEmpty()) {
+            context.append("RECENT EXERCISE SUMMARY:\n");
+            context.append("User has logged workouts for ").append(userExerciseData.size()).append(" days recently.\n\n");
+        }
+        
+        // Add user query
+        context.append("USER QUERY: ").append(message);
+        
+        // Process with Gemini API
+        geminiService.generateContent(context.toString(), new GeminiService.GeminiResponseCallback() {
+            @Override
+            public void onResponse(String response) {
+                if (getActivity() == null || !isAdded()) return;
+                
+                requireActivity().runOnUiThread(() -> {
+                    addBotMessage(response);
+                    
+                    // Save this chat to Firebase
+                    saveChatHistory(message, response);
+                });
+            }
+            
+            @Override
+            public void onError(String errorMessage) {
+                if (getActivity() == null || !isAdded()) return;
+                
+                requireActivity().runOnUiThread(() -> {
+                    Log.e(TAG, "Gemini API error: " + errorMessage);
+                    addBotMessage("I'm sorry, I'm having trouble processing your request right now. Please try again later.");
+                });
+            }
+        });
+    }
+    
+    private void addUserMessage(String message) {
+        ChatMessage userMessage = new ChatMessage(message, true);
+        chatMessages.add(userMessage);
+        chatAdapter.notifyItemInserted(chatMessages.size() - 1);
+        recyclerViewChat.smoothScrollToPosition(chatMessages.size() - 1);
+    }
+    
+    private void addBotMessage(String message) {
+        ChatMessage botMessage = new ChatMessage(message, false);
+        chatMessages.add(botMessage);
+        chatAdapter.notifyItemInserted(chatMessages.size() - 1);
+        recyclerViewChat.smoothScrollToPosition(chatMessages.size() - 1);
+    }
+    
+    private void saveChatHistory(String userMessage, String botResponse) {
+        try {
+            if (userRef != null) {
+                String chatId = userRef.child("chat_history").push().getKey();
+                Map<String, Object> chatEntry = new HashMap<>();
+                chatEntry.put("timestamp", System.currentTimeMillis());
+                chatEntry.put("userMessage", userMessage);
+                chatEntry.put("botResponse", botResponse);
+                
+                userRef.child("chat_history").child(chatId).setValue(chatEntry)
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Chat history saved successfully"))
+                    .addOnFailureListener(e -> Log.e(TAG, "Error saving chat history", e));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving chat history: " + e.getMessage());
         }
     }
 }
