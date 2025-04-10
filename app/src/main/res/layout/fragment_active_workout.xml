@@ -35,7 +35,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp"
                 android:src="@drawable/ic_back"
-                android:tint="@android:color/white" />
+                app:tint="@android:color/white" />
         </com.google.android.material.card.MaterialCardView>
 
         <!-- User Info with Better Typography -->
@@ -90,7 +90,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp"
                 android:src="@drawable/user"
-                android:tint="@android:color/white" />
+                app:tint="@android:color/white" />
         </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

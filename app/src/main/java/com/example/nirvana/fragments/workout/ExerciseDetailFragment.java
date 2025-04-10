@@ -70,8 +70,8 @@ public class ExerciseDetailFragment extends Fragment {
 
             txtExerciseName.setText(exercise.getName());
             txtExerciseDescription.setText(exercise.getDescription());
-            txtDuration.setText(String.format("%d minutes", exercise.getDuration()));
-            txtDifficulty.setText(exercise.getDifficulty());
+            txtDuration.setText(String.format("%d minutes", exercise.getDurationSeconds() / 60));
+            txtDifficulty.setText(exercise.getDifficultyLevel());
         }
     }
 
@@ -110,7 +110,7 @@ public class ExerciseDetailFragment extends Fragment {
         workoutEntry.put("exerciseId", exercise.getId());
         workoutEntry.put("exerciseName", exercise.getName());
         workoutEntry.put("startTime", System.currentTimeMillis());
-        workoutEntry.put("category", exercise.getCategory());
+        workoutEntry.put("muscleGroup", exercise.getMuscleGroup());
         
         db.collection("users")
             .document(userId)

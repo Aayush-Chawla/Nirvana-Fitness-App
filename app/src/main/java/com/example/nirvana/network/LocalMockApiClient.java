@@ -89,18 +89,18 @@ public class LocalMockApiClient {
         }
         
         @Override
-        public Call<ExerciseResponse> getExercisesByCategory(String category) {
+        public Call<ExerciseResponse> getExercisesByMuscleGroup(String muscleGroup) {
             return new MockCall<>(new Callback<ExerciseResponse>() {
                 @Override
                 public void onResponse(Call<ExerciseResponse> call, Response<ExerciseResponse> response) {
-                    Log.d(TAG, "Mock API: getExercisesByCategory called with category=" + category);
+                    Log.d(TAG, "Mock API: getExercisesByMuscleGroup called with muscleGroup=" + muscleGroup);
                 }
 
                 @Override
                 public void onFailure(Call<ExerciseResponse> call, Throwable t) {
                     Log.e(TAG, "Mock API failure", t);
                 }
-            }, loadExercisesByCategory(category));
+            }, loadExercisesByMuscleGroup(muscleGroup));
         }
 
         private WorkoutCategoryResponse loadGymWorkoutCategories() {
@@ -135,10 +135,10 @@ public class LocalMockApiClient {
             }
         }
         
-        private ExerciseResponse loadExercisesByCategory(String category) {
+        private ExerciseResponse loadExercisesByMuscleGroup(String muscleGroup) {
             try {
-                // Convert category to lowercase and remove spaces for file naming
-                String fileName = "exercises_" + category.toLowerCase().replace(' ', '_') + ".json";
+                // Convert muscleGroup to lowercase and remove spaces for file naming
+                String fileName = "exercises_" + muscleGroup.toLowerCase().replace(' ', '_') + ".json";
                 Log.d(TAG, "Loading exercises from file: " + fileName);
                 String json = JsonUtils.loadJSONFromAsset(appContext, fileName);
                 
@@ -149,7 +149,7 @@ public class LocalMockApiClient {
                 
                 return gson.fromJson(json, ExerciseResponse.class);
             } catch (Exception e) {
-                Log.e(TAG, "Error loading exercises for category: " + category, e);
+                Log.e(TAG, "Error loading exercises for muscle group: " + muscleGroup, e);
                 return null;
             }
         }

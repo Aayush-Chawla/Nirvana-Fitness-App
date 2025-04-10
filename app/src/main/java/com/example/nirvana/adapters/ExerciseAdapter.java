@@ -33,9 +33,9 @@ public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.Exerc
         public boolean areContentsTheSame(@NonNull Exercise oldItem, @NonNull Exercise newItem) {
             return oldItem.getName().equals(newItem.getName()) &&
                    oldItem.getDescription().equals(newItem.getDescription()) &&
-                   oldItem.getCategory().equals(newItem.getCategory()) &&
-                   oldItem.getDifficulty().equals(newItem.getDifficulty()) &&
-                   oldItem.getDuration() == newItem.getDuration();
+                   oldItem.getMuscleGroup().equals(newItem.getMuscleGroup()) &&
+                   oldItem.getDifficultyLevel().equals(newItem.getDifficultyLevel()) &&
+                   oldItem.getDurationSeconds() == newItem.getDurationSeconds();
         }
     };
 
@@ -93,9 +93,9 @@ public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.Exerc
             
             // Format details string
             String details = String.format("%s • %d min • %s", 
-                exercise.getCategory(),
-                exercise.getDuration(),
-                exercise.getDifficulty());
+                exercise.getMuscleGroup(),
+                exercise.getDurationSeconds() / 60, // Convert seconds to minutes
+                exercise.getDifficultyLevel());
             txtDetails.setText(details);
 
             // Load image using Glide with improved error handling
@@ -107,7 +107,7 @@ public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.Exerc
                 com.bumptech.glide.request.RequestOptions requestOptions = new com.bumptech.glide.request.RequestOptions()
                     .timeout(10000) // 10s timeout
                     .placeholder(R.drawable.ic_exercise_default)
-                    .error(getDefaultDrawableForCategory(exercise.getCategory()));
+                    .error(getDefaultDrawableForCategory(exercise.getMuscleGroup()));
                 
                 // Add headers to request to help with some hosting services
                 com.bumptech.glide.load.model.GlideUrl glideUrl = new com.bumptech.glide.load.model.GlideUrl(imageUrl, 
@@ -122,8 +122,8 @@ public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.Exerc
                     .into(imgExercise);
             } else {
                 // Set default image based on category
-                Log.d("ExerciseAdapter", "Using default image for category: " + exercise.getCategory());
-                imgExercise.setImageResource(getDefaultDrawableForCategory(exercise.getCategory()));
+                Log.d("ExerciseAdapter", "Using default image for category: " + exercise.getMuscleGroup());
+                imgExercise.setImageResource(getDefaultDrawableForCategory(exercise.getMuscleGroup()));
             }
 
             // Set click listener
@@ -135,28 +135,34 @@ public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.Exerc
             });
         }
         
-        private int getDefaultDrawableForCategory(String category) {
-            if (category == null) {
-                return R.drawable.ic_exercise_default;
-            }
+        private int getDefaultDrawableForCategory(String muscleGroup) {
+            if (muscleGroup == null) return R.drawable.ic_exercise_default;
             
-            String lowerCategory = category.toLowerCase();
-            if (lowerCategory.contains("chest")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("back")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("leg")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("arm")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("shoulder")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("core") || lowerCategory.contains("abs")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("cardio")) {
-                return R.drawable.ic_exercise_default;
-            } else {
-                return R.drawable.ic_exercise_default;
+            switch (muscleGroup.toLowerCase()) {
+                case "chest":
+                    return R.drawable.ic_chest;
+                case "back":
+                    return R.drawable.ic_back;
+                case "shoulders":
+                    return R.drawable.ic_shoulders;
+                case "arms":
+                case "biceps":
+                case "triceps":
+                    return R.drawable.ic_arms;
+                case "legs":
+                case "quadriceps":
+                case "hamstrings":
+                case "calves":
+                    return R.drawable.ic_legs;
+                case "abs":
+                case "core":
+                    return R.drawable.ic_core;
+                case "cardio":
+                    return R.drawable.ic_cardio;
+                case "full body":
+                    return R.drawable.ic_full_body;
+                default:
+                    return R.drawable.ic_exercise_default;
             }
         }
     }

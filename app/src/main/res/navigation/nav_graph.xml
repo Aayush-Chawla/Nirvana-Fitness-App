@@ -241,4 +241,22 @@
             app:argType="com.example.nirvana.models.Exercise" />
     </fragment>
 
+    <fragment
+        android:id="@+id/aiSectionFragment"
+        android:name="com.example.nirvana.fragments.AISectionFragment"
+        android:label="AI Features"
+        tools:layout="@layout/fragment_ai_section" />
+
+    <fragment
+        android:id="@+id/mealRecognitionFragment"
+        android:name="com.example.nirvana.fragments.MealRecognitionFragment"
+        android:label="Meal Recognition"
+        tools:layout="@layout/fragment_meal_recognition" />
+
+    <fragment
+        android:id="@+id/workoutPlanGeneratorFragment"
+        android:name="com.example.nirvana.fragments.WorkoutPlanGeneratorFragment"
+        android:label="Workout Plan Generator"
+        tools:layout="@layout/fragment_workout_plan_generator" />
+
 </navigation>

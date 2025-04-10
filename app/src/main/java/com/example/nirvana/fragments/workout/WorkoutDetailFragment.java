@@ -140,7 +140,7 @@ public class WorkoutDetailFragment extends Fragment implements ExerciseAdapter.O
                 "test1",
                 "Test Exercise 1",
                 "This is a test exercise description",
-                category,
+                "Chest",
                 "Beginner",
                 10,
                 null,
@@ -151,7 +151,7 @@ public class WorkoutDetailFragment extends Fragment implements ExerciseAdapter.O
                 "test2",
                 "Test Exercise 2",
                 "Another test exercise description",
-                category,
+                "Back",
                 "Intermediate",
                 15,
                 null,
@@ -165,7 +165,8 @@ public class WorkoutDetailFragment extends Fragment implements ExerciseAdapter.O
                     exercises.add(new Exercise(
                         "ub1", "Push-ups", 
                         "A fundamental bodyweight exercise that works the chest, shoulders, and triceps.",
-                        "Upper Body", "Beginner", 10,
+                        "Chest",
+                        "Beginner", 10,
                         "https://tse1.mm.bing.net/th?id=OIP._hkOZJF7_1c-hP9tjPxlzwHaFY&pid=Api&P=0&h=180", null
                     ));
                     // ... rest of upper body exercises
@@ -176,7 +177,8 @@ public class WorkoutDetailFragment extends Fragment implements ExerciseAdapter.O
                     exercises.add(new Exercise(
                         "lb1", "Squats", 
                         "A fundamental lower body exercise targeting quadriceps, hamstrings, and glutes.",
-                        "Lower Body", "Beginner", 15,
+                        "Legs",
+                        "Beginner", 15,
                         null, null
                     ));
                     // ... rest of lower body exercises
@@ -187,7 +189,8 @@ public class WorkoutDetailFragment extends Fragment implements ExerciseAdapter.O
                     exercises.add(new Exercise(
                         "def1", "Jumping Jacks", 
                         "A full-body cardio exercise that raises heart rate and improves coordination.",
-                        "Full Body", "Beginner", 10,
+                        "Full Body",
+                        "Beginner", 10,
                         null, null
                     ));
                     // ... rest of default exercises

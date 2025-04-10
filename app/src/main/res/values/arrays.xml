@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Fitness Levels -->
+    <string-array name="fitness_levels">
+        <item>Beginner</item>
+        <item>Intermediate</item>
+        <item>Advanced</item>
+    </string-array>
+
     <!-- Fitness Goals -->
     <string-array name="fitness_goals">
-        <item>Lose weight</item>
-        <item>Build muscle</item>
-        <item>Improve fitness</item>
-        <item>Increase flexibility</item>
-        <item>Improve cardiovascular health</item>
-        <item>Maintain current fitness</item>
+        <item>General Fitness</item>
+        <item>Weight Loss</item>
+        <item>Muscle Gain</item>
+        <item>Strength</item>
+        <item>Endurance</item>
+        <item>Flexibility</item>
     </string-array>
 
     <!-- Activity Levels -->

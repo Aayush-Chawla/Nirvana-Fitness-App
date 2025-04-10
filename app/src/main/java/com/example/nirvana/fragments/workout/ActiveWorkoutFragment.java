@@ -210,7 +210,7 @@ public class ActiveWorkoutFragment extends Fragment {
         btnNext.setEnabled(currentExerciseIndex < exercises.size() - 1 || isRestPeriod);
         
         // Start the timer for this exercise or rest period
-        startTimer(isRestPeriod ? REST_DURATION : exercise.getDuration() * 1000L);
+        startTimer(isRestPeriod ? REST_DURATION : exercise.getDurationSeconds() * 1000L);
         
         // Update the UI to show current exercise number out of total
         TextView txtProgress = requireView().findViewById(R.id.txtProgress);
@@ -492,11 +492,11 @@ public class ActiveWorkoutFragment extends Fragment {
         // Adjust duration based on experience level
         for (Exercise exercise : exerciseList) {
             if (experienceLevel.equalsIgnoreCase("Beginner")) {
-                exercise.setDuration(30); // 30 seconds for beginners
+                exercise.setDurationSeconds(30); // 30 seconds for beginners
             } else if (experienceLevel.equalsIgnoreCase("Intermediate")) {
-                exercise.setDuration(45); // 45 seconds for intermediate
+                exercise.setDurationSeconds(45); // 45 seconds for intermediate
             } else {
-                exercise.setDuration(60); // 60 seconds for advanced
+                exercise.setDurationSeconds(60); // 60 seconds for advanced
             }
         }
         

@@ -20,7 +20,7 @@ public interface WorkoutApiService {
     );
     
     @GET("exercises")
-    Call<ExerciseResponse> getExercisesByCategory(
-        @Query("category") String category
+    Call<ExerciseResponse> getExercisesByMuscleGroup(
+        @Query("muscleGroup") String muscleGroup
     );
 } 

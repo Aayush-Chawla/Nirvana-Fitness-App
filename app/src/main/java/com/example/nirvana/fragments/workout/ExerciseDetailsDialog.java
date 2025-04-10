@@ -63,16 +63,16 @@ public class ExerciseDetailsDialog extends BottomSheetDialogFragment {
                     .error(R.drawable.error_exercise)
                     .into(imgExercise);
             } else {
-                // Set a default image based on category
-                int defaultImage = getDefaultImageForCategory(exercise.getCategory());
+                // Set a default image based on muscle group
+                int defaultImage = getDefaultImageForMuscleGroup(exercise.getMuscleGroup());
                 imgExercise.setImageResource(defaultImage);
             }
 
             txtExerciseName.setText(exercise.getName());
             txtExerciseDescription.setText(exercise.getDescription());
-            txtCategory.setText(String.format("Category: %s", exercise.getCategory()));
-            txtDuration.setText(String.format("Duration: %d minutes", exercise.getDuration()));
-            txtDifficulty.setText(String.format("Difficulty: %s", exercise.getDifficulty()));
+            txtCategory.setText(String.format("Muscle Group: %s", exercise.getMuscleGroup()));
+            txtDuration.setText(String.format("Duration: %d minutes", exercise.getDurationSeconds() / 60));
+            txtDifficulty.setText(String.format("Difficulty: %s", exercise.getDifficultyLevel()));
 
             // Watch video button
             if (exercise.getVideoUrl() != null && !exercise.getVideoUrl().isEmpty()) {
@@ -90,8 +90,10 @@ public class ExerciseDetailsDialog extends BottomSheetDialogFragment {
         btnClose.setOnClickListener(v -> dismiss());
     }
 
-    private int getDefaultImageForCategory(String category) {
-        switch (category.toLowerCase()) {
+    private int getDefaultImageForMuscleGroup(String muscleGroup) {
+        if (muscleGroup == null) return R.drawable.ic_exercise_default;
+        
+        switch (muscleGroup.toLowerCase()) {
             case "chest":
                 return R.drawable.ic_chest;
             case "back":
@@ -101,11 +103,15 @@ public class ExerciseDetailsDialog extends BottomSheetDialogFragment {
             case "shoulders":
                 return R.drawable.ic_shoulders;
             case "arms":
+            case "biceps":
+            case "triceps":
                 return R.drawable.ic_arms;
+            case "abs":
             case "core":
                 return R.drawable.ic_core;
             case "cardio":
                 return R.drawable.ic_cardio;
+            case "full body":
             case "hiit":
                 return R.drawable.ic_hiit;
             default:

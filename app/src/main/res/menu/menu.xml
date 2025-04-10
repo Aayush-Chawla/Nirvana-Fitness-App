@@ -14,4 +14,8 @@
     <item android:id="@+id/dietFragment"
         android:title="Diet"
         android:icon="@drawable/diet"/>
+        
+    <item android:id="@+id/aiSectionFragment"
+        android:title="AI Assistant"
+        android:icon="@drawable/ic_ai_assistant"/>
 </menu>

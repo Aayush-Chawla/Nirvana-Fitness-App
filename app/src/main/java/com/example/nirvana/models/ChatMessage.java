@@ -1,19 +1,21 @@
 package com.example.nirvana.models;
 
+import java.util.Date;
+
 public class ChatMessage {
     private String message;
-    private boolean isUser; // true if message is from user, false if from bot
-    private long timestamp;
+    private boolean isUserMessage;
+    private Date timestamp;
     
+    // Empty constructor for Firebase
     public ChatMessage() {
-        // Required empty constructor for Firebase
-        this.timestamp = System.currentTimeMillis();
+        // Required empty constructor for Firestore
     }
     
-    public ChatMessage(String message, boolean isUser) {
+    public ChatMessage(String message, boolean isUserMessage) {
         this.message = message;
-        this.isUser = isUser;
-        this.timestamp = System.currentTimeMillis();
+        this.isUserMessage = isUserMessage;
+        this.timestamp = new Date();
     }
     
     public String getMessage() {
@@ -24,19 +26,19 @@ public class ChatMessage {
         this.message = message;
     }
     
-    public boolean isUser() {
-        return isUser;
+    public boolean isUserMessage() {
+        return isUserMessage;
     }
     
-    public void setUser(boolean user) {
-        isUser = user;
+    public void setUserMessage(boolean userMessage) {
+        isUserMessage = userMessage;
     }
     
-    public long getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
     
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 } 

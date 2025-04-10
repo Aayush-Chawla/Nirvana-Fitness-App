@@ -91,7 +91,7 @@ public class FirestoreHelper {
     public static void getMeals(OnDataFetchedListener<Map<String, List<Map<String, Object>>>> listener) {
         DocumentReference userRef = getUserDocRef();
         if (userRef == null) {
-            listener.onError("User not authenticated");
+                listener.onError("User not authenticated");
             return;
         }
 
@@ -160,8 +160,8 @@ public class FirestoreHelper {
                     profileData = new HashMap<>();
                 }
                 listener.onDataFetched(profileData);
-            })
-            .addOnFailureListener(e -> {
+                })
+                .addOnFailureListener(e -> {
                 Log.e(TAG, "Error getting user profile", e);
                 listener.onError(e.getMessage());
             });
@@ -199,7 +199,7 @@ public class FirestoreHelper {
             .addOnFailureListener(e -> {
                 Log.e(TAG, "Error logging food", e);
                 if (listener != null) listener.onFailure(e.getMessage());
-            });
+                });
     }
 
     /**
@@ -236,11 +236,11 @@ public class FirestoreHelper {
             .addOnSuccessListener(documentReference -> {
                 Log.d(TAG, "Food logged successfully");
                 if (listener != null) listener.onSuccess();
-            })
-            .addOnFailureListener(e -> {
+                })
+                .addOnFailureListener(e -> {
                 Log.e(TAG, "Error logging food", e);
                 if (listener != null) listener.onFailure(e.getMessage());
-            });
+                });
     }
 
     /**
@@ -259,15 +259,15 @@ public class FirestoreHelper {
             .document(today)
             .collection(mealType.toLowerCase())
             .document(foodItemId)
-            .delete()
-            .addOnSuccessListener(aVoid -> {
+                .delete()
+                .addOnSuccessListener(aVoid -> {
                 Log.d(TAG, "Food item deleted successfully");
                 if (listener != null) listener.onSuccess();
-            })
-            .addOnFailureListener(e -> {
+                })
+                .addOnFailureListener(e -> {
                 Log.e(TAG, "Error deleting food item", e);
                 if (listener != null) listener.onFailure(e.getMessage());
-            });
+                });
     }
 
     /**
@@ -293,11 +293,11 @@ public class FirestoreHelper {
             .addOnSuccessListener(aVoid -> {
                 Log.d(TAG, "Daily calories updated successfully");
                 if (listener != null) listener.onSuccess();
-            })
-            .addOnFailureListener(e -> {
+                })
+                .addOnFailureListener(e -> {
                 Log.e(TAG, "Error updating daily calories", e);
                 if (listener != null) listener.onFailure(e.getMessage());
-            });
+                });
     }
 
     /**
@@ -313,8 +313,8 @@ public class FirestoreHelper {
         userRef.collection("workouts")
             .orderBy("timestamp")
             .limit(limit)
-            .get()
-            .addOnSuccessListener(queryDocumentSnapshots -> {
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
                 List<Map<String, Object>> workouts = new ArrayList<>();
                 
                 for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
@@ -326,11 +326,11 @@ public class FirestoreHelper {
                 }
                 
                 listener.onDataFetched(workouts);
-            })
-            .addOnFailureListener(e -> {
+                })
+                .addOnFailureListener(e -> {
                 Log.e(TAG, "Error getting workouts", e);
                 listener.onError(e.getMessage());
-            });
+                });
     }
 
     /**
@@ -350,14 +350,14 @@ public class FirestoreHelper {
         
         userRef.collection("chats")
             .add(chatData)
-            .addOnSuccessListener(documentReference -> {
+                .addOnSuccessListener(documentReference -> {
                 Log.d(TAG, "Chat message saved successfully");
                 if (listener != null) listener.onSuccess();
-            })
-            .addOnFailureListener(e -> {
+                })
+                .addOnFailureListener(e -> {
                 Log.e(TAG, "Error saving chat message", e);
                 if (listener != null) listener.onFailure(e.getMessage());
-            });
+                });
     }
 
     /**

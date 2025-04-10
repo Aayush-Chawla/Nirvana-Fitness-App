@@ -65,8 +65,8 @@ public class ExerciseDetailsDialog extends BottomSheetDialogFragment {
 
             txtExerciseName.setText(exercise.getName());
             txtExerciseDescription.setText(exercise.getDescription());
-            txtDuration.setText(String.format("%d minutes", exercise.getDuration()));
-            txtDifficulty.setText(exercise.getDifficulty());
+            txtDuration.setText(String.format("%d minutes", exercise.getDurationSeconds() / 60));
+            txtDifficulty.setText(exercise.getDifficultyLevel());
 
             // Watch video button
             if (exercise.getVideoUrl() != null && !exercise.getVideoUrl().isEmpty()) {

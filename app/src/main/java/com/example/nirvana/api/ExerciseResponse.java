@@ -2,6 +2,7 @@ package com.example.nirvana.api;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
+import java.util.ArrayList;
 
 public class ExerciseResponse {
     @SerializedName("count")
@@ -26,8 +27,14 @@ public class ExerciseResponse {
         @SerializedName("description")
         private String description;
 
-        @SerializedName("category")
-        private String category;  // Changed to String to match Firebase data type
+        @SerializedName("muscleGroup")
+        private String muscleGroup;  // Changed from category to muscleGroup
+        
+        @SerializedName("difficulty")
+        private String difficulty;
+        
+        @SerializedName("imageUrl")
+        private String imageUrl;
 
         @SerializedName("muscles")
         private List<Integer> muscles;
@@ -42,7 +49,10 @@ public class ExerciseResponse {
         public String getId() { return id; }
         public String getName() { return name; }
         public String getDescription() { return description; }
-        public String getCategory() { return category; }
+        public String getMuscleGroup() { return muscleGroup; } // Updated getter
+        public String getCategory() { return muscleGroup; } // Keep for compatibility
+        public String getDifficulty() { return difficulty; } // Added method
+        public String getImageUrl() { return imageUrl; } // Added method
         public List<Integer> getMuscles() { return muscles; }
         public List<Integer> getMusclesSecondary() { return musclesSecondary; }
         public List<Integer> getEquipment() { return equipment; }
@@ -51,7 +61,10 @@ public class ExerciseResponse {
         public void setId(String id) { this.id = id; }
         public void setName(String name) { this.name = name; }
         public void setDescription(String description) { this.description = description; }
-        public void setCategory(String category) { this.category = category; }
+        public void setMuscleGroup(String muscleGroup) { this.muscleGroup = muscleGroup; } // Updated setter
+        public void setCategory(String category) { this.muscleGroup = category; } // Keep for compatibility
+        public void setDifficulty(String difficulty) { this.difficulty = difficulty; } // Added method
+        public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; } // Added method
         public void setMuscles(List<Integer> muscles) { this.muscles = muscles; }
         public void setMusclesSecondary(List<Integer> musclesSecondary) { this.musclesSecondary = musclesSecondary; }
         public void setEquipment(List<Integer> equipment) { this.equipment = equipment; }
@@ -62,6 +75,39 @@ public class ExerciseResponse {
     public String getNext() { return next; }
     public String getPrevious() { return previous; }
     public List<Exercise> getResults() { return results; }
+    
+    /**
+     * Convenience method for backward compatibility
+     * @return a list of exercises mapped to ExerciseDetails
+     */
+    public List<ExerciseDetails> getExercises() {
+        List<ExerciseDetails> details = new ArrayList<>();
+        if (results != null) {
+            for (Exercise exercise : results) {
+                details.add(new ExerciseDetails(exercise));
+            }
+        }
+        return details;
+    }
+    
+    /**
+     * ExerciseDetails adapter class for backward compatibility
+     */
+    public static class ExerciseDetails {
+        private Exercise exercise;
+        
+        public ExerciseDetails(Exercise exercise) {
+            this.exercise = exercise;
+        }
+        
+        public String getId() { return exercise.getId(); }
+        public String getName() { return exercise.getName(); }
+        public String getDescription() { return exercise.getDescription(); }
+        public String getCategory() { return exercise.getCategory(); }
+        public String getMuscleGroup() { return exercise.getMuscleGroup(); }
+        public String getDifficulty() { return exercise.getDifficulty(); }
+        public String getImageUrl() { return exercise.getImageUrl(); }
+    }
 }
 
 class ExerciseInfoResponse {

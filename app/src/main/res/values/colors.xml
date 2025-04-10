@@ -16,7 +16,9 @@
     <color name="primary">#5C6BC0</color>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#3949AB</color>
+    <color name="colorPrimaryLight">#C5CAE9</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorAccentDark">#F50057</color>
     <color name="primaryColor">#FF512F</color>
     <color name="primaryDarkColor">#DD2476</color>
     <color name="secondaryColor">#2196F3</color>
@@ -34,6 +36,7 @@
     <!-- Text Colors -->
     <color name="textPrimary">#212121</color>
     <color name="textSecondary">#757575</color>
+    <color name="textColorPrimary">#212121</color>
     <color name="textColorSecondary">#333333</color>
     <color name="textHint">#9E9E9E</color>
     <color name="text_primary">#212121</color>

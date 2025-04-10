@@ -44,7 +44,7 @@
                         android:id="@+id/txtWorkoutStreak"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="5 Day Streak"
+                        android:text="2 Day Streak"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 

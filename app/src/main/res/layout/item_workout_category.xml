@@ -51,9 +51,9 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_arrow_right"
-            android:tint="@color/text_secondary"
-            android:contentDescription="Arrow Right" />
+            android:contentDescription="See all"
+            android:src="@drawable/baseline_navigate_next_24"
+            app:tint="@color/text_secondary" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

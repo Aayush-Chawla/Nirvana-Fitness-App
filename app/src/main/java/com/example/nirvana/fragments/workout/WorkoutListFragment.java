@@ -157,12 +157,12 @@ public class WorkoutListFragment extends Fragment {
         }
         
         // First try to load exercises from our mock API
-        ApiClient.getWorkoutApiService().getExercisesByCategory(category).enqueue(new Callback<ExerciseResponse>() {
+        ApiClient.getWorkoutApiService().getExercisesByMuscleGroup(category).enqueue(new Callback<ExerciseResponse>() {
             @Override
             public void onResponse(Call<ExerciseResponse> call, Response<ExerciseResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getExercises() != null) {
                     Log.d(TAG, "Successfully loaded " + response.body().getExercises().size() + 
-                          " exercises from API for category: " + category);
+                          " exercises from API for muscle group: " + category);
                     
                     // Convert API model to app model
                     List<Exercise> exercises = new ArrayList<>();
