@@ -1,6 +1,7 @@
 package com.example.nirvana.fragments.diet;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.example.nirvana.R;
-import com.example.nirvana.data.models.FoodItem;
+import com.example.nirvana.models.FoodItem;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
@@ -19,24 +20,31 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.example.nirvana.utils.FirestoreHelper;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class DietFragment extends Fragment {
+    private static final String TAG = "DietFragment";
 
     private PieChart macrosChart;
     private MaterialButton btnLogDiet;
     private TextView tvCalories, tvRemaining, tvGoal;
 
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
+    private FirebaseFirestore db;
     private String userId;
+    private ListenerRegistration mealsListener;
+    private ListenerRegistration goalListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -46,9 +54,21 @@ public class DietFragment extends Fragment {
         initializeViews(view);
         initializeFirebase();
         setupButtonListeners();
-        loadUserDietData();
+        setupRealTimeListeners();
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Remove listeners to prevent memory leaks
+        if (mealsListener != null) {
+            mealsListener.remove();
+        }
+        if (goalListener != null) {
+            goalListener.remove();
+        }
     }
 
     private void initializeViews(View view) {
@@ -61,7 +81,7 @@ public class DietFragment extends Fragment {
 
     private void initializeFirebase() {
         mAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        db = FirebaseFirestore.getInstance();
         userId = mAuth.getCurrentUser().getUid();
     }
 
@@ -70,70 +90,157 @@ public class DietFragment extends Fragment {
                 Navigation.findNavController(v).navigate(R.id.action_dietFragment_to_logDietFragment));
     }
 
-    private void loadUserDietData() {
-        mDatabase.child("users").child(userId).child("meals").addListenerForSingleValueEvent(new ValueEventListener() {
+    private void setupRealTimeListeners() {
+        // Get today's date in the format used by the app
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
+        DocumentReference userRef = FirestoreHelper.getUserDocRef();
+        
+        if (userRef == null) {
+            Log.e(TAG, "User not authenticated");
+            return;
+        }
+        
+        // Listen for changes to all meal collections
+        setupMealListener(userRef, today);
+        
+        // Listen for changes to the calorie goal
+        setupCalorieGoalListener(userRef);
+    }
+    
+    private void setupMealListener(DocumentReference userRef, String today) {
+        // We need to listen to all meal types separately
+        List<String> mealTypes = List.of("breakfast", "lunch", "dinner", "snacks");
+        
+        for (String mealType : mealTypes) {
+            userRef.collection(FirestoreHelper.MEALS_COLLECTION)
+                .document(today)
+                .collection(mealType)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Listen failed for " + mealType, error);
+                        return;
+                    }
+
+                    if (snapshots == null) {
+                        return;
+                    }
+                    
+                    // When any meal collection changes, recalculate all totals
+                    calculateNutrientTotals();
+                });
+        }
+    }
+    
+    private void setupCalorieGoalListener(DocumentReference userRef) {
+        goalListener = userRef.collection("diet")
+            .document("goals")
+            .addSnapshotListener((snapshot, error) -> {
+                if (error != null) {
+                    Log.e(TAG, "Listen failed for calorie goal", error);
+                    return;
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    Long goal = snapshot.getLong("calories");
+                    if (goal != null) {
+                        updateCalorieGoal(goal);
+                    }
+                }
+            });
+    }
+
+    private void calculateNutrientTotals() {
+        FirestoreHelper.getMeals(new FirestoreHelper.OnDataFetchedListener<Map<String, List<Map<String, Object>>>>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                calculateNutrientTotals(snapshot);
-                fetchCalorieGoal();
+            public void onDataFetched(Map<String, List<Map<String, Object>>> meals) {
+                double totalCalories = 0;
+                double totalProtein = 0;
+                double totalCarbs = 0;
+                double totalFat = 0;
+
+                // Process each meal type
+                for (List<Map<String, Object>> mealItems : meals.values()) {
+                    for (Map<String, Object> foodMap : mealItems) {
+                        // Extract numeric values safely
+                        if (foodMap.containsKey("calories")) {
+                            Object cal = foodMap.get("calories");
+                            if (cal instanceof Number) {
+                                totalCalories += ((Number) cal).doubleValue();
+                            }
+                        }
+                        
+                        if (foodMap.containsKey("protein")) {
+                            Object prot = foodMap.get("protein");
+                            if (prot instanceof Number) {
+                                totalProtein += ((Number) prot).doubleValue();
+                            }
+                        }
+                        
+                        if (foodMap.containsKey("carbs")) {
+                            Object carb = foodMap.get("carbs");
+                            if (carb instanceof Number) {
+                                totalCarbs += ((Number) carb).doubleValue();
+                            }
+                        }
+                        
+                        if (foodMap.containsKey("fat")) {
+                            Object fat = foodMap.get("fat");
+                            if (fat instanceof Number) {
+                                totalFat += ((Number) fat).doubleValue();
+                            }
+                        }
+                    }
+                }
+
+                // Update UI with the totals
+                updateUI(totalCalories, totalProtein, totalCarbs, totalFat);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // Handle error
+            public void onError(String message) {
+                Log.e(TAG, "Error fetching meals: " + message);
             }
         });
     }
 
-    private void calculateNutrientTotals(DataSnapshot snapshot) {
-        long totalCalories = 0;
-        long totalProtein = 0;
-        long totalCarbs = 0;
-        long totalFat = 0;
-
-        for (DataSnapshot mealSnapshot : snapshot.getChildren()) {
-            for (DataSnapshot foodSnapshot : mealSnapshot.getChildren()) {
-                FoodItem foodItem = foodSnapshot.getValue(FoodItem.class);
-                if (foodItem != null) {
-                    totalCalories += foodItem.getCalories();
-                    totalProtein += foodItem.getProtein();
-                    totalCarbs += foodItem.getCarbs();
-                    totalFat += foodItem.getFat();
-                }
+    private void updateUI(double calories, double protein, double carbs, double fat) {
+        tvCalories.setText(String.format("%.0f", calories));
+        setupMacrosChart(protein, carbs, fat);
+        
+        // Update remaining calories if goal is available
+        String goalText = tvGoal.getText().toString();
+        if (!goalText.isEmpty() && !goalText.equals("0")) {
+            try {
+                long goal = Long.parseLong(goalText);
+                long remaining = goal - (long)calories;
+                tvRemaining.setText(String.valueOf(remaining));
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Error parsing goal value", e);
             }
         }
-
-        updateUI(totalCalories, totalProtein, totalCarbs, totalFat);
-    }
-
-    private void fetchCalorieGoal() {
-        mDatabase.child("users").child(userId).child("diet").child("goal").get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        Long goal = task.getResult().getValue(Long.class);
-                        if (goal != null) {
-                            updateCalorieGoal(goal);
-                        }
-                    }
-                });
-    }
-
-    private void updateUI(long calories, long protein, long carbs, long fat) {
-        tvCalories.setText(String.valueOf(calories));
-        setupMacrosChart(protein, carbs, fat);
     }
 
     private void updateCalorieGoal(long goal) {
         tvGoal.setText(String.valueOf(goal));
-        long remaining = goal - Long.parseLong(tvCalories.getText().toString());
-        tvRemaining.setText(String.valueOf(remaining));
+        
+        // Update remaining calories
+        String caloriesText = tvCalories.getText().toString();
+        if (!caloriesText.isEmpty()) {
+            try {
+                long calories = Long.parseLong(caloriesText);
+                long remaining = goal - calories;
+                tvRemaining.setText(String.valueOf(remaining));
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Error parsing calories value", e);
+            }
+        }
     }
 
-    private void setupMacrosChart(long protein, long carbs, long fat) {
+    private void setupMacrosChart(double protein, double carbs, double fat) {
         List<PieEntry> entries = new ArrayList<>();
-        if (protein > 0) entries.add(new PieEntry(protein, "Protein"));
-        if (carbs > 0) entries.add(new PieEntry(carbs, "Carbs"));
-        if (fat > 0) entries.add(new PieEntry(fat, "Fat"));
+        if (protein > 0) entries.add(new PieEntry((float)protein, "Protein"));
+        if (carbs > 0) entries.add(new PieEntry((float)carbs, "Carbs"));
+        if (fat > 0) entries.add(new PieEntry((float)fat, "Fat"));
 
         PieDataSet dataSet = new PieDataSet(entries, "Macros Breakdown");
         dataSet.setColors(ColorTemplate.MATERIAL_COLORS);

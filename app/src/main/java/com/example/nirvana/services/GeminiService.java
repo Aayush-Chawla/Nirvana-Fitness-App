@@ -11,6 +11,8 @@ import com.google.ai.client.generativeai.type.GenerateContentResponse;
 import com.google.ai.client.generativeai.type.GenerationConfig;
 
 import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import kotlin.coroutines.Continuation;
@@ -381,32 +383,18 @@ public class GeminiService {
                 return;
             }
             
-            String userId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
-            com.google.firebase.database.DatabaseReference userRef = com.google.firebase.database.FirebaseDatabase.getInstance()
-                .getReference().child("users").child(userId).child("profile");
-            
-            userRef.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+            // Use FirestoreHelper to get user profile from Firestore
+            com.example.nirvana.utils.FirestoreHelper.getUserProfile(new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<Map<String, Object>>() {
                 @Override
-                public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        // Extract user data
-                        java.util.Map<String, Object> userProfile = new java.util.HashMap<>();
-                        for (com.google.firebase.database.DataSnapshot child : dataSnapshot.getChildren()) {
-                            userProfile.put(child.getKey(), child.getValue());
-                        }
-                        
-                        // Generate appropriate response based on the query
-                        String response = generatePersonalizedResponse(userMessage, userProfile);
-                        callback.onResponse(response);
-                    } else {
-                        // If no profile data exists
-                        callback.onResponse("I couldn't find your profile information. Please ensure your profile is set up completely.");
-                    }
+                public void onDataFetched(Map<String, Object> userProfile) {
+                    // Generate appropriate response based on the query
+                    String response = generatePersonalizedResponse(userMessage, userProfile);
+                    callback.onResponse(response);
                 }
                 
                 @Override
-                public void onCancelled(com.google.firebase.database.DatabaseError databaseError) {
-                    android.util.Log.e(TAG, "Error fetching user data: " + databaseError.getMessage());
+                public void onError(String message) {
+                    android.util.Log.e(TAG, "Error fetching user data: " + message);
                     callback.onResponse("I'm having trouble accessing your information right now. Please try again later.");
                 }
             });
@@ -500,28 +488,17 @@ public class GeminiService {
                 return;
             }
             
-            String userId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
-            com.google.firebase.database.DatabaseReference mealsRef = com.google.firebase.database.FirebaseDatabase.getInstance()
-                .getReference().child("users").child(userId).child("meals");
-            
-            // Get today's date in the format used by the app
-            java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
-            String today = dateFormat.format(new java.util.Date());
-            
-            mealsRef.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+            // Use FirestoreHelper to get meals from Firestore
+            com.example.nirvana.utils.FirestoreHelper.getMeals(new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<Map<String, List<Map<String, Object>>>>() {
                 @Override
-                public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        String response = generateMealResponse(userMessage, dataSnapshot);
-                        callback.onResponse(response);
-                    } else {
-                        callback.onResponse("I don't see any meal logs in your profile. You can log your meals through the Diet section of the app.");
-                    }
+                public void onDataFetched(Map<String, List<Map<String, Object>>> meals) {
+                    String response = generateMealResponseFromFirestore(userMessage, meals);
+                    callback.onResponse(response);
                 }
                 
                 @Override
-                public void onCancelled(com.google.firebase.database.DatabaseError databaseError) {
-                    android.util.Log.e(TAG, "Error fetching meal data: " + databaseError.getMessage());
+                public void onError(String message) {
+                    android.util.Log.e(TAG, "Error fetching meal data: " + message);
                     callback.onResponse("I'm having trouble accessing your meal information right now. Please try again later.");
                 }
             });
@@ -531,54 +508,54 @@ public class GeminiService {
         }
     }
 
-    private String generateMealResponse(String userMessage, com.google.firebase.database.DataSnapshot dataSnapshot) {
+    private String generateMealResponseFromFirestore(String userMessage, Map<String, List<Map<String, Object>>> meals) {
         StringBuilder response = new StringBuilder();
         
         // Get information based on meal type mentioned
         if (userMessage.contains("breakfast")) {
             response.append("Here's what I found in your breakfast logs: ");
-            appendMealItems(response, dataSnapshot.child("breakfast"));
+            appendMealItemsFromFirestore(response, meals.get("breakfast"));
         } else if (userMessage.contains("lunch")) {
             response.append("Here's what I found in your lunch logs: ");
-            appendMealItems(response, dataSnapshot.child("lunch"));
+            appendMealItemsFromFirestore(response, meals.get("lunch"));
         } else if (userMessage.contains("dinner")) {
             response.append("Here's what I found in your dinner logs: ");
-            appendMealItems(response, dataSnapshot.child("dinner"));
+            appendMealItemsFromFirestore(response, meals.get("dinner"));
         } else if (userMessage.contains("snack")) {
             response.append("Here's what I found in your snack logs: ");
-            appendMealItems(response, dataSnapshot.child("snacks"));
+            appendMealItemsFromFirestore(response, meals.get("snacks"));
         } else {
             // General meal summary
             response.append("Here's a summary of your meal logs: \n\n");
             
             // Add breakfast
             response.append("Breakfast: ");
-            if (dataSnapshot.child("breakfast").exists() && dataSnapshot.child("breakfast").getChildrenCount() > 0) {
-                appendMealItems(response, dataSnapshot.child("breakfast"));
+            if (meals.containsKey("breakfast") && !meals.get("breakfast").isEmpty()) {
+                appendMealItemsFromFirestore(response, meals.get("breakfast"));
             } else {
                 response.append("No breakfast logged.\n");
             }
             
             // Add lunch
             response.append("\nLunch: ");
-            if (dataSnapshot.child("lunch").exists() && dataSnapshot.child("lunch").getChildrenCount() > 0) {
-                appendMealItems(response, dataSnapshot.child("lunch"));
+            if (meals.containsKey("lunch") && !meals.get("lunch").isEmpty()) {
+                appendMealItemsFromFirestore(response, meals.get("lunch"));
             } else {
                 response.append("No lunch logged.\n");
             }
             
             // Add dinner
             response.append("\nDinner: ");
-            if (dataSnapshot.child("dinner").exists() && dataSnapshot.child("dinner").getChildrenCount() > 0) {
-                appendMealItems(response, dataSnapshot.child("dinner"));
+            if (meals.containsKey("dinner") && !meals.get("dinner").isEmpty()) {
+                appendMealItemsFromFirestore(response, meals.get("dinner"));
             } else {
                 response.append("No dinner logged.\n");
             }
             
             // Add snacks
-            if (dataSnapshot.child("snacks").exists() && dataSnapshot.child("snacks").getChildrenCount() > 0) {
+            if (meals.containsKey("snacks") && !meals.get("snacks").isEmpty()) {
                 response.append("\nSnacks: ");
-                appendMealItems(response, dataSnapshot.child("snacks"));
+                appendMealItemsFromFirestore(response, meals.get("snacks"));
             }
         }
         
@@ -590,20 +567,20 @@ public class GeminiService {
         return response.toString();
     }
 
-    private void appendMealItems(StringBuilder response, com.google.firebase.database.DataSnapshot mealSnapshot) {
-        if (!mealSnapshot.exists() || mealSnapshot.getChildrenCount() == 0) {
+    private void appendMealItemsFromFirestore(StringBuilder response, List<Map<String, Object>> mealItems) {
+        if (mealItems == null || mealItems.isEmpty()) {
             response.append("No items found.");
             return;
         }
         
         boolean first = true;
-        for (com.google.firebase.database.DataSnapshot itemSnapshot : mealSnapshot.getChildren()) {
+        for (Map<String, Object> item : mealItems) {
             if (!first) {
                 response.append(", ");
             }
             
-            Object name = itemSnapshot.child("name").getValue();
-            Object calories = itemSnapshot.child("calories").getValue();
+            Object name = item.get("name");
+            Object calories = item.get("calories");
             
             if (name != null) {
                 response.append(name.toString());
@@ -628,24 +605,17 @@ public class GeminiService {
                 return;
             }
             
-            String userId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
-            com.google.firebase.database.DatabaseReference workoutRef = com.google.firebase.database.FirebaseDatabase.getInstance()
-                .getReference().child("users").child(userId).child("workouts");
-            
-            workoutRef.limitToLast(5).addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+            // Use FirestoreHelper to get recent workouts from Firestore
+            com.example.nirvana.utils.FirestoreHelper.getRecentWorkouts(5, new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<List<Map<String, Object>>>() {
                 @Override
-                public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
-                        String response = generateWorkoutResponse(userMessage, dataSnapshot);
-                        callback.onResponse(response);
-                    } else {
-                        callback.onResponse("I don't see any workout logs in your profile. You can track your workouts through the Workout section of the app.");
-                    }
+                public void onDataFetched(List<Map<String, Object>> workouts) {
+                    String response = generateWorkoutResponseFromFirestore(userMessage, workouts);
+                    callback.onResponse(response);
                 }
                 
                 @Override
-                public void onCancelled(com.google.firebase.database.DatabaseError databaseError) {
-                    android.util.Log.e(TAG, "Error fetching workout data: " + databaseError.getMessage());
+                public void onError(String message) {
+                    android.util.Log.e(TAG, "Error fetching workout data: " + message);
                     callback.onResponse("I'm having trouble accessing your workout information right now. Please try again later.");
                 }
             });
@@ -655,32 +625,17 @@ public class GeminiService {
         }
     }
 
-    private String generateWorkoutResponse(String userMessage, com.google.firebase.database.DataSnapshot dataSnapshot) {
+    private String generateWorkoutResponseFromFirestore(String userMessage, List<Map<String, Object>> workouts) {
         StringBuilder response = new StringBuilder("Here's a summary of your recent workouts:\n\n");
         
         int count = 0;
-        // Use a reverse iterator to show most recent workouts first
-        java.util.ArrayList<com.google.firebase.database.DataSnapshot> workouts = new java.util.ArrayList<>();
-        for (com.google.firebase.database.DataSnapshot snapshot : dataSnapshot.getChildren()) {
-            workouts.add(snapshot);
-        }
-        
-        // Sort by timestamp if available
-        java.util.Collections.sort(workouts, (a, b) -> {
-            Long timestampA = a.child("timestamp").getValue(Long.class);
-            Long timestampB = b.child("timestamp").getValue(Long.class);
-            if (timestampA == null) timestampA = 0L;
-            if (timestampB == null) timestampB = 0L;
-            return timestampB.compareTo(timestampA); // Descending order
-        });
-        
-        for (com.google.firebase.database.DataSnapshot workout : workouts) {
+        for (Map<String, Object> workout : workouts) {
             if (count >= 3) break; // Only show the 3 most recent workouts
             
             // Get workout details
-            Object type = workout.child("type").getValue();
-            Object date = workout.child("date").getValue();
-            Object duration = workout.child("duration").getValue();
+            Object type = workout.get("type");
+            Object date = workout.get("date");
+            Object duration = workout.get("duration");
             
             if (type != null) {
                 response.append("- ").append(type.toString());
@@ -696,21 +651,27 @@ public class GeminiService {
                 response.append("\n");
                 
                 // Add exercise details if available
-                if (workout.child("exercises").exists()) {
-                    response.append("  Exercises: ");
-                    boolean first = true;
-                    for (com.google.firebase.database.DataSnapshot exercise : workout.child("exercises").getChildren()) {
-                        if (!first) {
-                            response.append(", ");
+                if (workout.containsKey("exercises")) {
+                    Object exercises = workout.get("exercises");
+                    if (exercises instanceof List) {
+                        response.append("  Exercises: ");
+                        boolean first = true;
+                        for (Object exercise : (List) exercises) {
+                            if (exercise instanceof Map) {
+                                Map<String, Object> exerciseMap = (Map<String, Object>) exercise;
+                                if (!first) {
+                                    response.append(", ");
+                                }
+                                
+                                Object name = exerciseMap.get("name");
+                                if (name != null) {
+                                    response.append(name.toString());
+                                    first = false;
+                                }
+                            }
                         }
-                        
-                        Object name = exercise.child("name").getValue();
-                        if (name != null) {
-                            response.append(name.toString());
-                            first = false;
-                        }
+                        response.append("\n");
                     }
-                    response.append("\n");
                 }
                 
                 count++;

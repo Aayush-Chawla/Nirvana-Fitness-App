@@ -1,10 +1,12 @@
 package com.example.nirvana.fragments.diet;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -13,14 +15,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
 import com.example.nirvana.models.FoodItem;
 import com.example.nirvana.ui.adapters.FoodItemAdapter;
+import com.example.nirvana.utils.FirestoreHelper;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.DocumentSnapshot;
+
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Locale;
+import java.text.SimpleDateFormat;
 
 public class MealFragment extends Fragment {
 
@@ -40,8 +48,9 @@ public class MealFragment extends Fragment {
     private List<FoodItem> foodItems = new ArrayList<>();
 
     // Firebase
-    private DatabaseReference mDatabase;
+    private FirebaseFirestore db;
     private String userId;
+    private ListenerRegistration mealsListener;
 
     public MealFragment() {
         // Required empty public constructor
@@ -63,7 +72,7 @@ public class MealFragment extends Fragment {
         }
 
         // Initialize Firebase
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        db = FirebaseFirestore.getInstance();
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 
@@ -102,51 +111,172 @@ public class MealFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Remove listeners to prevent memory leaks
+        if (mealsListener != null) {
+            mealsListener.remove();
+        }
+    }
+
     private void loadMealItems() {
-        mDatabase.child("users").child(userId).child("meals").child(mealType)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        foodItems.clear();
-                        double totalCalories = 0;
-                        double totalProtein = 0;
-                        double totalCarbs = 0;
-                        double totalFat = 0;
+        // Clear any existing listener to prevent memory leaks
+        if (mealsListener != null) {
+            mealsListener.remove();
+        }
 
-                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                            FoodItem foodItem = dataSnapshot.getValue(FoodItem.class);
-                            if (foodItem != null) {
-                                foodItems.add(foodItem);
-                                totalCalories += foodItem.getCalories();
-                                totalProtein += foodItem.getProtein();
-                                totalCarbs += foodItem.getCarbs();
-                                totalFat += foodItem.getFat();
-                            }
+        // Get the user document reference
+        DocumentReference userRef = FirestoreHelper.getUserDocRef();
+        if (userRef == null) {
+            Toast.makeText(getContext(), "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Get today's date in the format used by the app
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
+        
+        // Log what we're listening to
+        Log.d("MealFragment", "Setting up real-time listener for: " + FirestoreHelper.MEALS_COLLECTION + "/" + today + "/" + mealType.toLowerCase());
+
+        // Set up real-time listener for the meal type
+        mealsListener = userRef.collection(FirestoreHelper.MEALS_COLLECTION)
+            .document(today)
+            .collection(mealType.toLowerCase())
+            .addSnapshotListener((snapshots, error) -> {
+                if (error != null) {
+                    Log.e("MealFragment", "Listen failed: " + error);
+                    Toast.makeText(getContext(), "Error loading meals: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (snapshots == null) {
+                    Log.d("MealFragment", "No snapshots received");
+                    return;
+                }
+
+                Log.d("MealFragment", "Received " + snapshots.getDocuments().size() + " items for " + mealType);
+
+                // Process meal data
+                foodItems.clear();
+                double totalCalories = 0;
+                double totalProtein = 0;
+                double totalCarbs = 0;
+                double totalFat = 0;
+
+                for (DocumentSnapshot document : snapshots.getDocuments()) {
+                    Map<String, Object> item = document.getData();
+                    if (item != null) {
+                        item.put("docId", document.getId());
+                        FoodItem foodItem = convertMapToFoodItem(item);
+                        if (foodItem != null) {
+                            foodItems.add(foodItem);
+                            totalCalories += foodItem.getCalories();
+                            totalProtein += foodItem.getProtein();
+                            totalCarbs += foodItem.getCarbs();
+                            totalFat += foodItem.getFat();
                         }
-
-                        // Update totals
-                        tvTotalCalories.setText(String.format("%.0f", totalCalories));
-                        tvTotalProtein.setText(String.format("%.0fg", totalProtein));
-                        tvTotalCarbs.setText(String.format("%.0fg", totalCarbs));
-                        tvTotalFat.setText(String.format("%.0fg", totalFat));
-
-                        // Show empty state if no items
-                        if (foodItems.isEmpty()) {
-                            tvEmptyState.setVisibility(View.VISIBLE);
-                            rvFoodItems.setVisibility(View.GONE);
-                        } else {
-                            tvEmptyState.setVisibility(View.GONE);
-                            rvFoodItems.setVisibility(View.VISIBLE);
-                        }
-
-                        adapter.notifyDataSetChanged();
                     }
+                }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        // Handle error
-                    }
-                });
+                // Update UI with the data
+                updateMealDisplay(totalCalories, totalProtein, totalCarbs, totalFat);
+            });
+    }
+
+    private void updateMealDisplay(double totalCalories, double totalProtein, double totalCarbs, double totalFat) {
+        // Update nutritional totals
+        tvTotalCalories.setText(String.format("%.0f", totalCalories));
+        tvTotalProtein.setText(String.format("%.0fg", totalProtein));
+        tvTotalCarbs.setText(String.format("%.0fg", totalCarbs));
+        tvTotalFat.setText(String.format("%.0fg", totalFat));
+
+        // Show empty state if no items
+        if (foodItems.isEmpty()) {
+            tvEmptyState.setVisibility(View.VISIBLE);
+            rvFoodItems.setVisibility(View.GONE);
+        } else {
+            tvEmptyState.setVisibility(View.GONE);
+            rvFoodItems.setVisibility(View.VISIBLE);
+        }
+
+        adapter.notifyDataSetChanged();
+    }
+
+    private FoodItem convertMapToFoodItem(Map<String, Object> map) {
+        try {
+            String id = map.containsKey("id") ? (String) map.get("id") : "";
+            String name = map.containsKey("name") ? (String) map.get("name") : "";
+            
+            // Handle various numeric types
+            int calories = 0;
+            if (map.containsKey("calories")) {
+                Object cal = map.get("calories");
+                if (cal instanceof Long) {
+                    calories = ((Long) cal).intValue();
+                } else if (cal instanceof Integer) {
+                    calories = (Integer) cal;
+                } else if (cal instanceof Double) {
+                    calories = ((Double) cal).intValue();
+                }
+            }
+            
+            // Get serving size as string from the map, default to "100g"
+            String servingSize = "100g";
+            if (map.containsKey("servingSize") && map.get("servingSize") != null) {
+                servingSize = (String) map.get("servingSize");
+            }
+
+            // Handle various numeric types for macros
+            double protein = 0;
+            if (map.containsKey("protein")) {
+                Object prot = map.get("protein");
+                if (prot instanceof Long) {
+                    protein = ((Long) prot).doubleValue();
+                } else if (prot instanceof Integer) {
+                    protein = ((Integer) prot).doubleValue();
+                } else if (prot instanceof Double) {
+                    protein = (Double) prot;
+                }
+            }
+
+            double carbs = 0;
+            if (map.containsKey("carbs")) {
+                Object carb = map.get("carbs");
+                if (carb instanceof Long) {
+                    carbs = ((Long) carb).doubleValue();
+                } else if (carb instanceof Integer) {
+                    carbs = ((Integer) carb).doubleValue();
+                } else if (carb instanceof Double) {
+                    carbs = (Double) carb;
+                }
+            }
+
+            double fat = 0;
+            if (map.containsKey("fat")) {
+                Object f = map.get("fat");
+                if (f instanceof Long) {
+                    fat = ((Long) f).doubleValue();
+                } else if (f instanceof Integer) {
+                    fat = ((Integer) f).doubleValue();
+                } else if (f instanceof Double) {
+                    fat = (Double) f;
+                }
+            }
+            
+            // Create food item with the extracted values
+            FoodItem foodItem = new FoodItem(id, name, calories, servingSize, protein, carbs, fat);
+            
+            // Also save the document ID for later use
+            if (map.containsKey("docId")) {
+                foodItem.setDocId((String) map.get("docId"));
+            }
+            
+            return foodItem;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void showFoodItemOptions(FoodItem foodItem) {
@@ -155,10 +285,19 @@ public class MealFragment extends Fragment {
     }
 
     public void addFoodItem(FoodItem foodItem) {
-        String key = mDatabase.child("users").child(userId).child("meals").child(mealType).push().getKey();
-        if (key != null) {
-            mDatabase.child("users").child(userId).child("meals").child(mealType).child(key).setValue(foodItem);
-        }
+        // Use FirestoreHelper to log food
+        FirestoreHelper.logFood(mealType, foodItem, foodItem.getServingSize(), new FirestoreHelper.OnCompleteListener() {
+            @Override
+            public void onSuccess() {
+                refreshFoodList();
+                Toast.makeText(getContext(), "Food item added to " + mealType, Toast.LENGTH_SHORT).show();
+            }
+            
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(getContext(), "Error adding food item: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public String getMealType() {
@@ -170,64 +309,48 @@ public class MealFragment extends Fragment {
     }
 
     private void deleteFoodItemByPosition(FoodItem foodItem, int position) {
-        // Get the database reference for the meals
-        DatabaseReference mealsRef = mDatabase.child("users").child(userId).child("meals").child(mealType);
+        if (foodItem.getDocId() == null || foodItem.getDocId().isEmpty()) {
+            Toast.makeText(getContext(), "Cannot delete item: missing document ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
         
-        // Query for the item
-        mealsRef.orderByChild("name").equalTo(foodItem.getName())
-            .addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        // Find and remove the first matching item
-                        for (DataSnapshot itemSnapshot : snapshot.getChildren()) {
-                            mealsRef.child(itemSnapshot.getKey()).removeValue()
-                                .addOnSuccessListener(aVoid -> {
-                                    // Remove from local list 
-                                    if (position >= 0 && position < foodItems.size()) {
-                                        foodItems.remove(position);
-                                        adapter.notifyItemRemoved(position);
-                                        updateNutrientTotals();
-                                    }
-                                });
-                            return; // Only delete first matching item
-                        }
-                    }
+        // Use FirestoreHelper to delete food item
+        FirestoreHelper.deleteFoodItem(mealType, foodItem.getDocId(), foodItem.getCalories(), new FirestoreHelper.OnCompleteListener() {
+            @Override
+            public void onSuccess() {
+                // Remove from local list
+                if (position >= 0 && position < foodItems.size()) {
+                    foodItems.remove(position);
+                    adapter.notifyItemRemoved(position);
+                    updateNutrientTotals();
                 }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    // Handle error
-                }
-            });
+                Toast.makeText(getContext(), "Food item deleted", Toast.LENGTH_SHORT).show();
+            }
+            
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(getContext(), "Error deleting food item: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
-    
+
     private void updateNutrientTotals() {
         double totalCalories = 0;
         double totalProtein = 0;
         double totalCarbs = 0;
         double totalFat = 0;
-        
+
         for (FoodItem foodItem : foodItems) {
             totalCalories += foodItem.getCalories();
             totalProtein += foodItem.getProtein();
             totalCarbs += foodItem.getCarbs();
             totalFat += foodItem.getFat();
         }
-        
-        // Update totals
+
+        // Update UI
         tvTotalCalories.setText(String.format("%.0f", totalCalories));
         tvTotalProtein.setText(String.format("%.0fg", totalProtein));
         tvTotalCarbs.setText(String.format("%.0fg", totalCarbs));
         tvTotalFat.setText(String.format("%.0fg", totalFat));
-        
-        // Show empty state if no items
-        if (foodItems.isEmpty()) {
-            tvEmptyState.setVisibility(View.VISIBLE);
-            rvFoodItems.setVisibility(View.GONE);
-        } else {
-            tvEmptyState.setVisibility(View.GONE);
-            rvFoodItems.setVisibility(View.VISIBLE);
-        }
     }
 }

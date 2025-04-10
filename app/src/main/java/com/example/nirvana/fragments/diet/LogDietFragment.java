@@ -16,7 +16,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.example.nirvana.models.FoodItem;
-import com.example.nirvana.utils.FirebaseHelper;
+import com.example.nirvana.utils.FirestoreHelper;
 
 public class LogDietFragment extends Fragment implements FoodSearchDialog.OnFoodSelectedListener {
 
@@ -95,7 +95,7 @@ public class LogDietFragment extends Fragment implements FoodSearchDialog.OnFood
     public void onFoodSelected(FoodItem foodItem, String servingSize) {
         String mealType = getMealType(viewPager.getCurrentItem());
         
-        FirebaseHelper.logFood(mealType, foodItem, servingSize, new FirebaseHelper.OnFoodLoggedListener() {
+        FirestoreHelper.logFood(mealType, foodItem, servingSize, new FirestoreHelper.OnCompleteListener() {
             @Override
             public void onSuccess() {
                 String message = String.format("%s (%s) added to %s", 

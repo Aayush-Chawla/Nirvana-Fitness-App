@@ -8,6 +8,7 @@ public class FoodItem {
     private double protein;
     private double carbs;
     private double fat;
+    private String docId;
 
     public FoodItem() {
         // Required empty constructor for Firebase
@@ -35,6 +36,24 @@ public class FoodItem {
 
     public String getServingSize() { return servingSize; }
     public void setServingSize(String servingSize) { this.servingSize = servingSize; }
+    
+    // Helper method to get numeric value from serving size
+    public float getServingSizeValue() {
+        if (servingSize == null || servingSize.isEmpty()) {
+            return 100f; // Default to 100g
+        }
+        
+        try {
+            String numericPart = servingSize.replaceAll("[^0-9.]", "");
+            if (!numericPart.isEmpty()) {
+                return Float.parseFloat(numericPart);
+            }
+        } catch (NumberFormatException e) {
+            // If parsing fails, return default
+        }
+        
+        return 100f; // Default to 100g if parsing fails
+    }
 
     public double getProtein() { return protein; }
     public void setProtein(double protein) { this.protein = protein; }
@@ -44,4 +63,7 @@ public class FoodItem {
 
     public double getFat() { return fat; }
     public void setFat(double fat) { this.fat = fat; }
+    
+    public String getDocId() { return docId; }
+    public void setDocId(String docId) { this.docId = docId; }
 } 
