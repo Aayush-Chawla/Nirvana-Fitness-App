@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Fitness Goals Icon -->
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp"
+            android:src="@drawable/ic_fitness_goals"
+            android:contentDescription="Fitness Goals" />
+
+        <!-- Primary Fitness Goal -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Primary Fitness Goal"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="What is your primary fitness goal?"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/rgFitnessGoal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <RadioButton
+                android:id="@+id/rbLoseWeight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lose weight"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbBuildMuscle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Build muscle"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbImproveFitness"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Improve fitness"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbIncreaseFlexibility"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Increase flexibility"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbImproveCardio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Improve cardiovascular health"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbMaintainFitness"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Maintain current fitness"
+                android:padding="12dp" />
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your primary goal will help us customize your fitness plan"
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Activity Level -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Current Activity Level"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:layout_marginBottom="12dp" />
+            
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="What is your current activity level?"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/rgActivityLevel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/rbSedentary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sedentary (little or no exercise)"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbLightlyActive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lightly Active (1-3 days/week)"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbModeratelyActive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Moderately Active (3-5 days/week)"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbVeryActive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Very Active (6-7 days/week)"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbExtraActive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Extra Active (physical job or 2x training)"
+                android:padding="12dp" />
+        </RadioGroup>
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your activity level helps us calculate your calorie needs"
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:layout_marginBottom="32dp"/>
+
+    </LinearLayout>
+</ScrollView> 

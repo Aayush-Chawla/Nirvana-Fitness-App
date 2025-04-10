@@ -47,4 +47,17 @@
     <string name="save_changes">Save Changes</string>
     <string name="settings">Settings</string>
     <string name="logout">Logout</string>
+    <!-- Add the following string resources -->
+    <string name="next">NEXT</string>
+    <string name="finish">FINISH</string>
+    <string name="basic_info_title">Basic Information</string>
+    <string name="basic_info_description">Let\'s start with some basic information about you</string>
+    <string name="body_metrics_title">Body Metrics</string>
+    <string name="body_metrics_description">Let\'s get accurate measurements to personalize your fitness plan</string>
+    <string name="fitness_goals_title">Fitness Goals</string>
+    <string name="fitness_goals_description">What are your fitness goals and activity level?</string>
+    <string name="health_info_title">Health Information</string>
+    <string name="health_info_description">Additional health information to tailor your experience</string>
+    <string name="schedule_preferences_title">Schedule Preferences</string>
+    <string name="schedule_preferences_description">Tell us about your workout schedule preferences</string>
 </resources>

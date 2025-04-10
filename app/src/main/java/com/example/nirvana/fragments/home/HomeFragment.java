@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -155,10 +156,26 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         if (mAuth.getCurrentUser() != null) {
             currentUserId = mAuth.getCurrentUser().getUid();
-            userRef = FirebaseDatabase.getInstance().getReference()
-                .child("users")
-                .child(currentUserId);
+            // Use Firestore document reference instead of Realtime Database
+            userRef = null; // No longer using Realtime Database reference
+            
+            // Trigger data migration on app startup
+            migrateDataToFirestore();
         }
+    }
+
+    private void migrateDataToFirestore() {
+        com.example.nirvana.utils.FirebaseHelper.migrateDataToFirestore(new com.example.nirvana.utils.FirebaseHelper.OnFoodLoggedListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Data migration to Firestore completed successfully");
+            }
+            
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Error migrating data to Firestore: " + error);
+            }
+        });
     }
 
     private void setupRecyclerView() {
@@ -453,110 +470,171 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     }
 
     private void setupChatbot(View view) {
-        // Initialize ChatAdapter and set up RecyclerView
+        // Initialize chatbot components
+        recyclerViewChat = view.findViewById(R.id.recyclerViewChat);
+        messageInput = view.findViewById(R.id.editTextMessage);
+        sendButton = view.findViewById(R.id.buttonSend);
+        
+        // Setup RecyclerView for chat messages
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setStackFromEnd(true);  // Messages display from bottom
+        recyclerViewChat.setLayoutManager(layoutManager);
+        
+        chatMessages = new ArrayList<>();
         chatAdapter = new ChatAdapter(chatMessages, requireContext());
-        recyclerViewChat.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerViewChat.setAdapter(chatAdapter);
         
-        // Initialize Gemini Service
+        // Initialize Gemini service
         geminiService = new GeminiService(requireContext());
         
-        // Add welcome message
-        addBotMessage("Hello! I'm your Nirvana Fitness assistant. How can I help you today? You can ask me about exercises, nutrition, or any fitness challenges you're facing.");
+        // Load user data for chatbot context
+        loadUserDataForChatbot();
         
-        // Set up send button
+        // Load chat history
+        loadChatHistory();
+        
+        // Setup send button
         sendButton.setOnClickListener(v -> {
             String message = messageInput.getText().toString().trim();
-            if (!TextUtils.isEmpty(message)) {
+            if (!message.isEmpty()) {
                 sendMessage(message);
-                messageInput.setText("");
+            }
+        });
+        
+        // Add demo button click listener if it exists
+        Button buttonTryMe = view.findViewById(R.id.buttonTryMe);
+        if (buttonTryMe != null) {
+            setupDemoButton(buttonTryMe);
+        }
+    }
+    
+    private void loadChatHistory() {
+        if (currentUserId == null) return;
+        
+        com.example.nirvana.utils.FirestoreHelper.getChatHistory(10, new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<List<Map<String, Object>>>() {
+            @Override
+            public void onDataFetched(List<Map<String, Object>> messages) {
+                Log.d(TAG, "Loading " + messages.size() + " chat messages from history");
+                
+                // Clear existing messages first
+                chatMessages.clear();
+                
+                // Messages come in descending order (newest first), so reverse to show oldest first
+                for (int i = messages.size() - 1; i >= 0; i--) {
+                    Map<String, Object> messageData = messages.get(i);
+                    String userMessage = (String) messageData.get("userMessage");
+                    String botResponse = (String) messageData.get("botResponse");
+                    
+                    // Add user message first
+                    chatMessages.add(new ChatMessage(userMessage, true));
+                    
+                    // Then add bot response
+                    chatMessages.add(new ChatMessage(botResponse, false));
+                }
+                
+                chatAdapter.notifyDataSetChanged();
+                
+                // Scroll to the bottom if there are messages
+                if (!chatMessages.isEmpty()) {
+                    recyclerViewChat.scrollToPosition(chatMessages.size() - 1);
+                }
+            }
+            
+            @Override
+            public void onError(String message) {
+                Log.e(TAG, "Error loading chat history: " + message);
+                // Continue without history
             }
         });
     }
 
     private void loadUserDataForChatbot() {
-        if (userRef == null) return;
+        if (currentUserId == null) return;
         
-        // Load profile data
-        userRef.child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
+        // Load profile data using FirestoreHelper
+        com.example.nirvana.utils.FirestoreHelper.getUserProfile(new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<Map<String, Object>>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot child : dataSnapshot.getChildren()) {
-                        userProfile.put(child.getKey(), child.getValue());
-                    }
+            public void onDataFetched(Map<String, Object> profile) {
+                userProfile.clear();
+                userProfile.putAll(profile);
                     Log.d(TAG, "User profile loaded for chatbot: " + userProfile.toString());
-                }
             }
             
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "Error loading profile data for chatbot: " + databaseError.getMessage());
+            public void onError(String message) {
+                Log.e(TAG, "Error loading profile data for chatbot: " + message);
             }
         });
         
-        // Load food log data
-        userRef.child("food_logs").limitToLast(7).addListenerForSingleValueEvent(new ValueEventListener() {
+        // Load meal data
+        loadMealDataForChatbot();
+        
+        // Load exercise data
+        loadExerciseDataForChatbot();
+    }
+    
+    private void loadMealDataForChatbot() {
+        // Use FirestoreHelper to get meals
+        Log.d(TAG, "Starting to fetch meal data for chatbot context");
+        com.example.nirvana.utils.FirestoreHelper.getMeals(new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<Map<String, List<Map<String, Object>>>>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) {
-                        String date = dateSnapshot.getKey();
-                        List<Map<String, Object>> dailyFoods = new ArrayList<>();
-                        
-                        for (DataSnapshot foodSnapshot : dateSnapshot.getChildren()) {
-                            Map<String, Object> foodItem = new HashMap<>();
-                            for (DataSnapshot foodDetail : foodSnapshot.getChildren()) {
-                                foodItem.put(foodDetail.getKey(), foodDetail.getValue());
-                            }
-                            dailyFoods.add(foodItem);
+            public void onDataFetched(Map<String, List<Map<String, Object>>> meals) {
+                // Process meals data for chatbot context
+                if (meals != null) {
+                    int totalMeals = 0;
+                    StringBuilder mealInfo = new StringBuilder("Meals loaded: ");
+                    
+                    for (String mealType : meals.keySet()) {
+                        if (meals.get(mealType) != null) {
+                            int count = meals.get(mealType).size();
+                            totalMeals += count;
+                            mealInfo.append(mealType).append("=").append(count).append(", ");
                         }
-                        
-                        userDietData.put(date, dailyFoods);
                     }
-                    Log.d(TAG, "User diet data loaded for chatbot (last 7 days)");
+                    
+                    Log.d(TAG, mealInfo.toString());
+                    userDietData.put("meal_count", totalMeals);
+                    Log.d(TAG, "Meal data loaded for chatbot: " + userDietData.toString());
+                } else {
+                    Log.d(TAG, "No meal data returned from Firestore");
                 }
             }
             
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "Error loading diet data for chatbot: " + databaseError.getMessage());
+            public void onError(String message) {
+                Log.e(TAG, "Error loading meal data for chatbot: " + message);
             }
         });
+    }
         
-        // Load workout data if available
-        userRef.child("workouts").limitToLast(7).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void loadExerciseDataForChatbot() {
+        // Use FirestoreHelper to get workouts
+        com.example.nirvana.utils.FirestoreHelper.getRecentWorkouts(10, new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<List<Map<String, Object>>>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot dateSnapshot : dataSnapshot.getChildren()) {
-                        String date = dateSnapshot.getKey();
-                        List<Map<String, Object>> dailyWorkouts = new ArrayList<>();
-                        
-                        for (DataSnapshot workoutSnapshot : dateSnapshot.getChildren()) {
-                            Map<String, Object> workoutItem = new HashMap<>();
-                            for (DataSnapshot workoutDetail : workoutSnapshot.getChildren()) {
-                                workoutItem.put(workoutDetail.getKey(), workoutDetail.getValue());
-                            }
-                            dailyWorkouts.add(workoutItem);
-                        }
-                        
-                        userExerciseData.put(date, dailyWorkouts);
-                    }
-                    Log.d(TAG, "User workout data loaded for chatbot (last 7 days)");
+            public void onDataFetched(List<Map<String, Object>> workouts) {
+                // Process workout data for chatbot context
+                if (workouts != null) {
+                    userExerciseData.put("workout_count", workouts.size());
+                    Log.d(TAG, "Exercise data loaded for chatbot: " + userExerciseData.toString());
                 }
             }
             
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "Error loading workout data for chatbot: " + databaseError.getMessage());
+            public void onError(String message) {
+                Log.e(TAG, "Error loading exercise data for chatbot: " + message);
             }
         });
     }
 
     private void sendMessage(String message) {
-        // Add user message to chat
+        // Don't process empty messages
+        if (TextUtils.isEmpty(message)) return;
+        
+        // Add message to chat
         addUserMessage(message);
+        
+        // Clear input
+        messageInput.setText("");
         
         // Build context for Gemini API
         StringBuilder context = new StringBuilder();
@@ -605,7 +683,26 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
                 
                 requireActivity().runOnUiThread(() -> {
                     Log.e(TAG, "Gemini API error: " + errorMessage);
-                    addBotMessage("I'm sorry, I'm having trouble processing your request right now. Please try again later.");
+                    // Instead of showing a generic error message, let the GeminiService handle it with a fallback
+                    // The service will provide a meaningful response based on the message content
+                    addBotMessage("I'll provide you with the best information I can without accessing the AI service.");
+                    
+                    // Call generateContent again - the fallback system will automatically kick in
+                    // since the error has already been logged
+                    geminiService.generateContent(message, new GeminiService.GeminiResponseCallback() {
+                        @Override
+                        public void onResponse(String response) {
+                            if (getActivity() == null || !isAdded()) return;
+                            addBotMessage(response);
+                            saveChatHistory(message, response);
+                        }
+                        
+                        @Override
+                        public void onError(String secondError) {
+                            // This should not happen since we're already using the fallback
+                            Log.e(TAG, "Double error in Gemini service: " + secondError);
+                        }
+                    });
                 });
             }
         });
@@ -626,21 +723,50 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     }
     
     private void saveChatHistory(String userMessage, String botResponse) {
-        try {
-            if (userRef != null) {
-                String chatId = userRef.child("chat_history").push().getKey();
-                Map<String, Object> chatEntry = new HashMap<>();
-                chatEntry.put("timestamp", System.currentTimeMillis());
-                chatEntry.put("userMessage", userMessage);
-                chatEntry.put("botResponse", botResponse);
-                
-                userRef.child("chat_history").child(chatId).setValue(chatEntry)
-                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Chat history saved successfully"))
-                    .addOnFailureListener(e -> Log.e(TAG, "Error saving chat history", e));
+        if (currentUserId == null) return;
+        
+        Log.d(TAG, "Attempting to save chat message to Firestore for user: " + currentUserId);
+        Log.d(TAG, "User message: " + (userMessage.length() > 50 ? userMessage.substring(0, 50) + "..." : userMessage));
+        Log.d(TAG, "Bot response: " + (botResponse.length() > 50 ? botResponse.substring(0, 50) + "..." : botResponse));
+        
+        // Use FirestoreHelper to save chat history
+        com.example.nirvana.utils.FirestoreHelper.saveChatMessage(userMessage, botResponse, new com.example.nirvana.utils.FirestoreHelper.OnCompleteListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Chat history saved successfully");
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Error saving chat history: " + e.getMessage());
-        }
+            
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Error saving chat history: " + error);
+            }
+        });
+    }
+
+    private void setupDemoButton(Button buttonTryMe) {
+        buttonTryMe.setOnClickListener(v -> {
+            // Cycle through demo questions
+            String[] demoQuestions = {
+                "What is my name?",
+                "How old am I?",
+                "What is my weight?",
+                "What are my recent meals?",
+                "Tell me about my workouts"
+            };
+            
+            // Use a tag to cycle through questions
+            int currentQuestion = 0;
+            if (buttonTryMe.getTag() != null) {
+                currentQuestion = (int) buttonTryMe.getTag();
+                currentQuestion = (currentQuestion + 1) % demoQuestions.length;
+            }
+            buttonTryMe.setTag(currentQuestion);
+            
+            // Send the selected demo question
+            String question = demoQuestions[currentQuestion];
+            messageInput.setText(question);
+            sendMessage(question);
+        });
     }
 }
 
