@@ -114,6 +114,9 @@
         <action
             android:id="@+id/action_workoutFragment_to_gymWorkoutFragment"
             app:destination="@id/gymWorkoutFragment" />
+        <action
+            android:id="@+id/action_workoutFragment_to_workoutPlanGeneratorFragment"
+            app:destination="@id/workoutPlanGeneratorFragment" />
     </fragment>
 
     <fragment
@@ -237,5 +240,29 @@
             android:name="exercise"
             app:argType="com.example.nirvana.models.Exercise" />
     </fragment>
+
+    <fragment
+        android:id="@+id/workoutPlanGeneratorFragment"
+        android:name="com.example.nirvana.fragments.WorkoutPlanGeneratorFragment"
+        android:label="AI Workout Plan Generator"
+        tools:layout="@layout/fragment_workout_plan_generator" />
+
+    <fragment
+        android:id="@+id/bodyAnalysisFragment"
+        android:name="com.example.nirvana.fragments.BodyAnalysisFragment"
+        android:label="Body Analysis"
+        tools:layout="@layout/fragment_body_analysis" />
+
+    <fragment
+        android:id="@+id/mealRecognitionFragment"
+        android:name="com.example.nirvana.fragments.MealRecognitionFragment"
+        android:label="Meal Recognition"
+        tools:layout="@layout/fragment_meal_recognition" />
+
+    <fragment
+        android:id="@+id/aiSectionFragment"
+        android:name="com.example.nirvana.fragments.AISectionFragment"
+        android:label="AI Features"
+        tools:layout="@layout/fragment_ai_section" />
 
 </navigation>

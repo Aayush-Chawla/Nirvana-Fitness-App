@@ -454,55 +454,24 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     }
 
     private void setupChatbot(View view) {
-        // Initialize chatbot
-        try {
-            geminiService = new GeminiService(requireContext());
-        } catch (Exception e) {
-            Log.e(TAG, "Error initializing Gemini service", e);
-        }
-        
-        // Set up message recycler view
+        // Initialize ChatAdapter and set up RecyclerView
         chatAdapter = new ChatAdapter(chatMessages, requireContext());
         recyclerViewChat.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerViewChat.setAdapter(chatAdapter);
         
+        // Initialize Gemini Service
+        geminiService = new GeminiService(requireContext());
+        
         // Add welcome message
-        if (chatMessages.isEmpty()) {
-            addBotMessage("Hello! I'm your Nirvana fitness assistant. Ask me about workouts, nutrition, or your progress.");
-        }
+        addBotMessage("Hello! I'm your Nirvana Fitness assistant. How can I help you today? You can ask me about exercises, nutrition, or any fitness challenges you're facing.");
         
         // Set up send button
         sendButton.setOnClickListener(v -> {
             String message = messageInput.getText().toString().trim();
             if (!TextUtils.isEmpty(message)) {
                 sendMessage(message);
+                messageInput.setText("");
             }
-        });
-        
-        // Set up Try Me button to demonstrate functionality
-        Button buttonTryMe = view.findViewById(R.id.buttonTryMe);
-        buttonTryMe.setOnClickListener(v -> {
-            // Cycle through demo questions
-            String[] demoQuestions = {
-                "What is my name?",
-                "How old am I?",
-                "What is my weight?",
-                "What are my recent meals?",
-                "Tell me about my workouts"
-            };
-            
-            // Use a tag to cycle through questions
-            int currentQuestion = 0;
-            if (buttonTryMe.getTag() != null) {
-                currentQuestion = (int) buttonTryMe.getTag();
-                currentQuestion = (currentQuestion + 1) % demoQuestions.length;
-            }
-            buttonTryMe.setTag(currentQuestion);
-            
-            // Send the selected demo question
-            String question = demoQuestions[currentQuestion];
-            messageInput.setText(question);
-            sendMessage(question);
         });
     }
 
@@ -592,9 +561,6 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
         
         // Add message to chat
         addUserMessage(message);
-        
-        // Clear input
-        messageInput.setText("");
         
         // Build context for Gemini API
         StringBuilder context = new StringBuilder();

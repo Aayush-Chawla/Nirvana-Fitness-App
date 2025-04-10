@@ -24,10 +24,42 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@id/message_layout"
+        app:layout_constraintBottom_toTopOf="@id/suggestionLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <!-- Suggestion Categories -->
+    <LinearLayout
+        android:id="@+id/suggestionLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/background_primary"
+        android:orientation="vertical"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/message_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Suggested questions:"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:layout_marginStart="4dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSuggestions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:paddingBottom="4dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/message_layout"

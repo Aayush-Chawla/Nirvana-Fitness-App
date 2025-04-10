@@ -95,24 +95,17 @@ public class WorkoutDetailFragment extends Fragment implements ExerciseAdapter.O
         try {
             Log.d("WorkoutDetail", "Setting up RecyclerView");
             
-            // Verify views are initialized
-            if (recyclerExerciseList == null) {
-                Log.e("WorkoutDetail", "RecyclerView is null!");
-                return;
-            }
+            // Get exercises for the category
+            exerciseList = getExercisesForCategory();
             
-            // Configure RecyclerView
-            LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
-            recyclerExerciseList.setLayoutManager(layoutManager);
-            recyclerExerciseList.setHasFixedSize(true);
-            
-            // Set adapter
+            // Initialize adapter
+            exerciseAdapter = new ExerciseAdapter(this);
             recyclerExerciseList.setAdapter(exerciseAdapter);
             
             // Submit list if available
             if (exerciseList != null && !exerciseList.isEmpty()) {
                 Log.d("WorkoutDetail", "Submitting exercises list of size: " + exerciseList.size());
-                exerciseAdapter.submitList(exerciseList);
+                exerciseAdapter.setExercises(exerciseList);
             } else {
                 Log.w("WorkoutDetail", "Exercise list is null or empty!");
             }

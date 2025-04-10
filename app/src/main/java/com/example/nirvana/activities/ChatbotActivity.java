@@ -14,7 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nirvana.R;
 import com.example.nirvana.adapters.ChatAdapter;
+import com.example.nirvana.adapters.SuggestionAdapter;
 import com.example.nirvana.models.ChatMessage;
+import com.example.nirvana.services.EnhancedFitnessAssistant;
 import com.example.nirvana.services.GeminiService;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,22 +24,26 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ChatbotActivity extends AppCompatActivity {
+public class ChatbotActivity extends AppCompatActivity implements SuggestionAdapter.OnSuggestionClickListener {
     private static final String TAG = "ChatbotActivity";
     private static final String BASIC_SYSTEM_PROMPT = "You are a fitness assistant. Keep responses brief.";
     private static final int MAX_RETRIES = 2;
 
     private RecyclerView recyclerView;
+    private RecyclerView rvSuggestions;
     private EditText messageInput;
     private ImageButton sendButton;
     private ChatAdapter chatAdapter;
+    private SuggestionAdapter suggestionAdapter;
     private List<ChatMessage> chatMessages;
+    private List<String> suggestionList;
     
-    private GeminiService geminiService;
+    private EnhancedFitnessAssistant fitnessAssistant;
     private DatabaseReference userRef;
     private Map<String, Object> userProfile = new HashMap<>();
     private int retryCount = 0;
@@ -55,25 +61,29 @@ public class ChatbotActivity extends AppCompatActivity {
 
         // Initialize views
         recyclerView = findViewById(R.id.recyclerView);
+        rvSuggestions = findViewById(R.id.rvSuggestions);
         messageInput = findViewById(R.id.messageInput);
         sendButton = findViewById(R.id.sendButton);
 
-        // Setup RecyclerView
+        // Setup RecyclerView for chat messages
         chatMessages = new ArrayList<>();
         chatAdapter = new ChatAdapter(chatMessages, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
         
-        // Initialize Gemini Service
+        // Setup suggestions
+        setupSuggestionList();
+        
+        // Initialize Enhanced Fitness Assistant
         try {
-            geminiService = new GeminiService(this);
-            Log.d(TAG, "GeminiService initialized successfully");
+            fitnessAssistant = new EnhancedFitnessAssistant(this);
+            Log.d(TAG, "EnhancedFitnessAssistant initialized successfully");
             
             // Test message - send directly to the service to verify it's working
-            testGeminiService();
+            testFitnessAssistant();
             
         } catch (Exception e) {
-            Log.e(TAG, "Error initializing GeminiService", e);
+            Log.e(TAG, "Error initializing EnhancedFitnessAssistant", e);
             Toast.makeText(this, "AI assistant features may be limited", Toast.LENGTH_SHORT).show();
         }
         
@@ -88,7 +98,7 @@ public class ChatbotActivity extends AppCompatActivity {
         }
 
         // Add welcome message
-        addBotMessage("Hello! I'm your fitness assistant. How can I help you today?");
+        addBotMessage("Hello! I'm your fitness assistant. Choose from the suggestions below or ask me anything about workouts, nutrition, and fitness goals.");
 
         // Setup send button
         sendButton.setOnClickListener(v -> {
@@ -106,20 +116,54 @@ public class ChatbotActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
     }
     
-    private void testGeminiService() {
-        String testPrompt = "Say hello";
-        Log.d(TAG, "Testing Gemini API with prompt: " + testPrompt);
+    private void setupSuggestionList() {
+        suggestionList = Arrays.asList(
+            "What is my BMI?",
+            "Home chest workout",
+            "Gym chest workout",
+            "Home back workout",
+            "Gym back workout",
+            "Core strengthening",
+            "Abs workout routine",
+            "Leg day exercises",
+            "Shoulder exercises",
+            "Protein intake guide",
+            "Calorie calculation",
+            "Weight loss tips",
+            "Muscle gain diet",
+            "Cardio routine",
+            "Stretching guide",
+            "Recovery tips",
+            "Workout schedule"
+        );
         
-        geminiService.generateContent(testPrompt, new GeminiService.GeminiResponseCallback() {
+        suggestionAdapter = new SuggestionAdapter(suggestionList, this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        rvSuggestions.setLayoutManager(layoutManager);
+        rvSuggestions.setAdapter(suggestionAdapter);
+    }
+    
+    @Override
+    public void onSuggestionClick(String suggestion) {
+        messageInput.setText(suggestion);
+        sendMessage(suggestion);
+        messageInput.setText("");
+    }
+    
+    private void testFitnessAssistant() {
+        String testPrompt = "Say hello";
+        Log.d(TAG, "Testing Fitness Assistant with prompt: " + testPrompt);
+        
+        fitnessAssistant.generateContent(testPrompt, new GeminiService.GeminiResponseCallback() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Gemini API test successful! Response: " + response);
+                Log.d(TAG, "Fitness Assistant test successful! Response: " + response);
                 Toast.makeText(ChatbotActivity.this, "AI connection successful!", Toast.LENGTH_SHORT).show();
             }
             
             @Override
             public void onError(String errorMessage) {
-                Log.e(TAG, "Gemini API test failed: " + errorMessage);
+                Log.e(TAG, "Fitness Assistant test failed: " + errorMessage);
                 Toast.makeText(ChatbotActivity.this, "AI connection issues: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
@@ -145,69 +189,137 @@ public class ChatbotActivity extends AppCompatActivity {
         // Add user message to chat
         addUserMessage(message);
         
-        // Just try with the raw message first - that's the simplest approach
-        sendPromptToGemini(message, message);
+        // Build a more specific prompt based on the type of question
+        String enhancedPrompt = buildEnhancedPrompt(message);
+        
+        // Send to Enhanced Fitness Assistant
+        sendPromptToGemini(enhancedPrompt, message);
+    }
+    
+    private String buildEnhancedPrompt(String userMessage) {
+        StringBuilder prompt = new StringBuilder();
+        
+        // Add user context if available
+        if (!userProfile.isEmpty()) {
+            prompt.append("USER CONTEXT: ");
+            for (Map.Entry<String, Object> entry : userProfile.entrySet()) {
+                prompt.append(entry.getKey()).append(": ").append(entry.getValue()).append(", ");
+            }
+            prompt.append("\n\n");
+        }
+        
+        // Add specialized instructions based on query type
+        String lowerCaseMessage = userMessage.toLowerCase();
+        
+        if (lowerCaseMessage.contains("bmi")) {
+            prompt.append("Answer the user's BMI question. If they're asking to calculate BMI, explain that you need their height and weight, and provide the formula. If they've provided height and weight, calculate their BMI value and explain what the value means for health.");
+        } 
+        else if (lowerCaseMessage.contains("chest") || lowerCaseMessage.contains("back") || 
+                 lowerCaseMessage.contains("leg") || lowerCaseMessage.contains("abs") || 
+                 lowerCaseMessage.contains("core") || lowerCaseMessage.contains("shoulder")) {
+            
+            prompt.append("Provide a focused workout routine for the specific body part mentioned (");
+            
+            if (lowerCaseMessage.contains("chest")) prompt.append("chest");
+            else if (lowerCaseMessage.contains("back")) prompt.append("back");
+            else if (lowerCaseMessage.contains("leg")) prompt.append("legs");
+            else if (lowerCaseMessage.contains("abs")) prompt.append("abs");
+            else if (lowerCaseMessage.contains("core")) prompt.append("core");
+            else if (lowerCaseMessage.contains("shoulder")) prompt.append("shoulders");
+            
+            prompt.append("). ");
+            
+            if (lowerCaseMessage.contains("home")) {
+                prompt.append("Focus on bodyweight or minimal equipment exercises that can be done at home. ");
+            } else if (lowerCaseMessage.contains("gym")) {
+                prompt.append("Include gym equipment-based exercises. ");
+            }
+            
+            prompt.append("Include 4-6 exercises with sets and reps, proper form cues, and progression tips. Keep it concise.");
+        }
+        else if (lowerCaseMessage.contains("protein") || lowerCaseMessage.contains("calorie") || 
+                 lowerCaseMessage.contains("diet") || lowerCaseMessage.contains("nutrition")) {
+            prompt.append("Provide nutritional guidance related to fitness. Include scientific rationale but keep it practical and actionable.");
+        }
+        else {
+            // General fitness query
+            prompt.append("Answer the user's fitness question with accurate, practical advice. Be concise but thorough.");
+        }
+        
+        prompt.append("\n\nUSER QUESTION: ").append(userMessage);
+        
+        return prompt.toString();
     }
     
     private void sendPromptToGemini(String prompt, String originalMessage) {
-        geminiService.generateContent(prompt, new GeminiService.GeminiResponseCallback() {
+        fitnessAssistant.generateContent(prompt, new GeminiService.GeminiResponseCallback() {
             @Override
             public void onResponse(String response) {
-                runOnUiThread(() -> {
-                    addBotMessage(response);
-                    
-                    // Save chat history if Firebase is available
-                    saveChatHistory(originalMessage, response);
-                });
+                addBotMessage(response);
+                
+                // Save to chat history
+                saveChatHistory(originalMessage, response);
+                
+                Log.d(TAG, "Received response from AI: Length=" + response.length());
             }
             
             @Override
             public void onError(String errorMessage) {
-                runOnUiThread(() -> {
-                    Log.e(TAG, "Gemini API error: " + errorMessage);
-                    
-                    // Retry with simpler prompt if this was a complex one
-                    if (retryCount < MAX_RETRIES) {
-                        retryCount++;
-                        Log.d(TAG, "Retry attempt " + retryCount);
-                        
-                        // Just use progressively shorter versions of the original message
-                        String retryPrompt = originalMessage;
-                        if (retryPrompt.length() > 20 * retryCount) {
-                            retryPrompt = retryPrompt.substring(0, Math.min(retryPrompt.length(), 20 * (MAX_RETRIES - retryCount + 1)));
-                        }
-                        
-                        // Try again with simpler prompt
-                        sendPromptToGemini(retryPrompt, originalMessage);
-                    } else {
-                        // If all retries failed, use fallback response
-                        addBotMessage("I'm having trouble connecting to my knowledge base right now. Here's a basic response:");
-                        fallbackResponse(originalMessage);
-                    }
-                });
+                Log.e(TAG, "Error generating response: " + errorMessage);
+                
+                if (retryCount < MAX_RETRIES) {
+                    // Retry with a simpler prompt
+                    retryCount++;
+                    String retryPrompt = originalMessage + " (please keep it brief)";
+                    Log.d(TAG, "Retrying with simplified prompt. Attempt " + retryCount);
+                    sendPromptToGemini(retryPrompt, originalMessage);
+                } else {
+                    // Fall back to basic responses after retries
+                    fallbackResponse(originalMessage);
+                }
             }
         });
     }
 
     private void fallbackResponse(String userMessage) {
-        // This is a fallback if Gemini API fails
+        // This is a fallback if Enhanced Fitness Assistant fails
         String response;
         userMessage = userMessage.toLowerCase();
         
-        if (userMessage.contains("workout") || userMessage.contains("exercise") || userMessage.contains("training")) {
-            response = "For a balanced workout routine, aim for 3-5 sessions per week including cardio, strength training, and flexibility exercises. Start with 30-minute sessions and gradually increase as your fitness improves.";
-        } else if (userMessage.contains("diet") || userMessage.contains("nutrition") || userMessage.contains("food") || userMessage.contains("eat")) {
-            response = "A balanced diet should include proteins (lean meats, fish, beans), complex carbs (whole grains, vegetables), and healthy fats (avocados, nuts, olive oil). Try to eat 3-5 servings of vegetables and 2-3 servings of fruit daily.";
-        } else if (userMessage.contains("hello") || userMessage.contains("hi") || userMessage.contains("hey")) {
-            response = "Hello! How can I assist you with your fitness journey today? Feel free to ask about workouts, nutrition plans, or general fitness advice.";
-        } else if (userMessage.contains("weight") || userMessage.contains("lose") || userMessage.contains("gain") || userMessage.contains("fat")) {
-            response = "Healthy weight management combines regular exercise with proper nutrition. For weight loss, aim for a calorie deficit through both diet and exercise. For muscle gain, incorporate strength training and ensure adequate protein intake.";
-        } else if (userMessage.contains("muscle") || userMessage.contains("strength") || userMessage.contains("lifting")) {
-            response = "To build muscle, focus on progressive overload in your strength training, adequate protein intake (1.6-2.2g per kg of bodyweight), and proper recovery. Include compound exercises like squats, deadlifts, and bench press in your routine.";
-        } else if (userMessage.contains("cardio") || userMessage.contains("running") || userMessage.contains("jogging")) {
-            response = "Cardiovascular exercise improves heart health, endurance, and can help with weight management. Aim for 150 minutes of moderate-intensity or 75 minutes of high-intensity cardio per week. Mix in interval training for maximum benefits.";
-        } else {
-            response = "As your fitness assistant, I can help with workout plans, nutrition advice, and healthy lifestyle tips. What specific fitness goal are you working toward right now?";
+        if (userMessage.contains("bmi")) {
+            response = "BMI (Body Mass Index) is calculated as weight(kg) / height²(m). A healthy BMI range is typically between 18.5-24.9. For personalized advice, please consult a healthcare professional.";
+        }
+        else if (userMessage.contains("chest") && userMessage.contains("workout")) {
+            if (userMessage.contains("home")) {
+                response = "Home chest workout: 1) Push-ups (3x10-15) 2) Decline push-ups (3x10) 3) Diamond push-ups (3x8-12) 4) Chest dips using chairs (3x8-10). Rest 60-90 seconds between sets.";
+            } else {
+                response = "Gym chest workout: 1) Bench press (4x8-12) 2) Incline dumbbell press (3x10-12) 3) Chest flys (3x12-15) 4) Cable crossovers (3x12-15). Focus on proper form and full range of motion.";
+            }
+        }
+        else if (userMessage.contains("back") && userMessage.contains("workout")) {
+            if (userMessage.contains("home")) {
+                response = "Home back workout: 1) Superman holds (3x30s) 2) Doorway rows (3x10-15) 3) Reverse snow angels (3x12) 4) Dolphin kicks (3x15). Focus on squeezing your shoulder blades together.";
+            } else {
+                response = "Gym back workout: 1) Lat pulldowns (4x10-12) 2) Seated rows (3x10-12) 3) Dumbbell rows (3x10-12 each side) 4) Face pulls (3x15). Focus on pulling with your back, not arms.";
+            }
+        }
+        else if (userMessage.contains("leg") && userMessage.contains("workout")) {
+            response = "Leg workout: 1) Squats or goblet squats (4x10-15) 2) Lunges (3x10-12 each leg) 3) Romanian deadlifts (3x10-12) 4) Calf raises (3x15-20). Ensure proper form to prevent knee injuries.";
+        }
+        else if (userMessage.contains("core") || userMessage.contains("abs")) {
+            response = "Core/Abs workout: 1) Plank (3x30-60s) 2) Bicycle crunches (3x15-20 each side) 3) Russian twists (3x20) 4) Leg raises (3x12-15). Train abs 2-3 times per week for best results.";
+        }
+        else if (userMessage.contains("shoulder")) {
+            response = "Shoulder workout: 1) Overhead press or pike push-ups (3x10-12) 2) Lateral raises (3x12-15) 3) Front raises (3x12) 4) Reverse flys (3x15). Maintain a neutral spine and avoid shrugging.";
+        }
+        else if (userMessage.contains("protein") || userMessage.contains("diet")) {
+            response = "For muscle building, aim for 1.6-2.2g of protein per kg of bodyweight daily. Good sources include lean meats, eggs, dairy, legumes, and plant-based options like tofu and tempeh. Spread intake throughout the day for optimal muscle protein synthesis.";
+        }
+        else if (userMessage.contains("calorie")) {
+            response = "Basic calorie calculation: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age + 5 (men) or -161 (women). Multiply by activity factor: 1.2 (sedentary), 1.375 (light active), 1.55 (moderate), 1.725 (very active).";
+        }
+        else {
+            response = "As your fitness assistant, I can help with workout plans, nutrition advice, and healthy lifestyle tips. Please ask specific questions about body parts, workout types, or nutrition goals.";
         }
         
         addBotMessage(response);

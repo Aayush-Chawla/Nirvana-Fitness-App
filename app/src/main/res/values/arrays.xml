@@ -1,4 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="fitness_levels">
+        <item>Beginner</item>
+        <item>Intermediate</item>
+        <item>Advanced</item>
+    </string-array>
+    
+    <string-array name="workout_goals">
+        <item>Build Muscle</item>
+        <item>Lose Weight</item>
+        <item>Improve Fitness</item>
+        <item>Increase Strength</item>
+        <item>Improve Flexibility</item>
+    </string-array>
+    
     <string-array name="fitness_goals">
         <item>Lose Weight</item>
         <item>Build Muscle</item>

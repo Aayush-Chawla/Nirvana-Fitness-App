@@ -181,7 +181,7 @@ public class WorkoutListFragment extends Fragment {
                     }
                     
                     if (!exercises.isEmpty()) {
-                        exerciseAdapter.submitList(exercises);
+                        exerciseAdapter.setExercises(exercises);
                         verifyRecyclerViewSetup();
                     } else {
                         Log.w(TAG, "API returned empty exercises list, falling back to hardcoded data");
@@ -208,12 +208,12 @@ public class WorkoutListFragment extends Fragment {
         // Update adapter with exercises
         if (!exercises.isEmpty()) {
             Log.d(TAG, "Submitting " + exercises.size() + " hardcoded exercises to adapter");
-            exerciseAdapter.submitList(exercises);
+            exerciseAdapter.setExercises(exercises);
             verifyRecyclerViewSetup();
         } else {
             Log.e(TAG, "No hardcoded exercises loaded for category: " + category);
             // Submit an empty list to avoid null pointer exceptions
-            exerciseAdapter.submitList(new ArrayList<>());
+            exerciseAdapter.setExercises(new ArrayList<>());
         }
     }
 
