@@ -154,7 +154,8 @@ public class WorkoutFragment extends Fragment {
         });
 
         cardCustomWorkout.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Custom Workout Coming Soon", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(requireView())
+                    .navigate(R.id.action_workoutFragment_to_customWorkoutFragment);
         });
 
         cardQuickWorkout.setOnClickListener(v -> {

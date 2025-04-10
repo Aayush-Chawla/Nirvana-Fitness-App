@@ -12,6 +12,9 @@ public class Exercise implements Serializable {
     private String imageUrl;
     private String videoUrl;
     private String historyId;
+    private int sets;
+    private int reps;
+    private int restInSeconds;
 
     public Exercise() {
         // Required empty constructor for Firebase
@@ -27,6 +30,9 @@ public class Exercise implements Serializable {
         this.duration = duration;
         this.imageUrl = imageUrl;
         this.videoUrl = videoUrl;
+        this.sets = 3;
+        this.reps = 10;
+        this.restInSeconds = 60;
     }
 
     // Getters and Setters
@@ -56,4 +62,13 @@ public class Exercise implements Serializable {
 
     public String getHistoryId() { return historyId; }
     public void setHistoryId(String historyId) { this.historyId = historyId; }
+    
+    public int getSets() { return sets; }
+    public void setSets(int sets) { this.sets = sets; }
+    
+    public int getReps() { return reps; }
+    public void setReps(int reps) { this.reps = reps; }
+    
+    public int getRestInSeconds() { return restInSeconds; }
+    public void setRestInSeconds(int restInSeconds) { this.restInSeconds = restInSeconds; }
 } 

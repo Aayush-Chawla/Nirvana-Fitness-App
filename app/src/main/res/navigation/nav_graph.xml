@@ -117,6 +117,9 @@
         <action
             android:id="@+id/action_workoutFragment_to_gymWorkoutFragment"
             app:destination="@id/gymWorkoutFragment" />
+        <action
+            android:id="@+id/action_workoutFragment_to_customWorkoutFragment"
+            app:destination="@id/customWorkoutFragment" />
     </fragment>
 
     <fragment
@@ -230,6 +233,23 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_customWorkoutFragment_to_customWorkoutDetailFragment"
+            app:destination="@id/customWorkoutDetailFragment" />
+        <action
+            android:id="@+id/action_customWorkoutFragment_to_activeWorkoutFragment"
+            app:destination="@id/activeWorkoutFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/customWorkoutDetailFragment"
+        android:name="com.example.nirvana.fragments.workout.CustomWorkoutDetailFragment"
+        android:label="Custom Workout Detail"
+        tools:layout="@layout/fragment_custom_workout_detail">
+        <argument
+            android:name="workoutId"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 
     <fragment

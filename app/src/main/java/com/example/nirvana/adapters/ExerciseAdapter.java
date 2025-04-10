@@ -13,11 +13,21 @@ import com.bumptech.glide.Glide;
 import com.example.nirvana.R;
 import com.example.nirvana.models.Exercise;
 import android.util.Log;
+import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.ExerciseViewHolder> {
     private final OnExerciseClickListener listener;
+    private final boolean isEditable;
+    private final Context context;
+    private ExerciseListener exerciseListener;
+    
+    // Listener interface for edit and delete operations
+    public interface ExerciseListener {
+        void onExerciseEdit(int position, Exercise exercise);
+        void onExerciseDelete(int position, Exercise exercise);
+    }
 
     public interface OnExerciseClickListener {
         void onExerciseClick(Exercise exercise);
@@ -39,9 +49,23 @@ public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.Exerc
         }
     };
 
+    // Constructor with additional parameter for edit mode
+    public ExerciseAdapter(Context context, List<Exercise> exercises, ExerciseListener exerciseListener, boolean isEditable) {
+        super(DIFF_CALLBACK);
+        this.context = context;
+        this.listener = null;
+        this.exerciseListener = exerciseListener;
+        this.isEditable = isEditable;
+        submitList(exercises);
+        Log.d("ExerciseAdapter", "Adapter created with editable mode: " + isEditable);
+    }
+    
+    // Original constructor
     public ExerciseAdapter(OnExerciseClickListener listener) {
         super(DIFF_CALLBACK);
         this.listener = listener;
+        this.context = null;
+        this.isEditable = false;
         Log.d("ExerciseAdapter", "Adapter created with DiffUtil");
     }
 
@@ -58,7 +82,52 @@ public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.Exerc
     public void onBindViewHolder(@NonNull ExerciseViewHolder holder, int position) {
         Exercise exercise = getItem(position);
         Log.d("ExerciseAdapter", "Binding exercise at position " + position + ": " + exercise.getName());
-        holder.bind(exercise, listener);
+        
+        // Set basic exercise details
+        holder.tvExerciseName.setText(exercise.getName());
+        
+        // For editable mode (custom workout)
+        if (isEditable) {
+            String details = String.format("%d sets x %d reps | %d second rest", 
+                exercise.getSets(), exercise.getReps(), exercise.getRestInSeconds());
+            holder.tvExerciseDetails.setText(details);
+            
+            // Show edit and delete buttons in editable mode
+            holder.ivEdit.setVisibility(View.VISIBLE);
+            holder.ivDelete.setVisibility(View.VISIBLE);
+            
+            // Set edit click listener
+            holder.ivEdit.setOnClickListener(v -> {
+                if (exerciseListener != null) {
+                    exerciseListener.onExerciseEdit(holder.getAdapterPosition(), exercise);
+                }
+            });
+            
+            // Set delete click listener
+            holder.ivDelete.setOnClickListener(v -> {
+                if (exerciseListener != null) {
+                    exerciseListener.onExerciseDelete(holder.getAdapterPosition(), exercise);
+                }
+            });
+        } else {
+            // Non-editable mode (regular exercise list)
+            String details = String.format("%s • %d min • %s", 
+                exercise.getCategory() != null ? exercise.getCategory() : "",
+                exercise.getDuration(),
+                exercise.getDifficulty() != null ? exercise.getDifficulty() : "");
+            holder.tvExerciseDetails.setText(details);
+            
+            // Hide edit and delete buttons in non-editable mode
+            holder.ivEdit.setVisibility(View.GONE);
+            holder.ivDelete.setVisibility(View.GONE);
+            
+            // Set click listener for the whole item
+            holder.itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onExerciseClick(exercise);
+                }
+            });
+        }
     }
 
     /**
@@ -71,93 +140,19 @@ public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.Exerc
     }
 
     static class ExerciseViewHolder extends RecyclerView.ViewHolder {
-        private final ImageView imgExercise;
-        private final TextView txtName;
-        private final TextView txtDescription;
-        private final TextView txtDetails;
+        private final ImageView ivExerciseIcon;
+        private final TextView tvExerciseName;
+        private final TextView tvExerciseDetails;
+        private final ImageView ivEdit;
+        private final ImageView ivDelete;
 
         public ExerciseViewHolder(@NonNull View itemView) {
             super(itemView);
-            imgExercise = itemView.findViewById(R.id.imgExercise);
-            txtName = itemView.findViewById(R.id.txtName);
-            txtDescription = itemView.findViewById(R.id.txtDescription);
-            txtDetails = itemView.findViewById(R.id.txtDetails);
-        }
-
-        public void bind(Exercise exercise, OnExerciseClickListener listener) {
-            Log.d("ExerciseAdapter", "Binding exercise: " + exercise.getName());
-            
-            // Set text fields
-            txtName.setText(exercise.getName());
-            txtDescription.setText(exercise.getDescription());
-            
-            // Format details string
-            String details = String.format("%s • %d min • %s", 
-                exercise.getCategory(),
-                exercise.getDuration(),
-                exercise.getDifficulty());
-            txtDetails.setText(details);
-
-            // Load image using Glide with improved error handling
-            String imageUrl = exercise.getImageUrl();
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                Log.d("ExerciseAdapter", "Loading image from URL: " + imageUrl);
-                
-                // Add request options to prevent 403 errors
-                com.bumptech.glide.request.RequestOptions requestOptions = new com.bumptech.glide.request.RequestOptions()
-                    .timeout(10000) // 10s timeout
-                    .placeholder(R.drawable.ic_exercise_default)
-                    .error(getDefaultDrawableForCategory(exercise.getCategory()));
-                
-                // Add headers to request to help with some hosting services
-                com.bumptech.glide.load.model.GlideUrl glideUrl = new com.bumptech.glide.load.model.GlideUrl(imageUrl, 
-                    new com.bumptech.glide.load.model.LazyHeaders.Builder()
-                        .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-                        .addHeader("Referer", "https://www.example.com/")
-                        .build());
-                
-                Glide.with(itemView.getContext())
-                    .load(glideUrl)
-                    .apply(requestOptions)
-                    .into(imgExercise);
-            } else {
-                // Set default image based on category
-                Log.d("ExerciseAdapter", "Using default image for category: " + exercise.getCategory());
-                imgExercise.setImageResource(getDefaultDrawableForCategory(exercise.getCategory()));
-            }
-
-            // Set click listener
-            itemView.setOnClickListener(v -> {
-                Log.d("ExerciseAdapter", "Exercise clicked: " + exercise.getName());
-                if (listener != null) {
-                    listener.onExerciseClick(exercise);
-                }
-            });
-        }
-        
-        private int getDefaultDrawableForCategory(String category) {
-            if (category == null) {
-                return R.drawable.ic_exercise_default;
-            }
-            
-            String lowerCategory = category.toLowerCase();
-            if (lowerCategory.contains("chest")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("back")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("leg")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("arm")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("shoulder")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("core") || lowerCategory.contains("abs")) {
-                return R.drawable.ic_exercise_default;
-            } else if (lowerCategory.contains("cardio")) {
-                return R.drawable.ic_exercise_default;
-            } else {
-                return R.drawable.ic_exercise_default;
-            }
+            ivExerciseIcon = itemView.findViewById(R.id.ivExerciseIcon);
+            tvExerciseName = itemView.findViewById(R.id.tvExerciseName);
+            tvExerciseDetails = itemView.findViewById(R.id.tvExerciseDetails);
+            ivEdit = itemView.findViewById(R.id.ivEdit);
+            ivDelete = itemView.findViewById(R.id.ivDelete);
         }
     }
 } 
