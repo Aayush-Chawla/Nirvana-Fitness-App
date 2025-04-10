@@ -139,6 +139,846 @@
       "serving_size": 50,
       "serving_unit": "g",
       "max_quantity": 200
+    },
+    {
+      "id": "11",
+      "name": "Turkey Breast",
+      "category": "Protein",
+      "per_100g": {
+        "calories": 104,
+        "protein": 24,
+        "carbs": 0,
+        "fat": 0.7
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 500
+    },
+    {
+      "id": "12",
+      "name": "Quinoa",
+      "category": "Grains",
+      "per_100g": {
+        "calories": 120,
+        "protein": 4.4,
+        "carbs": 21.3,
+        "fat": 1.9
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 350
+    },
+    {
+      "id": "13",
+      "name": "Tofu",
+      "category": "Protein",
+      "per_100g": {
+        "calories": 76,
+        "protein": 8,
+        "carbs": 1.9,
+        "fat": 4.8
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "14",
+      "name": "Lentils",
+      "category": "Protein",
+      "per_100g": {
+        "calories": 116,
+        "protein": 9,
+        "carbs": 20,
+        "fat": 0.4
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "15",
+      "name": "Shrimp",
+      "category": "Protein",
+      "per_100g": {
+        "calories": 99,
+        "protein": 24,
+        "carbs": 0.2,
+        "fat": 0.3
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "16",
+      "name": "White Rice",
+      "category": "Grains",
+      "per_100g": {
+        "calories": 130,
+        "protein": 2.7,
+        "carbs": 28.2,
+        "fat": 0.3
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "17",
+      "name": "Whole Wheat Bread",
+      "category": "Grains",
+      "per_100g": {
+        "calories": 247,
+        "protein": 13,
+        "carbs": 41,
+        "fat": 3.4
+      },
+      "serving_size": 30,
+      "serving_unit": "g",
+      "max_quantity": 150
+    },
+    {
+      "id": "18",
+      "name": "Tuna",
+      "category": "Protein",
+      "per_100g": {
+        "calories": 184,
+        "protein": 30,
+        "carbs": 0,
+        "fat": 6
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "19",
+      "name": "Beef (Ground, Lean)",
+      "category": "Protein",
+      "per_100g": {
+        "calories": 250,
+        "protein": 26,
+        "carbs": 0,
+        "fat": 15
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "20",
+      "name": "Barley",
+      "category": "Grains",
+      "per_100g": {
+        "calories": 123,
+        "protein": 2.3,
+        "carbs": 28.2,
+        "fat": 0.8
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "21",
+      "name": "Apple",
+      "category": "Fruits",
+      "per_100g": {
+        "calories": 52,
+        "protein": 0.3,
+        "carbs": 13.8,
+        "fat": 0.2
+      },
+      "serving_size": 150,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "22",
+      "name": "Orange",
+      "category": "Fruits",
+      "per_100g": {
+        "calories": 47,
+        "protein": 0.9,
+        "carbs": 11.8,
+        "fat": 0.1
+      },
+      "serving_size": 150,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "23",
+      "name": "Spinach",
+      "category": "Vegetables",
+      "per_100g": {
+        "calories": 23,
+        "protein": 2.9,
+        "carbs": 3.6,
+        "fat": 0.4
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "24",
+      "name": "Avocado",
+      "category": "Fruits",
+      "per_100g": {
+        "calories": 160,
+        "protein": 2,
+        "carbs": 8.5,
+        "fat": 14.7
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 200
+    },
+    {
+      "id": "25",
+      "name": "Carrots",
+      "category": "Vegetables",
+      "per_100g": {
+        "calories": 41,
+        "protein": 0.9,
+        "carbs": 9.6,
+        "fat": 0.2
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "26",
+      "name": "Strawberries",
+      "category": "Fruits",
+      "per_100g": {
+        "calories": 32,
+        "protein": 0.7,
+        "carbs": 7.7,
+        "fat": 0.3
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "27",
+      "name": "Blueberries",
+      "category": "Fruits",
+      "per_100g": {
+        "calories": 57,
+        "protein": 0.7,
+        "carbs": 14.5,
+        "fat": 0.3
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "28",
+      "name": "Kale",
+      "category": "Vegetables",
+      "per_100g": {
+        "calories": 49,
+        "protein": 4.3,
+        "carbs": 8.8,
+        "fat": 0.9
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "29",
+      "name": "Bell Pepper",
+      "category": "Vegetables",
+      "per_100g": {
+        "calories": 31,
+        "protein": 1,
+        "carbs": 6,
+        "fat": 0.3
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "30",
+      "name": "Mango",
+      "category": "Fruits",
+      "per_100g": {
+        "calories": 60,
+        "protein": 0.8,
+        "carbs": 15,
+        "fat": 0.4
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "31",
+      "name": "Cauliflower",
+      "category": "Vegetables",
+      "per_100g": {
+        "calories": 25,
+        "protein": 1.9,
+        "carbs": 5,
+        "fat": 0.3
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "32",
+      "name": "Tomato",
+      "category": "Vegetables",
+      "per_100g": {
+        "calories": 18,
+        "protein": 0.9,
+        "carbs": 3.9,
+        "fat": 0.2
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "33",
+      "name": "Pineapple",
+      "category": "Fruits",
+      "per_100g": {
+        "calories": 50,
+        "protein": 0.5,
+        "carbs": 13.1,
+        "fat": 0.1
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "34",
+      "name": "Cucumber",
+      "category": "Vegetables",
+      "per_100g": {
+        "calories": 15,
+        "protein": 0.7,
+        "carbs": 3.6,
+        "fat": 0.1
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "35",
+      "name": "Grapes",
+      "category": "Fruits",
+      "per_100g": {
+        "calories": 69,
+        "protein": 0.7,
+        "carbs": 18,
+        "fat": 0.2
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "36",
+      "name": "Milk (Whole)",
+      "category": "Dairy",
+      "per_100g": {
+        "calories": 61,
+        "protein": 3.2,
+        "carbs": 4.8,
+        "fat": 3.3
+      },
+      "serving_size": 250,
+      "serving_unit": "ml",
+      "max_quantity": 500
+    },
+    {
+      "id": "37",
+      "name": "Milk (Low-Fat)",
+      "category": "Dairy",
+      "per_100g": {
+        "calories": 42,
+        "protein": 3.4,
+        "carbs": 5,
+        "fat": 1
+      },
+      "serving_size": 250,
+      "serving_unit": "ml",
+      "max_quantity": 500
+    },
+    {
+      "id": "38",
+      "name": "Cheddar Cheese",
+      "category": "Dairy",
+      "per_100g": {
+        "calories": 402,
+        "protein": 25,
+        "carbs": 1.3,
+        "fat": 33.1
+      },
+      "serving_size": 30,
+      "serving_unit": "g",
+      "max_quantity": 150
+    },
+    {
+      "id": "39",
+      "name": "Cottage Cheese",
+      "category": "Dairy",
+      "per_100g": {
+        "calories": 98,
+        "protein": 11.1,
+        "carbs": 3.4,
+        "fat": 4.3
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "40",
+      "name": "Walnuts",
+      "category": "Nuts",
+      "per_100g": {
+        "calories": 654,
+        "protein": 15.2,
+        "carbs": 13.7,
+        "fat": 65.2
+      },
+      "serving_size": 30,
+      "serving_unit": "g",
+      "max_quantity": 100
+    },
+    {
+      "id": "41",
+      "name": "Cashews",
+      "category": "Nuts",
+      "per_100g": {
+        "calories": 553,
+        "protein": 18,
+        "carbs": 30.2,
+        "fat": 43.8
+      },
+      "serving_size": 30,
+      "serving_unit": "g",
+      "max_quantity": 100
+    },
+    {
+      "id": "42",
+      "name": "Peanut Butter",
+      "category": "Nuts",
+      "per_100g": {
+        "calories": 588,
+        "protein": 25,
+        "carbs": 20,
+        "fat": 50
+      },
+      "serving_size": 30,
+      "serving_unit": "g",
+      "max_quantity": 100
+    },
+    {
+      "id": "43",
+      "name": "Olive Oil",
+      "category": "Oils",
+      "per_100g": {
+        "calories": 884,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 100
+      },
+      "serving_size": 15,
+      "serving_unit": "ml",
+      "max_quantity": 50
+    },
+    {
+      "id": "44",
+      "name": "Honey",
+      "category": "Sweeteners",
+      "per_100g": {
+        "calories": 304,
+        "protein": 0.3,
+        "carbs": 82.4,
+        "fat": 0
+      },
+      "serving_size": 15,
+      "serving_unit": "g",
+      "max_quantity": 50
+    },
+    {
+      "id": "45",
+      "name": "Dark Chocolate",
+      "category": "Sweets",
+      "per_100g": {
+        "calories": 598,
+        "protein": 7.8,
+        "carbs": 45.9,
+        "fat": 43
+      },
+      "serving_size": 30,
+      "serving_unit": "g",
+      "max_quantity": 100
+    },
+    {
+      "id": "46",
+      "name": "Hummus",
+      "category": "Spreads",
+      "per_100g": {
+        "calories": 166,
+        "protein": 8,
+        "carbs": 14.3,
+        "fat": 9.6
+      },
+      "serving_size": 50,
+      "serving_unit": "g",
+      "max_quantity": 200
+    },
+    {
+      "id": "47",
+      "name": "Pasta (Cooked)",
+      "category": "Grains",
+      "per_100g": {
+        "calories": 131,
+        "protein": 5.2,
+        "carbs": 25.4,
+        "fat": 1.1
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "48",
+      "name": "Black Beans",
+      "category": "Legumes",
+      "per_100g": {
+        "calories": 132,
+        "protein": 8.9,
+        "carbs": 24,
+        "fat": 0.5
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 300
+    },
+    {
+      "id": "49",
+      "name": "Potatoes",
+      "category": "Vegetables",
+      "per_100g": {
+        "calories": 77,
+        "protein": 2,
+        "carbs": 17,
+        "fat": 0.1
+      },
+      "serving_size": 150,
+      "serving_unit": "g",
+      "max_quantity": 500
+    },
+    {
+      "id": "50",
+      "name": "Watermelon",
+      "category": "Fruits",
+      "per_100g": {
+        "calories": 30,
+        "protein": 0.6,
+        "carbs": 7.6,
+        "fat": 0.2
+      },
+      "serving_size": 150,
+      "serving_unit": "g",
+      "max_quantity": 500
+    },
+    {
+      "id": "51",
+      "name": "Protein Shake",
+      "category": "Beverages",
+      "per_100g": {
+        "calories": 120,
+        "protein": 24,
+        "carbs": 3,
+        "fat": 1
+      },
+      "serving_size": 300,
+      "serving_unit": "ml",
+      "max_quantity": 600
+    },
+    {
+      "id": "52",
+      "name": "Chicken Salad",
+      "category": "Prepared Meals",
+      "per_100g": {
+        "calories": 137,
+        "protein": 17.5,
+        "carbs": 5.2,
+        "fat": 5.1
+      },
+      "serving_size": 200,
+      "serving_unit": "g",
+      "max_quantity": 600
+    },
+    {
+      "id": "53",
+      "name": "Caesar Salad",
+      "category": "Prepared Meals",
+      "per_100g": {
+        "calories": 127,
+        "protein": 6.8,
+        "carbs": 3.2,
+        "fat": 10.1
+      },
+      "serving_size": 200,
+      "serving_unit": "g",
+      "max_quantity": 600
+    },
+    {
+      "id": "54",
+      "name": "Turkey Sandwich",
+      "category": "Prepared Meals",
+      "per_100g": {
+        "calories": 210,
+        "protein": 13.2,
+        "carbs": 26.5,
+        "fat": 6.3
+      },
+      "serving_size": 170,
+      "serving_unit": "g",
+      "max_quantity": 340
+    },
+    {
+      "id": "55",
+      "name": "Green Tea",
+      "category": "Beverages",
+      "per_100g": {
+        "calories": 1,
+        "protein": 0,
+        "carbs": 0.2,
+        "fat": 0
+      },
+      "serving_size": 240,
+      "serving_unit": "ml",
+      "max_quantity": 720
+    },
+    {
+      "id": "56",
+      "name": "Coffee (Black)",
+      "category": "Beverages",
+      "per_100g": {
+        "calories": 2,
+        "protein": 0.1,
+        "carbs": 0.3,
+        "fat": 0
+      },
+      "serving_size": 240,
+      "serving_unit": "ml",
+      "max_quantity": 720
+    },
+    {
+      "id": "57",
+      "name": "Orange Juice",
+      "category": "Beverages",
+      "per_100g": {
+        "calories": 45,
+        "protein": 0.7,
+        "carbs": 10.4,
+        "fat": 0.2
+      },
+      "serving_size": 240,
+      "serving_unit": "ml",
+      "max_quantity": 500
+    },
+    {
+      "id": "58",
+      "name": "White Fish (Cod)",
+      "category": "Protein",
+      "per_100g": {
+        "calories": 82,
+        "protein": 18,
+        "carbs": 0,
+        "fat": 0.7
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "59",
+      "name": "Pork Chop",
+      "category": "Protein",
+      "per_100g": {
+        "calories": 204,
+        "protein": 26,
+        "carbs": 0,
+        "fat": 11
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "60",
+      "name": "Lamb",
+      "category": "Protein",
+      "per_100g": {
+        "calories": 258,
+        "protein": 25.6,
+        "carbs": 0,
+        "fat": 17.1
+      },
+      "serving_size": 100,
+      "serving_unit": "g",
+      "max_quantity": 400
+    },
+    {
+      "id": "61",
+      "name": "Smoothie (Fruit)",
+      "category": "Beverages",
+      "per_100g": {
+        "calories": 74,
+        "protein": 1.2,
+        "carbs": 16.4,
+        "fat": 0.6
+      },
+      "serving_size": 300,
+      "serving_unit": "ml",
+      "max_quantity": 500
+    },
+    {
+      "id": "62",
+      "name": "Smoothie (Green)",
+      "category": "Beverages",
+      "per_100g": {
+        "calories": 57,
+        "protein": 1.8,
+        "carbs": 11.7,
+        "fat": 0.5
+      },
+      "serving_size": 300,
+      "serving_unit": "ml",
+      "max_quantity": 500
+    },
+    {
+      "id": "63",
+      "name": "Chia Seeds",
+      "category": "Seeds",
+      "per_100g": {
+        "calories": 486,
+        "protein": 16.5,
+        "carbs": 42.1,
+        "fat": 30.7
+      },
+      "serving_size": 15,
+      "serving_unit": "g",
+      "max_quantity": 50
+    },
+    {
+      "id": "64",
+      "name": "Flax Seeds",
+      "category": "Seeds",
+      "per_100g": {
+        "calories": 534,
+        "protein": 18.3,
+        "carbs": 28.9,
+        "fat": 42.2
+      },
+      "serving_size": 15,
+      "serving_unit": "g",
+      "max_quantity": 50
+    },
+    {
+      "id": "65",
+      "name": "Coconut Water",
+      "category": "Beverages",
+      "per_100g": {
+        "calories": 19,
+        "protein": 0.7,
+        "carbs": 3.7,
+        "fat": 0.2
+      },
+      "serving_size": 240,
+      "serving_unit": "ml",
+      "max_quantity": 500
+    },
+    {
+      "id": "66",
+      "name": "Beef Stir-Fry",
+      "category": "Prepared Meals",
+      "per_100g": {
+        "calories": 186,
+        "protein": 16.2,
+        "carbs": 10.3,
+        "fat": 9.8
+      },
+      "serving_size": 250,
+      "serving_unit": "g",
+      "max_quantity": 500
+    },
+    {
+      "id": "67",
+      "name": "Vegetable Soup",
+      "category": "Prepared Meals",
+      "per_100g": {
+        "calories": 72,
+        "protein": 2.4,
+        "carbs": 12.9,
+        "fat": 1.5
+      },
+      "serving_size": 240,
+      "serving_unit": "g",
+      "max_quantity": 500
+    },
+    {
+      "id": "68",
+      "name": "Chicken Curry",
+      "category": "Prepared Meals",
+      "per_100g": {
+        "calories": 147,
+        "protein": 14.3,
+        "carbs": 6.2,
+        "fat": 7.9
+      },
+      "serving_size": 250,
+      "serving_unit": "g",
+      "max_quantity": 500
+    },
+    {
+      "id": "69",
+      "name": "Whey Protein Powder",
+      "category": "Supplements",
+      "per_100g": {
+        "calories": 370,
+        "protein": 80,
+        "carbs": 7.8,
+        "fat": 3.5
+      },
+      "serving_size": 30,
+      "serving_unit": "g",
+      "max_quantity": 60
+    },
+    {
+      "id": "70",
+      "name": "Vegetable Protein Powder",
+      "category": "Supplements",
+      "per_100g": {
+        "calories": 400,
+        "protein": 75,
+        "carbs": 10.5,
+        "fat": 6.2
+      },
+      "serving_size": 30,
+      "serving_unit": "g",
+      "max_quantity": 60
     }
   ]
 } 
