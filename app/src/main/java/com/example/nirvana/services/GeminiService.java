@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.nirvana.utils.FirestoreHelper;
 import com.google.ai.client.generativeai.GenerativeModel;
 import com.google.ai.client.generativeai.type.GenerateContentResponse;
 import com.google.ai.client.generativeai.type.GenerationConfig;
@@ -384,7 +385,7 @@ public class GeminiService {
             }
             
             // Use FirestoreHelper to get user profile from Firestore
-            com.example.nirvana.utils.FirestoreHelper.getUserProfile(new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<Map<String, Object>>() {
+            FirestoreHelper.getUserProfile(new FirestoreHelper.OnDataFetchedListener<Map<String, Object>>() {
                 @Override
                 public void onDataFetched(Map<String, Object> userProfile) {
                     // Generate appropriate response based on the query
@@ -489,7 +490,7 @@ public class GeminiService {
             }
             
             // Use FirestoreHelper to get meals from Firestore
-            com.example.nirvana.utils.FirestoreHelper.getMeals(new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<Map<String, List<Map<String, Object>>>>() {
+            FirestoreHelper.getMeals(new FirestoreHelper.OnDataFetchedListener<Map<String, List<Map<String, Object>>>>() {
                 @Override
                 public void onDataFetched(Map<String, List<Map<String, Object>>> meals) {
                     String response = generateMealResponseFromFirestore(userMessage, meals);
@@ -606,7 +607,7 @@ public class GeminiService {
             }
             
             // Use FirestoreHelper to get recent workouts from Firestore
-            com.example.nirvana.utils.FirestoreHelper.getRecentWorkouts(5, new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<List<Map<String, Object>>>() {
+            FirestoreHelper.getRecentWorkouts(5, new FirestoreHelper.OnDataFetchedListener<List<Map<String, Object>>>() {
                 @Override
                 public void onDataFetched(List<Map<String, Object>> workouts) {
                     String response = generateWorkoutResponseFromFirestore(userMessage, workouts);

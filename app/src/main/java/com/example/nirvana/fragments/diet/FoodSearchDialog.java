@@ -42,7 +42,7 @@ public class FoodSearchDialog extends DialogFragment {
     }
 
     public interface OnFoodSelectedListener {
-        void onFoodSelected(FoodItem foodItem, String servingSize);
+        void onFoodSelected(com.example.nirvana.data.models.FoodItem foodItem, String servingSize);
     }
 
     public void setOnFoodSelectedListener(OnFoodSelectedListener listener) {
@@ -161,11 +161,32 @@ public class FoodSearchDialog extends DialogFragment {
                    }
                    String servingSize = servingSizeText + "g";
                    if (listener != null) {
-                       listener.onFoodSelected(foodItem, servingSize);
+                       com.example.nirvana.data.models.FoodItem dataFoodItem = convertToDataFoodItem(foodItem, servingSize);
+                       listener.onFoodSelected(dataFoodItem, servingSize);
                    }
                })
                .setNegativeButton("Cancel", null)
                .show();
+    }
+    
+    /**
+     * Converts a FoodItem from models package to a FoodItem from data.models package
+     */
+    private com.example.nirvana.data.models.FoodItem convertToDataFoodItem(FoodItem foodItem, String servingSize) {
+        com.example.nirvana.data.models.FoodItem dataFoodItem = new com.example.nirvana.data.models.FoodItem();
+        dataFoodItem.setFoodId(foodItem.getId());
+        dataFoodItem.setName(foodItem.getName());
+        dataFoodItem.setFoodName(foodItem.getName());
+        dataFoodItem.setCaloriesInt(foodItem.getCalories());
+        dataFoodItem.setCalories(foodItem.getCalories());
+        dataFoodItem.setProtein(foodItem.getProtein());
+        dataFoodItem.setCarbs(foodItem.getCarbs());
+        dataFoodItem.setFat(foodItem.getFat());
+        dataFoodItem.setServingDescription(servingSize);
+        dataFoodItem.setServingId("custom");
+        dataFoodItem.setMealType("snack"); // Default value, can be changed by caller
+        
+        return dataFoodItem;
     }
     
     private void updateNutritionInfo(TextView tvNutritionInfo, FoodItem foodItem, int servingSize) {

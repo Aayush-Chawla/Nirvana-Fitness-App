@@ -33,6 +33,8 @@ import com.example.nirvana.models.BlogPost;
 import com.example.nirvana.models.ChatMessage;
 import com.example.nirvana.models.GymMembership;
 import com.example.nirvana.services.GeminiService;
+import com.example.nirvana.utils.FirebaseHelper;
+import com.example.nirvana.utils.FirestoreHelper;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -511,7 +513,7 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     private void loadChatHistory() {
         if (currentUserId == null) return;
         
-        com.example.nirvana.utils.FirestoreHelper.getChatHistory(10, new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<List<Map<String, Object>>>() {
+        FirebaseHelper.getChatHistory(10, new FirestoreHelper.OnDataFetchedListener<List<Map<String, Object>>>() {
             @Override
             public void onDataFetched(List<Map<String, Object>> messages) {
                 Log.d(TAG, "Loading " + messages.size() + " chat messages from history");
@@ -552,7 +554,7 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
         if (currentUserId == null) return;
         
         // Load profile data using FirestoreHelper
-        com.example.nirvana.utils.FirestoreHelper.getUserProfile(new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<Map<String, Object>>() {
+        FirestoreHelper.getUserProfile(new FirestoreHelper.OnDataFetchedListener<Map<String, Object>>() {
             @Override
             public void onDataFetched(Map<String, Object> profile) {
                 userProfile.clear();
@@ -576,7 +578,7 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     private void loadMealDataForChatbot() {
         // Use FirestoreHelper to get meals
         Log.d(TAG, "Starting to fetch meal data for chatbot context");
-        com.example.nirvana.utils.FirestoreHelper.getMeals(new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<Map<String, List<Map<String, Object>>>>() {
+        FirestoreHelper.getMeals(new FirestoreHelper.OnDataFetchedListener<Map<String, List<Map<String, Object>>>>() {
             @Override
             public void onDataFetched(Map<String, List<Map<String, Object>>> meals) {
                 // Process meals data for chatbot context
@@ -609,7 +611,7 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
         
     private void loadExerciseDataForChatbot() {
         // Use FirestoreHelper to get workouts
-        com.example.nirvana.utils.FirestoreHelper.getRecentWorkouts(10, new com.example.nirvana.utils.FirestoreHelper.OnDataFetchedListener<List<Map<String, Object>>>() {
+        FirestoreHelper.getRecentWorkouts(10, new FirestoreHelper.OnDataFetchedListener<List<Map<String, Object>>>() {
             @Override
             public void onDataFetched(List<Map<String, Object>> workouts) {
                 // Process workout data for chatbot context
@@ -723,14 +725,11 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     }
     
     private void saveChatHistory(String userMessage, String botResponse) {
-        if (currentUserId == null) return;
-        
-        Log.d(TAG, "Attempting to save chat message to Firestore for user: " + currentUserId);
         Log.d(TAG, "User message: " + (userMessage.length() > 50 ? userMessage.substring(0, 50) + "..." : userMessage));
         Log.d(TAG, "Bot response: " + (botResponse.length() > 50 ? botResponse.substring(0, 50) + "..." : botResponse));
         
         // Use FirestoreHelper to save chat history
-        com.example.nirvana.utils.FirestoreHelper.saveChatMessage(userMessage, botResponse, new com.example.nirvana.utils.FirestoreHelper.OnCompleteListener() {
+        FirestoreHelper.saveChatMessage(userMessage, botResponse, new FirestoreHelper.OnCompleteListener() {
             @Override
             public void onSuccess() {
                 Log.d(TAG, "Chat history saved successfully");

@@ -52,6 +52,18 @@ public class FirebaseHelper {
     }
 
     /**
+     * Get chat history for the current user
+     * This delegates to FirestoreHelper
+     * 
+     * @param limit The maximum number of chat messages to retrieve
+     * @param listener Callback for the retrieved chat history
+     */
+    public static void getChatHistory(int limit, FirestoreHelper.OnDataFetchedListener<List<Map<String, Object>>> listener) {
+        // Delegate to FirestoreHelper
+        FirestoreHelper.getChatHistory(limit, listener);
+    }
+
+    /**
      * Checks if the user data has been migrated to Firestore
      *
      * @param userId    The user ID to check

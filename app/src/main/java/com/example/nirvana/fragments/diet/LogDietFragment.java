@@ -92,14 +92,16 @@ public class LogDietFragment extends Fragment implements FoodSearchDialog.OnFood
     }
 
     @Override
-    public void onFoodSelected(FoodItem foodItem, String servingSize) {
+    public void onFoodSelected(com.example.nirvana.data.models.FoodItem foodItem, String servingSize) {
         String mealType = getMealType(viewPager.getCurrentItem());
         
+        // Use the overloaded method for data.models.FoodItem directly
         FirestoreHelper.logFood(mealType, foodItem, servingSize, new FirestoreHelper.OnCompleteListener() {
             @Override
             public void onSuccess() {
+                String foodName = foodItem.getName() != null ? foodItem.getName() : foodItem.getFoodName();
                 String message = String.format("%s (%s) added to %s", 
-                    foodItem.getName(), 
+                    foodName, 
                     servingSize,
                     mealType);
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
