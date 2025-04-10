@@ -24,6 +24,7 @@ import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -762,6 +763,133 @@ public class FirestoreHelper {
                           Log.e(TAG, "Error migrating " + collectionName + " item " + docId + ": " + e.getMessage()));
                 }
             }
+        }
+    }
+
+    /**
+     * Fetch today's food logs directly for nutrition tracking
+     * @param listener Callback for when data is fetched
+     */
+    public static void fetchTodayFoodLogs(OnNutritionDataFetchedListener listener) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            if (listener != null) {
+                listener.onError("No user logged in");
+            }
+            return;
+        }
+        
+        String userId = currentUser.getUid();
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        List<String> mealTypes = Arrays.asList("breakfast", "lunch", "dinner", "snacks");
+        final double[] totals = new double[4]; // calories, protein, carbs, fat
+        final int[] processedTypes = {0};
+        
+        Log.d(TAG, "Fetching today's food logs for: " + today);
+        
+        // Try direct path to meals collection first
+        db.collection("users").document(userId)
+          .collection("meals")
+          .whereEqualTo("date", today)
+          .get()
+          .addOnSuccessListener(querySnapshot -> {
+              Log.d(TAG, "Found " + querySnapshot.size() + " meals for today in meals collection");
+              
+              if (!querySnapshot.isEmpty()) {
+                  for (DocumentSnapshot doc : querySnapshot) {
+                      Map<String, Object> data = doc.getData();
+                      if (data != null) {
+                          // Extract nutrients
+                          Object cal = data.get("calories");
+                          Object protein = data.get("protein");
+                          Object carbs = data.get("carbs");
+                          Object fat = data.get("fat");
+                          
+                          // Add to totals with null check
+                          totals[0] += (cal instanceof Number) ? ((Number) cal).doubleValue() : 0;
+                          totals[1] += (protein instanceof Number) ? ((Number) protein).doubleValue() : 0;
+                          totals[2] += (carbs instanceof Number) ? ((Number) carbs).doubleValue() : 0;
+                          totals[3] += (fat instanceof Number) ? ((Number) fat).doubleValue() : 0;
+                      }
+                  }
+                  
+                  // Notify with direct results
+                  if (listener != null) {
+                      listener.onDataFetched(totals[0], totals[1], totals[2], totals[3]);
+                  }
+              } else {
+                  // Try the structured food_logs path if meals is empty
+                  checkAllMealTypes(userId, today, mealTypes, totals, processedTypes, listener);
+              }
+          })
+          .addOnFailureListener(e -> {
+              Log.e(TAG, "Error fetching meals: " + e.getMessage());
+              checkAllMealTypes(userId, today, mealTypes, totals, processedTypes, listener);
+          });
+    }
+    
+    private static void checkAllMealTypes(String userId, String date, List<String> mealTypes, 
+                                       double[] totals, int[] processedTypes, 
+                                       OnNutritionDataFetchedListener listener) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        
+        for (String mealType : mealTypes) {
+            db.collection("users").document(userId)
+              .collection("food_logs").document(date)
+              .collection(mealType)
+              .get()
+              .addOnSuccessListener(querySnapshot -> {
+                  Log.d(TAG, "Found " + querySnapshot.size() + " items in " + mealType);
+                  
+                  for (DocumentSnapshot doc : querySnapshot) {
+                      Map<String, Object> data = doc.getData();
+                      if (data != null) {
+                          // Extract nutrients
+                          Object cal = data.get("calories");
+                          Object protein = data.get("protein");
+                          Object carbs = data.get("carbs");
+                          Object fat = data.get("fat");
+                          
+                          // Add to totals with null check
+                          totals[0] += (cal instanceof Number) ? ((Number) cal).doubleValue() : 0;
+                          totals[1] += (protein instanceof Number) ? ((Number) protein).doubleValue() : 0;
+                          totals[2] += (carbs instanceof Number) ? ((Number) carbs).doubleValue() : 0;
+                          totals[3] += (fat instanceof Number) ? ((Number) fat).doubleValue() : 0;
+                      }
+                  }
+                  
+                  processedTypes[0]++;
+                  
+                  // If all meal types have been processed, return result
+                  if (processedTypes[0] >= mealTypes.size()) {
+                      if (listener != null) {
+                          listener.onDataFetched(totals[0], totals[1], totals[2], totals[3]);
+                      }
+                  }
+              })
+              .addOnFailureListener(e -> {
+                  Log.e(TAG, "Error fetching " + mealType + ": " + e.getMessage());
+                  processedTypes[0]++;
+                  
+                  // If all meal types have been processed, return result
+                  if (processedTypes[0] >= mealTypes.size()) {
+                      if (listener != null) {
+                          listener.onDataFetched(totals[0], totals[1], totals[2], totals[3]);
+                      }
+                  }
+              });
+        }
+    }
+    
+    /**
+     * Listener interface for nutrition data fetching
+     */
+    public interface OnNutritionDataFetchedListener {
+        void onDataFetched(double calories, double protein, double carbs, double fat);
+        default void onError(String errorMessage) {
+            Log.e(TAG, "Error fetching nutrition data: " + errorMessage);
         }
     }
 } 

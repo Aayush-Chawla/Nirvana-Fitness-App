@@ -107,17 +107,24 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
             // Set nutrition info
             if (tvNutritionInfo != null) {
                 try {
-                    // Calculate nutrition for one serving
-                    double calories = food.calculateCalories(food.getServingSize());
-                    double protein = food.calculateProtein(food.getServingSize());
-                    double carbs = food.calculateCarbs(food.getServingSize());
-                    double fat = food.calculateFat(food.getServingSize());
+                    // Check if this is a recommendation text or actual food item
+                    if (food.getCategory() != null && food.getCategory().equals("Recommendation")) {
+                        // For recommendation text items, hide or set empty nutrition info
+                        tvNutritionInfo.setVisibility(View.GONE);
+                    } else {
+                        tvNutritionInfo.setVisibility(View.VISIBLE);
+                        // Calculate nutrition for one serving
+                        double calories = food.calculateCalories(food.getServingSize());
+                        double protein = food.calculateProtein(food.getServingSize());
+                        double carbs = food.calculateCarbs(food.getServingSize());
+                        double fat = food.calculateFat(food.getServingSize());
 
-                    // Format nutrition info
-                    String nutritionInfo = String.format(Locale.getDefault(),
-                        "%d cal • %.1fg P • %.1fg C • %.1fg F",
-                        (int) calories, protein, carbs, fat);
-                    tvNutritionInfo.setText(nutritionInfo);
+                        // Format nutrition info
+                        String nutritionInfo = String.format(Locale.getDefault(),
+                            "%d cal • %.1fg P • %.1fg C • %.1fg F",
+                            (int) calories, protein, carbs, fat);
+                        tvNutritionInfo.setText(nutritionInfo);
+                    }
                 } catch (Exception e) {
                     Log.e(TAG, "Error calculating nutrition info", e);
                     tvNutritionInfo.setText("Nutrition info not available");
@@ -128,7 +135,11 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
             if (ivRecommendationIcon != null) {
                 String category = food.getCategory() != null ? food.getCategory().toLowerCase() : "";
                 int iconResId;
-                if (category.contains("protein") || category.contains("meat")) {
+                
+                if (category.contains("recommendation")) {
+                    // Use a specific icon for recommendation items
+                    iconResId = R.drawable.ic_food;
+                } else if (category.contains("protein") || category.contains("meat")) {
                     iconResId = R.drawable.ic_protein;
                 } else if (category.contains("fruit")) {
                     iconResId = R.drawable.ic_fruits;

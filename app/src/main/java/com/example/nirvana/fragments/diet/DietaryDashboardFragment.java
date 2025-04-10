@@ -19,6 +19,7 @@ import com.example.nirvana.models.NutritionAnalysis;
 import com.example.nirvana.models.PredefinedFoodItem;
 import com.example.nirvana.services.NutritionAnalysisService;
 import com.example.nirvana.ui.adapters.RecommendationAdapter;
+import com.example.nirvana.utils.FirestoreHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -62,6 +63,9 @@ public class DietaryDashboardFragment extends Fragment implements Recommendation
             String userId = currentUser.getUid();
             nutritionAnalysisService = new NutritionAnalysisService(userId);
             startRealtimeUpdates();
+            
+            // Also directly fetch today's food logs to ensure we have the latest data
+            fetchTodaysFoodLogs();
         } else {
             Log.e(TAG, "No user is signed in");
             Toast.makeText(getContext(), "Please sign in to view your nutrition data", Toast.LENGTH_SHORT).show();
@@ -142,7 +146,7 @@ public class DietaryDashboardFragment extends Fragment implements Recommendation
     }
 
     private void setStatusColor(TextView textView, String status) {
-        if (status.equals("Optimal")) {
+        if (status.equals("Optimal") || status.equals("Tracking")) {
             textView.setTextColor(getResources().getColor(R.color.green_500));
         } else if (status.equals("Low")) {
             textView.setTextColor(getResources().getColor(R.color.orange_500));
@@ -156,15 +160,37 @@ public class DietaryDashboardFragment extends Fragment implements Recommendation
         if (recommendations != null && recommendations.length > 0) {
             List<PredefinedFoodItem> foodItems = new ArrayList<>();
             for (String recommendation : recommendations) {
-                // Create a basic PredefinedFoodItem from the recommendation string
-                PredefinedFoodItem foodItem = new PredefinedFoodItem();
-                foodItem.setName(recommendation);
-                foodItem.setCategory("Other"); // Default category
-                foodItem.setServingSize(100); // Default serving size in grams
-                foodItems.add(foodItem);
+                try {
+                    // Create a properly initialized PredefinedFoodItem from the recommendation string
+                    PredefinedFoodItem foodItem = new PredefinedFoodItem();
+                    foodItem.setId("rec_" + foodItems.size()); // Generate a dummy ID
+                    foodItem.setName(recommendation); // Use the recommendation text as the name
+                    foodItem.setCategory("Recommendation"); // Set a category to ensure proper icon display
+                    foodItem.setServingSize(100); // Default serving size in grams
+                    foodItem.setServingUnit("g"); // Set serving unit
+                    
+                    // Set nutritional values to 0 as this is just a recommendation text
+                    PredefinedFoodItem.NutritionPer100g nutrition = new PredefinedFoodItem.NutritionPer100g();
+                    nutrition.setCalories(0);
+                    nutrition.setProtein(0);
+                    nutrition.setCarbs(0);
+                    nutrition.setFat(0);
+                    foodItem.setPer100g(nutrition);
+                    
+                    foodItems.add(foodItem);
+                    Log.d(TAG, "Added recommendation: " + recommendation);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error creating recommendation item", e);
+                }
             }
-            recommendationAdapter.updateRecommendations(foodItems);
-            Log.d(TAG, "Loaded " + foodItems.size() + " recommendations");
+            
+            if (!foodItems.isEmpty()) {
+                recommendationAdapter.updateRecommendations(foodItems);
+                Log.d(TAG, "Loaded " + foodItems.size() + " recommendations");
+            } else {
+                Log.d(TAG, "No valid recommendations to display");
+                recommendationAdapter.updateRecommendations(new ArrayList<>());
+            }
         } else {
             Log.d(TAG, "No recommendations available");
             recommendationAdapter.updateRecommendations(new ArrayList<>());
@@ -179,6 +205,66 @@ public class DietaryDashboardFragment extends Fragment implements Recommendation
                 "Selected: " + food.getName(), 
                 Toast.LENGTH_SHORT).show();
             // TODO: Implement your logic for handling the selected food item
+        }
+    }
+
+    /**
+     * Fetch today's food logs directly from Firestore
+     */
+    private void fetchTodaysFoodLogs() {
+        FirestoreHelper.fetchTodayFoodLogs(new FirestoreHelper.OnNutritionDataFetchedListener() {
+            @Override
+            public void onDataFetched(double calories, double protein, double carbs, double fat) {
+                if (getActivity() == null || !isAdded()) return;
+                
+                Log.d(TAG, "Direct fetch - Today's nutrients: calories=" + calories + 
+                      ", protein=" + protein + ", carbs=" + carbs + ", fat=" + fat);
+                
+                // If we have data, update the UI immediately
+                if (calories > 0 || protein > 0 || carbs > 0 || fat > 0) {
+                    getActivity().runOnUiThread(() -> {
+                        updateTodayNutritionUI(calories, protein, carbs, fat);
+                    });
+                }
+            }
+            
+            @Override
+            public void onError(String errorMessage) {
+                Log.e(TAG, "Error fetching today's food logs: " + errorMessage);
+            }
+        });
+    }
+    
+    /**
+     * Update UI with today's nutrition data
+     */
+    private void updateTodayNutritionUI(double calories, double protein, double carbs, double fat) {
+        // Only update if we aren't already showing non-zero values (to avoid overwriting weekly data)
+        if (tvCalories.getText().toString().equals("0") || tvCalories.getText().toString().equals("0.0")) {
+            tvCalories.setText(decimalFormat.format(calories));
+            tvProtein.setText(decimalFormat.format(protein) + "g");
+            tvCarbs.setText(decimalFormat.format(carbs) + "g");
+            tvFat.setText(decimalFormat.format(fat) + "g");
+            
+            Log.d(TAG, "Updated UI with today's nutrition data");
+            
+            // Generate status based on today's values
+            // We'll use simplified status here - just Low if zero
+            String calorieStatus = calories > 0 ? "Tracking" : "Low";
+            String proteinStatus = protein > 0 ? "Tracking" : "Low";
+            String carbsStatus = carbs > 0 ? "Tracking" : "Low";
+            String fatStatus = fat > 0 ? "Tracking" : "Low";
+            
+            tvCaloriesStatus.setText(calorieStatus);
+            tvProteinStatus.setText(proteinStatus);
+            tvCarbsStatus.setText(carbsStatus);
+            tvFatStatus.setText(fatStatus);
+            
+            // Set colors
+            setStatusColor(tvCaloriesStatus, calorieStatus);
+            setStatusColor(tvProteinStatus, proteinStatus);
+            setStatusColor(tvCarbsStatus, carbsStatus);
+            setStatusColor(tvFatStatus, fatStatus);
         }
     }
 } 
