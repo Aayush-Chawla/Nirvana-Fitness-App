@@ -59,13 +59,13 @@ public class ProfileSetupFragment extends Fragment {
     private boolean usingMetric = true;
     
     // Page 3 - Fitness Goals
-    private AutoCompleteTextView spinnerFitnessGoal;
-    private AutoCompleteTextView spinnerActivityLevel;
+    private RadioGroup rgFitnessGoal, rgActivityLevel;
     private String activityLevel = "";
+    private String fitnessGoal = "";
     
     // Page 4 - Dietary Preferences
     private ChipGroup chipGroupDiet;
-    private AutoCompleteTextView spinnerMealsPerDay;
+    private RadioGroup rgMealsPerDay;
     private List<String> selectedDietaryPreferences = new ArrayList<>();
     
     // Page 5 - Health Information
@@ -76,7 +76,7 @@ public class ProfileSetupFragment extends Fragment {
     
     // Page 6 - Schedule Preferences
     private ChipGroup workoutDaysChipGroup, workoutTimeChipGroup, workoutTypeChipGroup;
-    private AutoCompleteTextView workoutDurationDropdown;
+    private RadioGroup workoutDurationRadioGroup;
     private ChipGroup equipmentChipGroup;
     private List<String> selectedWorkoutDays = new ArrayList<>();
     private String selectedWorkoutTime = "";
@@ -421,51 +421,37 @@ public class ProfileSetupFragment extends Fragment {
     private void initFitnessGoalsControls() {
         View view = getPageView(2);
         if (view != null) {
-            spinnerFitnessGoal = view.findViewById(R.id.spinnerFitnessGoal);
-            spinnerActivityLevel = view.findViewById(R.id.spinnerActivityLevel);
+            rgFitnessGoal = view.findViewById(R.id.rgFitnessGoal);
+            rgActivityLevel = view.findViewById(R.id.rgActivityLevel);
             
-            // Set up fitness goals dropdown
-            if (spinnerFitnessGoal != null) {
-                String[] fitnessGoals = {
-                    "Lose weight", 
-                    "Build muscle", 
-                    "Improve fitness", 
-                    "Increase flexibility", 
-                    "Improve cardiovascular health",
-                    "Maintain current fitness"
-                };
-                
-                // Initialize using helper method
-                initDropdownMenu(spinnerFitnessGoal, fitnessGoals, 
-                    userProfile.containsKey("fitnessGoal") ? 
-                    (String) userProfile.get("fitnessGoal") : 
-                    fitnessGoals[0]);
-            }
-            
-            // Set up activity level dropdown
-            if (spinnerActivityLevel != null) {
-                String[] activityLevels = {
-                    "Sedentary (little or no exercise)",
-                    "Lightly Active (1-3 days/week)",
-                    "Moderately Active (3-5 days/week)",
-                    "Very Active (6-7 days/week)",
-                    "Extra Active (physical job or 2x training)"
-                };
-                
-                // Initialize using helper method
-                initDropdownMenu(spinnerActivityLevel, activityLevels,
-                    userProfile.containsKey("activityLevel") ? 
-                    (String) userProfile.get("activityLevel") : 
-                    activityLevels[0]);
-                
-                // Set up item selection listener if needed
-                spinnerActivityLevel.setOnItemClickListener((parent, view1, position, id) -> {
-                    activityLevel = activityLevels[position];
+            // Set listeners for radio groups
+            if (rgFitnessGoal != null) {
+                rgFitnessGoal.setOnCheckedChangeListener((group, checkedId) -> {
+                    RadioButton rb = view.findViewById(checkedId);
+                    if (rb != null) {
+                        fitnessGoal = rb.getText().toString();
+                    }
                 });
                 
-                // Make sure activityLevel has a default value
-                if (TextUtils.isEmpty(activityLevel)) {
-                    activityLevel = activityLevels[0];
+                // Restore previously selected value if exists
+                if (userProfile.containsKey("fitnessGoal")) {
+                    String storedGoal = (String) userProfile.get("fitnessGoal");
+                    setRadioButtonByText(rgFitnessGoal, storedGoal);
+                }
+            }
+            
+            if (rgActivityLevel != null) {
+                rgActivityLevel.setOnCheckedChangeListener((group, checkedId) -> {
+                    RadioButton rb = view.findViewById(checkedId);
+                    if (rb != null) {
+                        activityLevel = rb.getText().toString();
+                    }
+                });
+                
+                // Restore previously selected value if exists
+                if (userProfile.containsKey("activityLevel")) {
+                    String storedActivity = (String) userProfile.get("activityLevel");
+                    setRadioButtonByText(rgActivityLevel, storedActivity);
                 }
             }
         }
@@ -475,21 +461,9 @@ public class ProfileSetupFragment extends Fragment {
         View view = getPageView(3);
         if (view != null) {
             chipGroupDiet = view.findViewById(R.id.chipGroupDiet);
-            spinnerMealsPerDay = view.findViewById(R.id.spinnerMealsPerDay);
+            rgMealsPerDay = view.findViewById(R.id.rgMealsPerDay);
             
-            // Set up meals per day dropdown
-            if (spinnerMealsPerDay != null) {
-                String[] mealsOptions = {"2", "3", "4", "5", "6"};
-                
-                // Initialize using helper method
-                String defaultMeals = "3";
-                if (userProfile.containsKey("mealsPerDay")) {
-                    defaultMeals = String.valueOf(((Number) userProfile.get("mealsPerDay")).intValue());
-                }
-                initDropdownMenu(spinnerMealsPerDay, mealsOptions, defaultMeals);
-            }
-            
-            // Set chip group listener
+            // Set up chip group listener
             if (chipGroupDiet != null) {
                 setupChipGroup(chipGroupDiet, selectedDietaryPreferences);
                 
@@ -508,6 +482,48 @@ public class ProfileSetupFragment extends Fragment {
                             }
                         }
                     }
+                }
+            }
+            
+            // Set up meal count radio group
+            if (rgMealsPerDay != null) {
+                rgMealsPerDay.setOnCheckedChangeListener((group, checkedId) -> {
+                    // Extract the number from the radio button text (e.g., "3 meals per day" -> "3")
+                    RadioButton rb = view.findViewById(checkedId);
+                    if (rb != null) {
+                        String mealsText = rb.getText().toString();
+                        try {
+                            String numMeals = mealsText.split(" ")[0]; // Get the first word which should be the number
+                            userProfile.put("mealsPerDay", Integer.parseInt(numMeals));
+                        } catch (Exception e) {
+                            Log.e("ProfileSetup", "Error parsing meals: " + e.getMessage());
+                        }
+                    }
+                });
+                
+                // Restore saved value
+                if (userProfile.containsKey("mealsPerDay")) {
+                    int meals = ((Number) userProfile.get("mealsPerDay")).intValue();
+                    switch (meals) {
+                        case 2:
+                            rgMealsPerDay.check(R.id.rbMeals2);
+                            break;
+                        case 3:
+                            rgMealsPerDay.check(R.id.rbMeals3);
+                            break;
+                        case 4:
+                            rgMealsPerDay.check(R.id.rbMeals4);
+                            break;
+                        case 5:
+                            rgMealsPerDay.check(R.id.rbMeals5);
+                            break;
+                        case 6:
+                            rgMealsPerDay.check(R.id.rbMeals6);
+                            break;
+                    }
+                } else {
+                    // Default to 3 meals
+                    rgMealsPerDay.check(R.id.rbMeals3);
                 }
             }
         }
@@ -573,31 +589,63 @@ public class ProfileSetupFragment extends Fragment {
             workoutDaysChipGroup = view.findViewById(R.id.workout_days_chip_group);
             workoutTimeChipGroup = view.findViewById(R.id.workout_time_chip_group);
             workoutTypeChipGroup = view.findViewById(R.id.workout_type_chip_group);
-            workoutDurationDropdown = view.findViewById(R.id.workout_duration_dropdown);
+            workoutDurationRadioGroup = view.findViewById(R.id.workout_duration_radio_group);
             equipmentChipGroup = view.findViewById(R.id.available_equipment_chip_group);
             
             // Log findings for debugging
             Log.d("ProfileSetup", "workoutDaysChipGroup: " + (workoutDaysChipGroup != null ? "found" : "not found"));
             Log.d("ProfileSetup", "workoutTimeChipGroup: " + (workoutTimeChipGroup != null ? "found" : "not found"));
             Log.d("ProfileSetup", "workoutTypeChipGroup: " + (workoutTypeChipGroup != null ? "found" : "not found"));
-            Log.d("ProfileSetup", "workoutDurationDropdown: " + (workoutDurationDropdown != null ? "found" : "not found"));
+            Log.d("ProfileSetup", "workoutDurationRadioGroup: " + (workoutDurationRadioGroup != null ? "found" : "not found"));
             Log.d("ProfileSetup", "equipmentChipGroup: " + (equipmentChipGroup != null ? "found" : "not found"));
             
-            // Set up workout duration dropdown
-            if (workoutDurationDropdown != null) {
-                String[] durationOptions = {"15", "30", "45", "60", "90", "120"};
+            // Set up workout duration radio group
+            if (workoutDurationRadioGroup != null) {
+                workoutDurationRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                    RadioButton rb = view.findViewById(checkedId);
+                    if (rb != null) {
+                        String durationText = rb.getText().toString();
+                        try {
+                            // Extract number from text (e.g., "30 minutes" -> "30")
+                            workoutDuration = durationText.split(" ")[0];
+                            userProfile.put("workoutDuration", workoutDuration);
+                        } catch (Exception e) {
+                            Log.e("ProfileSetup", "Error parsing duration: " + e.getMessage());
+                        }
+                    }
+                });
                 
-                // Get default value from profile or use "30"
-                String defaultDuration = "30";
+                // Select default or saved value
                 if (userProfile.containsKey("workoutDuration")) {
-                    defaultDuration = userProfile.get("workoutDuration").toString();
+                    String savedDuration = userProfile.get("workoutDuration").toString();
+                    switch (savedDuration) {
+                        case "15":
+                            workoutDurationRadioGroup.check(R.id.rb_duration_15);
+                            break;
+                        case "30":
+                            workoutDurationRadioGroup.check(R.id.rb_duration_30);
+                            break;
+                        case "45":
+                            workoutDurationRadioGroup.check(R.id.rb_duration_45);
+                            break;
+                        case "60":
+                            workoutDurationRadioGroup.check(R.id.rb_duration_60);
+                            break;
+                        case "90":
+                            workoutDurationRadioGroup.check(R.id.rb_duration_90);
+                            break;
+                        case "120":
+                            workoutDurationRadioGroup.check(R.id.rb_duration_120);
+                            break;
+                        default:
+                            // Default to 30 minutes
+                            workoutDurationRadioGroup.check(R.id.rb_duration_30);
+                            break;
+                    }
+                } else {
+                    // Default to 30 minutes
+                    workoutDurationRadioGroup.check(R.id.rb_duration_30);
                 }
-                
-                // Initialize using helper method
-                initDropdownMenu(workoutDurationDropdown, durationOptions, defaultDuration);
-                
-                // Save default value
-                workoutDuration = defaultDuration;
             }
             
             // Set up chip group listeners
@@ -849,52 +897,41 @@ public class ProfileSetupFragment extends Fragment {
                     return true;
                     
                 case 2: // Fitness Goals
-                    AutoCompleteTextView spinnerFitnessGoal = pageView.findViewById(R.id.spinnerFitnessGoal);
-                    AutoCompleteTextView spinnerActivityLevel = pageView.findViewById(R.id.spinnerActivityLevel);
+                    RadioGroup rgFitnessGoal = pageView.findViewById(R.id.rgFitnessGoal);
+                    RadioGroup rgActivityLevel = pageView.findViewById(R.id.rgActivityLevel);
                     
-                    if (spinnerFitnessGoal == null || spinnerActivityLevel == null) {
+                    if (rgFitnessGoal == null || rgActivityLevel == null) {
                         showToast("Unable to validate page");
                         return false;
                     }
                     
                     // Check if fitness goal is selected
-                    if (spinnerFitnessGoal.getText() == null || 
-                        spinnerFitnessGoal.getText().toString().trim().isEmpty()) {
+                    if (rgFitnessGoal.getCheckedRadioButtonId() == -1) {
                         showToast("Please select your fitness goal");
                         return false;
                     }
                     
                     // Check if activity level is selected
-                    if (spinnerActivityLevel.getText() == null || 
-                        spinnerActivityLevel.getText().toString().trim().isEmpty()) {
+                    if (rgActivityLevel.getCheckedRadioButtonId() == -1) {
                         showToast("Please select your activity level");
                         return false;
                     }
                     
-                    // Update activityLevel with selected value
-                    activityLevel = spinnerActivityLevel.getText().toString();
                     return true;
                     
                 case 3: // Dietary Preferences
                     // Validate spinnerMealsPerDay input
-                    AutoCompleteTextView mealsPerDay = pageView.findViewById(R.id.spinnerMealsPerDay);
-                    if (mealsPerDay != null) {
-                        if (mealsPerDay.getText() == null || mealsPerDay.getText().toString().trim().isEmpty()) {
-                            showToast("Please select number of meals per day");
-                            return false;
-                        }
-                        
-                        try {
-                            int meals = Integer.parseInt(mealsPerDay.getText().toString().trim());
-                            if (meals < 2 || meals > 6) {
-                                showToast("Please select a valid number of meals (2-6)");
-                                return false;
-                            }
-                        } catch (NumberFormatException e) {
-                            showToast("Please select a valid number of meals");
-                            return false;
-                        }
+                    RadioGroup rgMealsPerDay = pageView.findViewById(R.id.rgMealsPerDay);
+                    if (rgMealsPerDay == null) {
+                        showToast("Please select number of meals per day");
+                        return false;
                     }
+                    
+                    if (rgMealsPerDay.getCheckedRadioButtonId() == -1) {
+                        showToast("Please select a valid number of meals");
+                        return false;
+                    }
+                    
                     return true;
                     
                 case 4: // Health Information
@@ -938,9 +975,9 @@ public class ProfileSetupFragment extends Fragment {
                         return false;
                     }
                     
-                    AutoCompleteTextView workoutDurationDropdown = pageView.findViewById(R.id.workout_duration_dropdown);
-                    if (workoutDurationDropdown == null) {
-                        Log.e("ProfileSetup", "workoutDurationDropdown is null");
+                    RadioGroup workoutDurationRadioGroup = pageView.findViewById(R.id.workout_duration_radio_group);
+                    if (workoutDurationRadioGroup == null) {
+                        Log.e("ProfileSetup", "workoutDurationRadioGroup is null");
                         showToast("Unable to access workout duration field");
                         return false;
                     }
@@ -995,8 +1032,7 @@ public class ProfileSetupFragment extends Fragment {
                     }
                     
                     // Check workout duration
-                    if (workoutDurationDropdown.getText() == null || 
-                        workoutDurationDropdown.getText().toString().isEmpty()) {
+                    if (workoutDurationRadioGroup.getCheckedRadioButtonId() == -1) {
                         showToast("Please select a workout duration");
                         return false;
                     }
@@ -1069,28 +1105,52 @@ public class ProfileSetupFragment extends Fragment {
                 break;
                 
             case 2: // Fitness Goals
-                if (spinnerFitnessGoal != null && spinnerFitnessGoal.getText() != null) {
-                    userProfile.put("fitnessGoal", spinnerFitnessGoal.getText().toString());
+                if (!TextUtils.isEmpty(fitnessGoal)) {
+                    userProfile.put("fitnessGoal", fitnessGoal);
+                } else {
+                    // Get the selected fitness goal from radio group
+                    int fitnessGoalId = rgFitnessGoal.getCheckedRadioButtonId();
+                    if (fitnessGoalId != -1) {
+                        RadioButton rb = getView().findViewById(fitnessGoalId);
+                        if (rb != null) {
+                            userProfile.put("fitnessGoal", rb.getText().toString());
+                        }
+                    }
                 }
                 
-                if (spinnerActivityLevel != null && spinnerActivityLevel.getText() != null) {
-                    userProfile.put("activityLevel", spinnerActivityLevel.getText().toString());
-                } else if (!TextUtils.isEmpty(activityLevel)) {
+                if (!TextUtils.isEmpty(activityLevel)) {
                     userProfile.put("activityLevel", activityLevel);
+                } else {
+                    // Get the selected activity level from radio group
+                    int activityLevelId = rgActivityLevel.getCheckedRadioButtonId();
+                    if (activityLevelId != -1) {
+                        RadioButton rb = getView().findViewById(activityLevelId);
+                        if (rb != null) {
+                            userProfile.put("activityLevel", rb.getText().toString());
+                        }
+                    }
                 }
                 break;
                 
             case 3: // Dietary Preferences
-                if (spinnerMealsPerDay != null && spinnerMealsPerDay.getText() != null) {
-                    try {
-                        userProfile.put("mealsPerDay", Integer.parseInt(spinnerMealsPerDay.getText().toString()));
-                    } catch (NumberFormatException e) {
-                        // Use default if invalid
-                        userProfile.put("mealsPerDay", 3);
-                    }
-                }
                 if (selectedDietaryPreferences != null) {
                     userProfile.put("dietaryPreferences", new ArrayList<>(selectedDietaryPreferences));
+                }
+                
+                // Get the selected meals per day from radio group
+                int mealsId = rgMealsPerDay.getCheckedRadioButtonId();
+                if (mealsId != -1) {
+                    RadioButton rb = getView().findViewById(mealsId);
+                    if (rb != null) {
+                        String mealsText = rb.getText().toString();
+                        try {
+                            String numMeals = mealsText.split(" ")[0]; // Get the first word (number)
+                            userProfile.put("mealsPerDay", Integer.parseInt(numMeals));
+                        } catch (Exception e) {
+                            Log.e("ProfileSetup", "Error parsing meals: " + e.getMessage());
+                            userProfile.put("mealsPerDay", 3); // Default to 3 if parsing fails
+                        }
+                    }
                 }
                 break;
                 
@@ -1106,12 +1166,9 @@ public class ProfileSetupFragment extends Fragment {
                 if (rgSleepPattern != null) {
                     int sleepId = rgSleepPattern.getCheckedRadioButtonId();
                     if (sleepId != -1) {
-                        View view = getPageView(currentPage);
-                        if (view != null) {
-                            RadioButton rb = view.findViewById(sleepId);
-                            if (rb != null) {
-                                userProfile.put("sleepPattern", rb.getText().toString());
-                            }
+                        RadioButton rb = getView().findViewById(sleepId);
+                        if (rb != null) {
+                            userProfile.put("sleepPattern", rb.getText().toString());
                         }
                     }
                 }
@@ -1122,7 +1179,7 @@ public class ProfileSetupFragment extends Fragment {
                     userProfile.put("workoutDays", new ArrayList<>(selectedWorkoutDays));
                 }
                 
-                if (selectedWorkoutTime != null) {
+                if (selectedWorkoutTime != null && !selectedWorkoutTime.isEmpty()) {
                     userProfile.put("workoutTime", selectedWorkoutTime);
                 }
                 
@@ -1130,8 +1187,26 @@ public class ProfileSetupFragment extends Fragment {
                     userProfile.put("workoutTypes", new ArrayList<>(selectedWorkoutTypes));
                 }
                 
-                if (workoutDurationDropdown != null && workoutDurationDropdown.getText() != null) {
-                    userProfile.put("workoutDuration", workoutDurationDropdown.getText().toString());
+                // Get workout duration from radio group
+                if (workoutDurationRadioGroup != null) {
+                    int durationId = workoutDurationRadioGroup.getCheckedRadioButtonId();
+                    if (durationId != -1) {
+                        RadioButton rb = getView().findViewById(durationId);
+                        if (rb != null) {
+                            String durationText = rb.getText().toString();
+                            try {
+                                String duration = durationText.split(" ")[0]; // Get the first word (number)
+                                userProfile.put("workoutDuration", duration);
+                                workoutDuration = duration;
+                            } catch (Exception e) {
+                                Log.e("ProfileSetup", "Error parsing duration: " + e.getMessage());
+                                userProfile.put("workoutDuration", "30"); // Default to 30 if parsing fails
+                            }
+                        }
+                    } else {
+                        // Use the workoutDuration variable we've been tracking
+                        userProfile.put("workoutDuration", workoutDuration);
+                    }
                 }
                 
                 if (selectedEquipment != null) {
@@ -1187,35 +1262,73 @@ public class ProfileSetupFragment extends Fragment {
     private void initDropdownMenu(AutoCompleteTextView dropdown, String[] options, String defaultValue) {
         if (dropdown == null) return;
         
-        // Create a simple adapter
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+        // Create an adapter with a custom layout that won't auto-dismiss
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
             requireContext(),
-            android.R.layout.simple_spinner_dropdown_item, 
+            R.layout.simple_dropdown_item,  // Use a custom layout (we'll create this)
             options
-        );
+        ) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                // Prevent the dropdown from getting focus
+                view.setFocusable(false);
+                return view;
+            }
+        };
         
-        // Set adapter and configuration
+        // Set adapter
         dropdown.setAdapter(adapter);
-        dropdown.setThreshold(0); // Show all options regardless of text
+        
+        // Critical: prevent auto-dismissal by using INPUT_METHOD_NOT_NEEDED
+        dropdown.setInputType(0); // No input type
         
         // Set initial value
         if (!TextUtils.isEmpty(defaultValue)) {
             dropdown.setText(defaultValue, false);
         }
         
-        // Force dropdown to show on click - crucial part
+        // Make it act like a button
+        dropdown.setFocusable(false);
+        dropdown.setClickable(true);
+        
+        // Set up a simple click listener
         dropdown.setOnClickListener(v -> {
+            // Force show dropdown
             dropdown.showDropDown();
         });
         
-        // Force dropdown height to show multiple items
+        // Set a listener for item selection
+        dropdown.setOnItemClickListener((parent, view, position, id) -> {
+            // Set the text without triggering filter
+            dropdown.setText(options[position], false);
+            // Hide dropdown after selection
+            dropdown.dismissDropDown();
+        });
+        
+        // Make sure dropdown shows enough items
         dropdown.setDropDownHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
         
-        // Show dropdown when view is touched (additional reliability)
-        dropdown.setOnTouchListener((v, event) -> {
-            dropdown.showDropDown();
-            return false;
+        // Override the default behavior to prevent auto-dismiss
+        dropdown.setOnDismissListener(() -> {
+            // Do nothing, which prevents some auto-dismiss scenarios
         });
+    }
+
+    // Utility method to set radio button by text value
+    private void setRadioButtonByText(RadioGroup radioGroup, String text) {
+        if (radioGroup == null || TextUtils.isEmpty(text)) return;
+        
+        for (int i = 0; i < radioGroup.getChildCount(); i++) {
+            View child = radioGroup.getChildAt(i);
+            if (child instanceof RadioButton) {
+                RadioButton rb = (RadioButton) child;
+                if (rb.getText().toString().equals(text)) {
+                    rb.setChecked(true);
+                    return;
+                }
+            }
+        }
     }
 }
 

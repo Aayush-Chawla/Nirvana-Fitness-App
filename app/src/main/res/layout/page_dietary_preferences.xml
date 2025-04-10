@@ -119,19 +119,48 @@
             android:textColor="@color/black"
             android:layout_marginBottom="12dp" />
 
-        <com.google.android.material.textfield.TextInputLayout
+        <RadioGroup
+            android:id="@+id/rgMealsPerDay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
 
-            <AutoCompleteTextView
-                android:id="@+id/spinnerMealsPerDay"
+            <RadioButton
+                android:id="@+id/rbMeals2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none"
-                android:hint="Select number of meals"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:text="2 meals per day"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbMeals3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="3 meals per day"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbMeals4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="4 meals per day"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbMeals5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="5 meals per day"
+                android:padding="12dp" />
+
+            <RadioButton
+                android:id="@+id/rbMeals6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="6 meals per day"
+                android:padding="12dp" />
+        </RadioGroup>
 
         <!-- Meal Time Preferences -->
         <TextView
