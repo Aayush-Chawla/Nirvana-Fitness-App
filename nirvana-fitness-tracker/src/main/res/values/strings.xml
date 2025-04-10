@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Nirvana Fitness Tracker</string>
+    <string name="health_tracking_notification_title">Nirvana Fitness Tracking</string>
+    <string name="health_tracking_notification_text">Tracking your fitness data</string>
+    <string name="sync_success">Data synced successfully</string>
+    <string name="sync_failed">Failed to sync data</string>
+    <string name="permission_required">Health permissions required</string>
+    <string name="permission_rationale">This app needs health permissions to track your fitness data</string>
+</resources>

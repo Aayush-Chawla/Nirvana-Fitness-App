@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Nirvana"
 include(":app")
+include(":nirvana-fitness-tracker")
