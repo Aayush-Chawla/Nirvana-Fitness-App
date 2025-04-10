@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Profile Image Placeholder -->
+        <FrameLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/circle_background">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_person"
+                android:contentDescription="Profile avatar" />
+        </FrameLayout>
+
+        <!-- Full Name Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Full Name"
+            app:startIconDrawable="@drawable/ic_person"
+            app:endIconMode="clear_text"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etFullName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Age Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Age"
+            app:startIconDrawable="@drawable/ic_calendar"
+            app:endIconMode="clear_text"
+            android:layout_marginBottom="24dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etAge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Gender Selection -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gender"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:layout_marginBottom="12dp" />
+
+        <RadioGroup
+            android:id="@+id/rgGender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <RadioButton
+                android:id="@+id/rbMale"
+                android:layout_width="110dp"
+                android:layout_height="48dp"
+                android:text="Male"
+                android:textColor="@color/black"
+                android:background="@drawable/radio_selector"
+                android:button="@null"
+                android:elevation="2dp"
+                android:gravity="center"
+                android:layout_margin="4dp" />
+
+            <RadioButton
+                android:id="@+id/rbFemale"
+                android:layout_width="110dp"
+                android:layout_height="48dp"
+                android:text="Female"
+                android:textColor="@color/black"
+                android:background="@drawable/radio_selector"
+                android:button="@null"
+                android:elevation="2dp"
+                android:gravity="center"
+                android:layout_margin="4dp" />
+
+            <RadioButton
+                android:id="@+id/rbOther"
+                android:layout_width="110dp"
+                android:layout_height="48dp"
+                android:text="Other"
+                android:textColor="@color/black"
+                android:background="@drawable/radio_selector"
+                android:button="@null"
+                android:elevation="2dp"
+                android:gravity="center"
+                android:layout_margin="4dp" />
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your information is private and will only be used to customize your fitness experience"
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:layout_marginTop="24dp"
+            android:gravity="center" />
+
+    </LinearLayout>
+</ScrollView> 

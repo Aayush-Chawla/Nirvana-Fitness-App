@@ -1,186 +1,94 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
+    android:orientation="vertical"
     android:background="@color/white">
 
+    <!-- Progress Indicator -->
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progressIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progress="20"
+        app:trackThickness="4dp"
+        app:trackCornerRadius="2dp"
+        app:indicatorColor="@color/primaryColor"
+        app:trackColor="#E0E0E0" />
+
+    <!-- Page Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center">
+        android:padding="24dp">
 
-        <!-- Profile Setup Title -->
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Set Up Your Profile"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            android:layout_marginBottom="16dp"
-            android:gravity="center" />
-
-        <!-- Profile Card with Glassmorphic Effect -->
-        <androidx.cardview.widget.CardView
+            android:id="@+id/tvPageTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="12dp"
-            android:padding="24dp"
-            android:backgroundTint="@color/white"
-            android:alpha="0.95">
+            android:text="Basic Information"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <!-- Name Input -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Full Name"
-                    app:endIconMode="clear_text">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textPersonName" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Age Input -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Age"
-                    android:layout_marginTop="12dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etAge"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Weight Input -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Weight (kg)"
-                    android:layout_marginTop="12dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etWeight"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberDecimal" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Height Input -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Height (cm)"
-                    android:layout_marginTop="12dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etHeight"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="numberDecimal" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Gender Selection -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Gender"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="12dp" />
-                <RadioGroup
-                    android:id="@+id/rgGender"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/rbMale"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Male"
-                        android:textSize="16sp"
-                        android:textColor="@color/black"
-                        android:padding="8dp"/>
-
-                    <RadioButton
-                        android:id="@+id/rbFemale"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Female"
-                        android:textSize="16sp"
-                        android:textColor="@color/black"
-                        android:padding="8dp"/>
-
-                    <RadioButton
-                        android:id="@+id/rbOther"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Other"
-                        android:textSize="16sp"
-                        android:textColor="@color/black"
-                        android:padding="8dp"/>
-                </RadioGroup>
-
-
-                <!-- Fitness Goal -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Fitness Goal"
-                    android:layout_marginTop="12dp">
-
-                    <Spinner
-                        android:id="@+id/spinnerFitnessGoal"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/transparent"
-                        android:entries="@array/fitness_goals"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Activity Level -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Activity Level"
-                    android:layout_marginTop="12dp">
-
-                    <Spinner
-                        android:id="@+id/spinnerActivityLevel"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/transparent"
-                        android:entries="@array/activity_levels"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Save Profile Button -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSaveProfile"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Save &amp; Continue"
-                    android:layout_marginTop="20dp"
-                    android:textSize="16sp"
-                    app:cornerRadius="20dp"
-                    android:backgroundTint="@color/primaryColor"
-                    android:textColor="@color/white"
-                    android:elevation="10dp" />
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
+        <TextView
+            android:id="@+id/tvPageDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Let's start with some basic information about you"
+            android:textSize="16sp"
+            android:textColor="#757575"
+            android:layout_marginTop="8dp" />
+            
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/pageIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:tabBackground="@drawable/tab_selector"
+            app:tabGravity="center"
+            app:tabIndicatorHeight="0dp" />
     </LinearLayout>
-</ScrollView>
+
+    <!-- Content Container - ViewPager2 -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Navigation Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/btnPrevious"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PREVIOUS"
+            android:textColor="@color/black"
+            android:backgroundTint="#F5F5F5"
+            app:cornerRadius="20dp"
+            android:visibility="invisible" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NEXT"
+            android:textColor="@color/white"
+            android:backgroundTint="#FF5722"
+            app:cornerRadius="20dp" />
+    </LinearLayout>
+</LinearLayout>
