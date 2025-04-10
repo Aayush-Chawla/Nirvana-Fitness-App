@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -18,11 +19,15 @@ import com.example.nirvana.R;
 import com.example.nirvana.adapters.FoodSearchAdapter;
 import com.example.nirvana.api.FoodSearchResponse;
 import com.example.nirvana.models.FoodItem;
+import com.example.nirvana.models.PredefinedFoodItem;
+import com.example.nirvana.services.FoodItemService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class FoodSearchDialog extends DialogFragment {
+    private static final String TAG = "FoodSearchDialog";
     private EditText editSearch;
     private RecyclerView recyclerResults;
     private FoodSearchAdapter adapter;
@@ -82,29 +87,36 @@ public class FoodSearchDialog extends DialogFragment {
     }
 
     private void performSearch(String query) {
-        List<FoodSearchResponse.FoodItem> apiResults = getDummySearchResults();
-        // Filter results based on search query
-        if (!query.isEmpty()) {
-            apiResults = apiResults.stream()
-                    .filter(item -> item.getName().toLowerCase().contains(query.toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-        List<FoodItem> modelResults = convertApiResultsToModelItems(apiResults);
-        adapter.updateFoodItems(modelResults);
-    }
-
-    private List<FoodItem> convertApiResultsToModelItems(List<FoodSearchResponse.FoodItem> apiResults) {
-        return apiResults.stream()
-                .map(apiItem -> new FoodItem(
-                    apiItem.getId(),
-                    apiItem.getName(),
-                    apiItem.getCalories(),
-                    apiItem.getServingSize(),
-                    apiItem.getProtein(),
-                    apiItem.getCarbs(),
-                    apiItem.getFat()
-                ))
+        // Get food items from assets/food_items.json through FoodItemService
+        List<PredefinedFoodItem> predefinedItems = FoodItemService.loadFoodItems(requireContext());
+        List<FoodItem> modelResults = new ArrayList<>();
+        
+        // Filter items based on search query
+        List<PredefinedFoodItem> filteredItems;
+        if (query.isEmpty()) {
+            filteredItems = predefinedItems;
+        } else {
+            filteredItems = predefinedItems.stream()
+                .filter(item -> item.getName().toLowerCase().contains(query.toLowerCase()))
                 .collect(Collectors.toList());
+        }
+        
+        // Convert PredefinedFoodItem to FoodItem
+        for (PredefinedFoodItem item : filteredItems) {
+            FoodItem foodItem = new FoodItem(
+                item.getId(),
+                item.getName(),
+                (int) item.getPer100g().getCalories(),
+                item.getServingSize() + item.getServingUnit(),
+                item.getPer100g().getProtein(),
+                item.getPer100g().getCarbs(),
+                item.getPer100g().getFat()
+            );
+            modelResults.add(foodItem);
+        }
+        
+        Log.d(TAG, "Found " + modelResults.size() + " food items matching '" + query + "'");
+        adapter.updateFoodItems(modelResults);
     }
 
     private void showServingSelectionDialog(FoodItem foodItem) {
@@ -169,62 +181,5 @@ public class FoodSearchDialog extends DialogFragment {
                 "Nutrition for %dg:\n\nCalories: %d\nProtein: %.1fg\nCarbs: %.1fg\nFat: %.1fg",
                 servingSize, calories, protein, carbs, fat);
         tvNutritionInfo.setText(info);
-    }
-
-    private List<FoodSearchResponse.FoodItem> getDummySearchResults() {
-        List<FoodSearchResponse.FoodItem> results = new ArrayList<>();
-        
-        // Add dummy food items
-        FoodSearchResponse.FoodItem item1 = new FoodSearchResponse.FoodItem();
-        item1.setId("1");
-        item1.setName("Chicken Breast");
-        item1.setCalories(165);
-        item1.setServingSize("100g");
-        item1.setProtein(31);
-        item1.setCarbs(0);
-        item1.setFat(3.6);
-        results.add(item1);
-
-        FoodSearchResponse.FoodItem item2 = new FoodSearchResponse.FoodItem();
-        item2.setId("2");
-        item2.setName("Brown Rice");
-        item2.setCalories(111);
-        item2.setServingSize("100g");
-        item2.setProtein(2.6);
-        item2.setCarbs(23);
-        item2.setFat(0.9);
-        results.add(item2);
-
-        FoodSearchResponse.FoodItem item3 = new FoodSearchResponse.FoodItem();
-        item3.setId("3");
-        item3.setName("Broccoli");
-        item3.setCalories(55);
-        item3.setServingSize("100g");
-        item3.setProtein(3.7);
-        item3.setCarbs(11.2);
-        item3.setFat(0.6);
-        results.add(item3);
-
-        FoodSearchResponse.FoodItem item4 = new FoodSearchResponse.FoodItem();
-        item4.setId("4");
-        item4.setName("Salmon");
-        item4.setCalories(208);
-        item4.setServingSize("100g");
-        item4.setProtein(22);
-        item4.setCarbs(0);
-        item4.setFat(13);
-        results.add(item4);
-
-        FoodSearchResponse.FoodItem item5 = new FoodSearchResponse.FoodItem();
-        item5.setId("5");
-        item5.setName("Sweet Potato");
-        item5.setCalories(86);
-        item5.setServingSize("100g");
-        item5.setProtein(1.6);
-        item5.setCarbs(20);
-        item5.setFat(0.1);
-        results.add(item5);
-
-        return results;
     }
 }

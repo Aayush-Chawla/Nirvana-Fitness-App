@@ -24,6 +24,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.SetOptions;
 import com.example.nirvana.utils.FirestoreHelper;
 
 import java.text.SimpleDateFormat;
@@ -32,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.HashMap;
 
 public class DietFragment extends Fragment {
     private static final String TAG = "DietFragment";
@@ -100,6 +102,9 @@ public class DietFragment extends Fragment {
             return;
         }
         
+        // First, check if calorie goal exists and create it if it doesn't
+        checkAndCreateCalorieGoal(userRef);
+        
         // Listen for changes to all meal collections
         setupMealListener(userRef, today);
         
@@ -147,6 +152,108 @@ public class DietFragment extends Fragment {
                     }
                 }
             });
+    }
+
+    private void checkAndCreateCalorieGoal(DocumentReference userRef) {
+        // Check if diet goals document exists
+        userRef.collection("diet").document("goals").get()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (!document.exists() || document.getLong("calories") == null || document.getLong("calories") == 0) {
+                        // No calorie goal exists, fetch user profile to calculate it
+                        userRef.collection("profile").document("details").get()
+                            .addOnSuccessListener(profileDoc -> {
+                                if (profileDoc.exists()) {
+                                    // Calculate calorie goal from profile data
+                                    long calorieGoal = calculateCalorieGoal(profileDoc);
+                                    
+                                    // Save the calculated goal
+                                    Map<String, Object> goals = new HashMap<>();
+                                    goals.put("calories", calorieGoal);
+                                    
+                                    userRef.collection("diet").document("goals").set(goals, SetOptions.merge())
+                                        .addOnSuccessListener(aVoid -> {
+                                            Log.d(TAG, "Calorie goal saved: " + calorieGoal);
+                                            // Update UI immediately
+                                            updateCalorieGoal(calorieGoal);
+                                        })
+                                        .addOnFailureListener(e -> Log.e(TAG, "Error saving calorie goal", e));
+                                } else {
+                                    // No profile exists, set a default goal
+                                    setDefaultCalorieGoal(userRef);
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Error fetching user profile", e);
+                                // Set default goal on failure
+                                setDefaultCalorieGoal(userRef);
+                            });
+                    }
+                } else {
+                    Log.e(TAG, "Error checking calorie goal", task.getException());
+                }
+            });
+    }
+
+    private long calculateCalorieGoal(DocumentSnapshot profileDoc) {
+        // Extract profile data with safe defaults
+        double weight = profileDoc.getDouble("weight") != null ? profileDoc.getDouble("weight") : 70.0;
+        double height = profileDoc.getDouble("height") != null ? profileDoc.getDouble("height") : 170.0;
+        long age = profileDoc.getLong("age") != null ? profileDoc.getLong("age") : 30;
+        String gender = profileDoc.getString("gender") != null ? profileDoc.getString("gender") : "Male";
+        String activityLevel = profileDoc.getString("activityLevel") != null ? profileDoc.getString("activityLevel") : "Moderately Active";
+        String fitnessGoal = profileDoc.getString("fitnessGoal") != null ? profileDoc.getString("fitnessGoal") : "Maintain current fitness";
+        
+        // Calculate BMR using Mifflin-St Jeor Equation
+        double bmr;
+        if (gender.equals("Male")) {
+            bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+        } else {
+            bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+        }
+        
+        // Calculate TDEE based on activity level
+        double tdee = calculateTDEE(bmr, activityLevel);
+        
+        // Adjust based on fitness goal
+        if (fitnessGoal.contains("Lose weight")) {
+            tdee = tdee * 0.85; // 15% deficit for weight loss
+        } else if (fitnessGoal.contains("Build muscle")) {
+            tdee = tdee * 1.1; // 10% surplus for muscle gain
+        }
+        
+        return Math.round(tdee);
+    }
+
+    private double calculateTDEE(double bmr, String activityLevel) {
+        if (activityLevel.contains("Sedentary")) {
+            return bmr * 1.2;
+        } else if (activityLevel.contains("Lightly Active")) {
+            return bmr * 1.375;
+        } else if (activityLevel.contains("Moderately Active")) {
+            return bmr * 1.55;
+        } else if (activityLevel.contains("Very Active")) {
+            return bmr * 1.725;
+        } else if (activityLevel.contains("Extra Active")) {
+            return bmr * 1.9;
+        } else {
+            return bmr * 1.2;
+        }
+    }
+
+    private void setDefaultCalorieGoal(DocumentReference userRef) {
+        long defaultGoal = 2000; // Default daily calorie goal
+        Map<String, Object> goals = new HashMap<>();
+        goals.put("calories", defaultGoal);
+        
+        userRef.collection("diet").document("goals").set(goals, SetOptions.merge())
+            .addOnSuccessListener(aVoid -> {
+                Log.d(TAG, "Default calorie goal saved: " + defaultGoal);
+                // Update UI immediately
+                updateCalorieGoal(defaultGoal);
+            })
+            .addOnFailureListener(e -> Log.e(TAG, "Error saving default calorie goal", e));
     }
 
     private void calculateNutrientTotals() {
