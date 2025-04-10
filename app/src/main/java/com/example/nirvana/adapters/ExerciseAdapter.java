@@ -160,7 +160,7 @@ public class ExerciseAdapter extends ListAdapter<Exercise, ExerciseAdapter.Exerc
                 case "cardio":
                     return R.drawable.ic_cardio;
                 case "full body":
-                    return R.drawable.ic_full_body;
+                    return R.drawable.ic_hiit;
                 default:
                     return R.drawable.ic_exercise_default;
             }

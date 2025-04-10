@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="?attr/colorSurface">
+    android:background="@android:color/white">
 
     <ImageView
         android:id="@+id/imgExercise"
@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?attr/textAppearanceHeadline6"
-        android:textColor="?attr/colorOnSurface"
+        android:textColor="@android:color/black"
         android:layout_marginBottom="8dp" />
 
     <TextView
@@ -28,7 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?attr/textAppearanceBody1"
-        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textColor="@android:color/darker_gray"
         android:layout_marginBottom="16dp" />
 
     <com.google.android.material.card.MaterialCardView
@@ -37,8 +37,8 @@
         android:layout_marginBottom="16dp"
         app:cardElevation="0dp"
         app:strokeWidth="1dp"
-        app:strokeColor="?attr/colorOutline"
-        app:cardBackgroundColor="?attr/colorSurface">
+        app:strokeColor="@android:color/darker_gray"
+        app:cardBackgroundColor="@android:color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -52,9 +52,9 @@
                 android:layout_height="wrap_content"
                 android:drawablePadding="8dp"
                 android:textAppearance="?attr/textAppearanceBody2"
-                android:textColor="?attr/colorOnSurface"
+                android:textColor="@android:color/black"
                 app:drawableStartCompat="@drawable/ic_category"
-                app:drawableTint="?attr/colorOnSurface" />
+                app:drawableTint="@android:color/black" />
 
             <TextView
                 android:id="@+id/txtDifficulty"
@@ -63,9 +63,9 @@
                 android:layout_marginTop="8dp"
                 android:drawablePadding="8dp"
                 android:textAppearance="?attr/textAppearanceBody2"
-                android:textColor="?attr/colorOnSurface"
+                android:textColor="@android:color/black"
                 app:drawableStartCompat="@drawable/ic_difficulty"
-                app:drawableTint="?attr/colorOnSurface" />
+                app:drawableTint="@android:color/black" />
 
             <TextView
                 android:id="@+id/txtDuration"
@@ -74,9 +74,9 @@
                 android:layout_marginTop="8dp"
                 android:drawablePadding="8dp"
                 android:textAppearance="?attr/textAppearanceBody2"
-                android:textColor="?attr/colorOnSurface"
+                android:textColor="@android:color/black"
                 app:drawableStartCompat="@drawable/ic_time"
-                app:drawableTint="?attr/colorOnSurface" />
+                app:drawableTint="@android:color/black" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
