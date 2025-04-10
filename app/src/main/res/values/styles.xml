@@ -25,7 +25,7 @@
     </style>
 
     <!-- Material Components Dialog Theme -->
-    <style name="ThemeOverlay.MaterialComponents.Dialog" parent="ThemeOverlay.MaterialComponents.Dialog">
+    <style name="ThemeOverlay.MaterialComponents.Dialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -33,7 +33,7 @@
     </style>
 
     <!-- Dialog theme -->
-    <style name="Theme.MaterialComponents.Dialog" parent="Theme.MaterialComponents.Dialog">
+    <style name="Theme.MaterialComponents.Dialog" parent="@style/Theme.MaterialComponents.Light.Dialog">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
