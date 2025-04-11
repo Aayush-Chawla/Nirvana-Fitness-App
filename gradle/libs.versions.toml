@@ -22,6 +22,7 @@ lifecycleViewmodelKtx = "2.6.1"
 firebaseFirestoreVersion = "25.1.3"
 generativeai = "0.4.0"
 googleGenerativeai = "0.9.0"
+litertSupportApi = "1.2.0"
 
 [libraries]
 activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity" }
@@ -47,6 +48,7 @@ lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-view
 google-firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestoreVersion" }
 generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
 google-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "googleGenerativeai" }
+litert-support-api = { group = "com.google.ai.edge.litert", name = "litert-support-api", version.ref = "litertSupportApi" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

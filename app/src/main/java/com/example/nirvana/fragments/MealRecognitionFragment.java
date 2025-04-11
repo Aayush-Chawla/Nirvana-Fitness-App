@@ -23,9 +23,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nirvana.R;
+import com.example.nirvana.ml.FoodRecognitionModel;
+import com.example.nirvana.ml.FoodNutritionData;
+import com.example.nirvana.ui.adapters.IdentifiedFoodAdapter;
 import com.google.android.material.card.MaterialCardView;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Fragment for meal recognition and nutritional analysis
@@ -43,6 +48,9 @@ public class MealRecognitionFragment extends Fragment {
     private RecyclerView rvIdentifiedFoods;
     
     private Bitmap mealPhoto;
+    private FoodRecognitionModel foodRecognitionModel;
+    private List<FoodRecognitionModel.FoodRecognitionResult> recognizedFoods;
+    private IdentifiedFoodAdapter foodAdapter;
     
     @Nullable
     @Override
@@ -66,13 +74,19 @@ public class MealRecognitionFragment extends Fragment {
         tvRecommendations = view.findViewById(R.id.tvRecommendations);
         rvIdentifiedFoods = view.findViewById(R.id.rvIdentifiedFoods);
         
+        // Initialize food recognition model
+        foodRecognitionModel = new FoodRecognitionModel(requireContext());
+        recognizedFoods = new ArrayList<>();
+        
+        // Initialize RecyclerView and adapter
+        rvIdentifiedFoods.setLayoutManager(new LinearLayoutManager(requireContext()));
+        foodAdapter = new IdentifiedFoodAdapter(recognizedFoods);
+        rvIdentifiedFoods.setAdapter(foodAdapter);
+        
         // Initial UI state
         btnAnalyzeMeal.setEnabled(false);
         cardAnalysisResults.setVisibility(View.GONE);
         progressMealAnalysis.setVisibility(View.GONE);
-        
-        // Set up RecyclerView
-        rvIdentifiedFoods.setLayoutManager(new LinearLayoutManager(requireContext()));
         
         // Set up button listeners
         btnTakePhoto.setOnClickListener(v -> takePhoto());
@@ -101,7 +115,6 @@ public class MealRecognitionFragment extends Fragment {
         
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
-                // Handle camera photo
                 Bundle extras = data.getExtras();
                 if (extras != null) {
                     mealPhoto = (Bitmap) extras.get("data");
@@ -109,7 +122,6 @@ public class MealRecognitionFragment extends Fragment {
                     btnAnalyzeMeal.setEnabled(true);
                 }
             } else if (requestCode == REQUEST_PICK_IMAGE && data != null) {
-                // Handle picked photo
                 Uri selectedImage = data.getData();
                 try {
                     mealPhoto = MediaStore.Images.Media.getBitmap(
@@ -134,19 +146,70 @@ public class MealRecognitionFragment extends Fragment {
         progressMealAnalysis.setVisibility(View.VISIBLE);
         btnAnalyzeMeal.setEnabled(false);
         
-        // TODO: Implement meal recognition using ML model
-        
-        // For now, just show a placeholder result after a delay
-        ivMealPreview.postDelayed(() -> {
-            progressMealAnalysis.setVisibility(View.GONE);
-            cardAnalysisResults.setVisibility(View.VISIBLE);
-            btnAnalyzeMeal.setEnabled(true);
+        // Run food recognition in background
+        new Thread(() -> {
+            // Perform food recognition
+            recognizedFoods = foodRecognitionModel.recognizeFood(mealPhoto);
             
-            // Set placeholder data
-            tvNutritionSummary.setText("Calories: 450 kcal\nProtein: 20g\nCarbs: 45g\nFat: 15g");
-            tvRecommendations.setText("This meal appears to be balanced. Consider adding more vegetables for additional fiber and micronutrients.");
+            // Calculate total nutrition
+            final double[] totals = new double[4]; // calories, protein, carbs, fat
+            StringBuilder recommendations = new StringBuilder();
             
-            // TODO: Populate RecyclerView with identified food items
-        }, 2000);
+            for (FoodRecognitionModel.FoodRecognitionResult result : recognizedFoods) {
+                FoodNutritionData.NutritionInfo nutritionInfo = FoodNutritionData.getNutritionInfo(result.getFoodName());
+                if (nutritionInfo != null) {
+                    totals[0] += nutritionInfo.getCalories();
+                    totals[1] += nutritionInfo.getProtein();
+                    totals[2] += nutritionInfo.getCarbs();
+                    totals[3] += nutritionInfo.getFat();
+                }
+            }
+            
+            // Generate recommendations based on nutritional content
+            if (totals[0] > 800) {
+                recommendations.append("This meal is quite high in calories. Consider reducing portion sizes.\n");
+            }
+            if (totals[1] < 20) {
+                recommendations.append("Consider adding more protein-rich foods.\n");
+            }
+            if (totals[2] > 100) {
+                recommendations.append("The meal is high in carbohydrates. Consider balancing with more vegetables.\n");
+            }
+            if (totals[3] > 30) {
+                recommendations.append("This meal is high in fat. Consider choosing leaner options next time.\n");
+            }
+            
+            final String finalRecommendations = recommendations.toString();
+            
+            // Update UI on main thread
+            requireActivity().runOnUiThread(() -> {
+                progressMealAnalysis.setVisibility(View.GONE);
+                cardAnalysisResults.setVisibility(View.VISIBLE);
+                btnAnalyzeMeal.setEnabled(true);
+                
+                // Update nutrition summary
+                String nutritionText = String.format("Calories: %.0f kcal\nProtein: %.1fg\nCarbs: %.1fg\nFat: %.1fg",
+                        totals[0], totals[1], totals[2], totals[3]);
+                tvNutritionSummary.setText(nutritionText);
+                
+                // Update recommendations
+                if (finalRecommendations.length() > 0) {
+                    tvRecommendations.setText(finalRecommendations);
+                } else {
+                    tvRecommendations.setText("This meal appears to be well-balanced. Keep up the good work!");
+                }
+                
+                // Update RecyclerView
+                foodAdapter.updateFoods(recognizedFoods);
+            });
+        }).start();
+    }
+    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (foodRecognitionModel != null) {
+            foodRecognitionModel.close();
+        }
     }
 } 
