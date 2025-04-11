@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.firebase.FirebaseApp;
 import com.example.nirvana.api.LocalMockApiClient;
 import com.example.nirvana.utils.FirestoreHelper;
+import com.example.nirvana.utils.NotificationUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -25,6 +26,10 @@ public class NirvanaApp extends Application {
         // Initialize Local Mock API Client
         mockApiClient = new LocalMockApiClient(this);
         Log.d(TAG, "LocalMockApiClient initialized successfully");
+        
+        // Create notification channels
+        NotificationUtils.createNotificationChannels(this);
+        Log.d(TAG, "Notification channels created successfully");
         
         // Trigger data migration if user is logged in
         triggerDataMigration();

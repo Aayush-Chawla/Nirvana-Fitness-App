@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".NirvanaApp"
@@ -42,6 +43,15 @@
             android:name=".activities.ChatbotActivity"
             android:exported="false"
             android:theme="@style/Theme.Nirvana" />
+
+        <receiver
+            android:name=".receivers.NirvanaNotificationReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.example.nirvana.ACTION_SHOW_NOTIFICATION" />
+                <action android:name="com.example.nirvana.ACTION_WELCOME_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
