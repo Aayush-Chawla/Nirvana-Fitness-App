@@ -16,6 +16,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
@@ -128,6 +129,15 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
         if (checkLocationPermission()) {
             loadNearbyGyms();
         }
+        
+        // Handle back press to prevent navigation to loginFragment
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), 
+            new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    requireActivity().finish();
+                }
+            });
     }
 
     private void initializeViews(View view) {

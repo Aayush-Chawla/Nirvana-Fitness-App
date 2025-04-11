@@ -10,6 +10,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
@@ -74,6 +75,21 @@ public class WorkoutFragment extends Fragment {
 
         // Start animations
         startAnimations();
+        
+        // Setup back navigation
+        setupBackNavigation();
+    }
+    
+    private void setupBackNavigation() {
+        // This prevents the back button from taking us to the login fragment
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(),
+            new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    // Navigate to the home fragment when back is pressed
+                    Navigation.findNavController(requireView()).navigate(R.id.homeFragment);
+                }
+            });
     }
 
     private void setupFirebase() {

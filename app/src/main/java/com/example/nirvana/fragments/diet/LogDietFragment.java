@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 import com.example.nirvana.R;
@@ -39,9 +40,8 @@ public class LogDietFragment extends Fragment implements FoodSearchDialog.OnFood
         // Setup toolbar back button
         androidx.appcompat.widget.Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> {
-            if (getActivity() != null) {
-                getActivity().onBackPressed();
-            }
+            // Use Navigation component to navigate up instead of onBackPressed
+            Navigation.findNavController(requireView()).navigateUp();
         });
 
         // Setup ViewPager with tabs

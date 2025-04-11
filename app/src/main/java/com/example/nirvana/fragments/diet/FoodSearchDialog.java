@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
@@ -17,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
 import com.example.nirvana.adapters.FoodSearchAdapter;
-import com.example.nirvana.api.FoodSearchResponse;
 import com.example.nirvana.models.FoodItem;
 import com.example.nirvana.models.PredefinedFoodItem;
 import com.example.nirvana.services.FoodItemService;
@@ -26,6 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Dialog for searching and selecting food items.
+ * Note: This dialog works with two different FoodItem classes:
+ * - com.example.nirvana.models.FoodItem (used by the adapter)
+ * - com.example.nirvana.data.models.FoodItem (used by Firestore)
+ */
 public class FoodSearchDialog extends DialogFragment {
     private static final String TAG = "FoodSearchDialog";
     private EditText editSearch;
@@ -41,6 +45,9 @@ public class FoodSearchDialog extends DialogFragment {
         return dialog;
     }
 
+    /**
+     * Interface for notifying when a food item has been selected
+     */
     public interface OnFoodSelectedListener {
         void onFoodSelected(com.example.nirvana.data.models.FoodItem foodItem, String servingSize);
     }
@@ -171,20 +178,48 @@ public class FoodSearchDialog extends DialogFragment {
     
     /**
      * Converts a FoodItem from models package to a FoodItem from data.models package
+     * @param foodItem The source FoodItem from models package
+     * @param servingSize The selected serving size (e.g. "100g")
+     * @return A new FoodItem from data.models package with values from the source
      */
     private com.example.nirvana.data.models.FoodItem convertToDataFoodItem(FoodItem foodItem, String servingSize) {
         com.example.nirvana.data.models.FoodItem dataFoodItem = new com.example.nirvana.data.models.FoodItem();
+        
+        // Extract numeric part from serving size
+        float servingSizeValue = 100f; // Default value
+        try {
+            String numericPart = servingSize.replaceAll("[^0-9.]", "");
+            if (!numericPart.isEmpty()) {
+                servingSizeValue = Float.parseFloat(numericPart);
+            }
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Error parsing serving size: " + servingSize, e);
+        }
+        
+        // Calculate the ratio for nutrition values
+        float ratio = servingSizeValue / 100f; // Base values are for 100g
+        
+        // Set all properties
         dataFoodItem.setFoodId(foodItem.getId());
         dataFoodItem.setName(foodItem.getName());
         dataFoodItem.setFoodName(foodItem.getName());
-        dataFoodItem.setCaloriesInt(foodItem.getCalories());
-        dataFoodItem.setCalories(foodItem.getCalories());
-        dataFoodItem.setProtein(foodItem.getProtein());
-        dataFoodItem.setCarbs(foodItem.getCarbs());
-        dataFoodItem.setFat(foodItem.getFat());
+        
+        // Calculate actual calories based on serving size
+        int adjustedCalories = Math.round(foodItem.getCalories() * ratio);
+        dataFoodItem.setCaloriesInt(adjustedCalories);
+        dataFoodItem.setCalories(adjustedCalories);
+        
+        // Calculate actual macros based on serving size
+        dataFoodItem.setProtein(foodItem.getProtein() * ratio);
+        dataFoodItem.setCarbs(foodItem.getCarbs() * ratio);
+        dataFoodItem.setFat(foodItem.getFat() * ratio);
+        
+        // Set serving information
         dataFoodItem.setServingDescription(servingSize);
         dataFoodItem.setServingId("custom");
-        dataFoodItem.setMealType("snack"); // Default value, can be changed by caller
+        
+        // Default meal type (will be updated by LogDietFragment based on selected tab)
+        dataFoodItem.setMealType("snack");
         
         return dataFoodItem;
     }

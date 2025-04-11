@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
@@ -57,8 +58,21 @@ public class DietFragment extends Fragment {
         initializeFirebase();
         setupButtonListeners();
         setupRealTimeListeners();
+        setupBackNavigation();
 
         return view;
+    }
+    
+    private void setupBackNavigation() {
+        // This prevents the back button from taking us to the login fragment
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(),
+            new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    // Navigate to the home fragment when back is pressed
+                    Navigation.findNavController(requireView()).navigate(R.id.homeFragment);
+                }
+            });
     }
 
     @Override
