@@ -14,6 +14,7 @@ import androidx.navigation.Navigation;
 
 import com.example.nirvana.R;
 import com.example.nirvana.models.FoodItem;
+import com.example.nirvana.utils.NotificationUtils;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
@@ -48,6 +49,10 @@ public class DietFragment extends Fragment {
     private String userId;
     private ListenerRegistration mealsListener;
     private ListenerRegistration goalListener;
+    
+    // Track previous calorie value to avoid duplicate notifications
+    private long previousCalorieValue = 0;
+    private String currentDate = "";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -57,6 +62,15 @@ public class DietFragment extends Fragment {
         initializeViews(view);
         initializeFirebase();
         setupButtonListeners();
+        
+        // Check if the date has changed
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
+        if (!today.equals(currentDate)) {
+            currentDate = today;
+            // Reset notification flags for a new day
+            NotificationUtils.resetCalorieNotificationFlags();
+        }
+        
         setupRealTimeListeners();
         setupBackNavigation();
 
@@ -315,6 +329,28 @@ public class DietFragment extends Fragment {
 
                 // Update UI with the totals
                 updateUI(totalCalories, totalProtein, totalCarbs, totalFat);
+                
+                // Check if we should show a notification for calorie goal progress
+                // Only check if the calorie value has changed to avoid duplicate checks
+                long currentCalories = (long) totalCalories;
+                if (currentCalories != previousCalorieValue) {
+                    previousCalorieValue = currentCalories;
+                    
+                    // Get the calorie goal
+                    String goalText = tvGoal.getText().toString();
+                    if (!goalText.isEmpty() && !goalText.equals("0")) {
+                        try {
+                            long goal = Long.parseLong(goalText);
+                            // Check and show calorie goal notifications
+                            NotificationUtils.checkAndShowCalorieGoalNotifications(
+                                    requireContext(), 
+                                    currentCalories, 
+                                    goal);
+                        } catch (NumberFormatException e) {
+                            Log.e(TAG, "Error parsing goal value for notifications", e);
+                        }
+                    }
+                }
             }
 
             @Override
@@ -351,6 +387,12 @@ public class DietFragment extends Fragment {
                 long calories = Long.parseLong(caloriesText);
                 long remaining = goal - calories;
                 tvRemaining.setText(String.valueOf(remaining));
+                
+                // Check if we should show notifications based on the updated goal
+                NotificationUtils.checkAndShowCalorieGoalNotifications(
+                        requireContext(), 
+                        calories, 
+                        goal);
             } catch (NumberFormatException e) {
                 Log.e(TAG, "Error parsing calories value", e);
             }

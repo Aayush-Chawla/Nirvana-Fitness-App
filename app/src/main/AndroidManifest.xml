@@ -50,6 +50,8 @@
             <intent-filter>
                 <action android:name="com.example.nirvana.ACTION_SHOW_NOTIFICATION" />
                 <action android:name="com.example.nirvana.ACTION_WELCOME_NOTIFICATION" />
+                <action android:name="com.example.nirvana.ACTION_CALORIE_GOAL_50_PERCENT" />
+                <action android:name="com.example.nirvana.ACTION_CALORIE_GOAL_COMPLETE" />
             </intent-filter>
         </receiver>
 
