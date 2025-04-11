@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.nirvana.R;
 import com.example.nirvana.adapters.BlogAdapter;
 import com.example.nirvana.adapters.ChatAdapter;
+import com.example.nirvana.adapters.RecentMealsAdapter;
 import com.example.nirvana.models.BlogPost;
 import com.example.nirvana.models.ChatMessage;
 import com.example.nirvana.models.GymMembership;
@@ -461,14 +462,125 @@ public class HomeFragment extends Fragment implements BlogAdapter.OnBlogClickLis
     }
 
     private void setupDietaryDashboardCard(View view) {
-        View dietaryDashboardCard = view.findViewById(R.id.cardDietaryDashboard);
-        if (dietaryDashboardCard != null) {
-            dietaryDashboardCard.setOnClickListener(v -> {
-                // Navigate to DietaryDashboardFragment
-                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
-                navController.navigate(R.id.action_homeFragment_to_dietaryDashboardFragment);
+        // Initialize the dietary dashboard card
+        CardView cardDietaryDashboard = view.findViewById(R.id.cardDietaryDashboard);
+        if (cardDietaryDashboard != null) {
+            cardDietaryDashboard.setOnClickListener(v -> {
+                Navigation.findNavController(view).navigate(R.id.action_homeFragment_to_dietaryDashboardFragment);
             });
         }
+        
+        // Load recent diet entries
+        loadRecentDietEntries(view);
+    }
+    
+    private void loadRecentDietEntries(View view) {
+        // Get references to UI elements
+        TextView tvRecentMeals = view.findViewById(R.id.tvRecentMeals);
+        RecyclerView rvRecentMeals = view.findViewById(R.id.rvRecentMeals);
+        
+        if (tvRecentMeals == null || rvRecentMeals == null) {
+            Log.e(TAG, "Diet UI elements not found in layout");
+            return;
+        }
+        
+        // Set up RecyclerView
+        rvRecentMeals.setLayoutManager(new LinearLayoutManager(requireContext()));
+        RecentMealsAdapter recentMealsAdapter = new RecentMealsAdapter();
+        rvRecentMeals.setAdapter(recentMealsAdapter);
+        
+        // Fetch recent meals from Firestore
+        FirestoreHelper.getMeals(new FirestoreHelper.OnDataFetchedListener<Map<String, List<Map<String, Object>>>>() {
+            @Override
+            public void onDataFetched(Map<String, List<Map<String, Object>>> meals) {
+                if (getActivity() == null || !isAdded()) return;
+                
+                getActivity().runOnUiThread(() -> {
+                    List<Map<String, Object>> allMeals = new ArrayList<>();
+                    
+                    // Combine all meals into a single list
+                    if (meals != null) {
+                        for (Map.Entry<String, List<Map<String, Object>>> entry : meals.entrySet()) {
+                            String mealType = entry.getKey();
+                            List<Map<String, Object>> mealItems = entry.getValue();
+                            
+                            if (mealItems != null && !mealItems.isEmpty()) {
+                                for (Map<String, Object> item : mealItems) {
+                                    // Add meal type to each item
+                                    item.put("mealType", mealType);
+                                    allMeals.add(item);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Sort by timestamp (most recent first)
+                    allMeals.sort((a, b) -> {
+                        Object timestampA = a.get("timestamp");
+                        Object timestampB = b.get("timestamp");
+                        
+                        if (timestampA == null || timestampB == null) {
+                            return 0;
+                        }
+                        
+                        long timeA, timeB;
+                        
+                        // Handle Long type
+                        if (timestampA instanceof Long) {
+                            timeA = (Long) timestampA;
+                        }
+                        // Handle Timestamp type
+                        else if (timestampA instanceof com.google.firebase.Timestamp) {
+                            timeA = ((com.google.firebase.Timestamp) timestampA).getSeconds() * 1000;
+                        }
+                        else {
+                            Log.w(TAG, "Unexpected timestamp type: " + timestampA.getClass().getName());
+                            return 0;
+                        }
+                        
+                        // Handle Long type
+                        if (timestampB instanceof Long) {
+                            timeB = (Long) timestampB;
+                        }
+                        // Handle Timestamp type
+                        else if (timestampB instanceof com.google.firebase.Timestamp) {
+                            timeB = ((com.google.firebase.Timestamp) timestampB).getSeconds() * 1000;
+                        }
+                        else {
+                            Log.w(TAG, "Unexpected timestamp type: " + timestampB.getClass().getName());
+                            return 0;
+                        }
+                        
+                        return Long.compare(timeB, timeA); // Descending order (most recent first)
+                    });
+                    
+                    // Limit to 5 most recent entries
+                    int limit = Math.min(allMeals.size(), 5);
+                    List<Map<String, Object>> recentMeals = allMeals.subList(0, limit);
+                    
+                    // Update UI
+                    if (recentMeals.isEmpty()) {
+                        tvRecentMeals.setText("No recent meals logged");
+                        rvRecentMeals.setVisibility(View.GONE);
+                    } else {
+                        tvRecentMeals.setText("Recent Meals");
+                        rvRecentMeals.setVisibility(View.VISIBLE);
+                        recentMealsAdapter.setMeals(recentMeals);
+                    }
+                });
+            }
+            
+            @Override
+            public void onError(String message) {
+                if (getActivity() == null || !isAdded()) return;
+                
+                getActivity().runOnUiThread(() -> {
+                    Log.e(TAG, "Error loading recent meals: " + message);
+                    tvRecentMeals.setText("Error loading meals");
+                    rvRecentMeals.setVisibility(View.GONE);
+                });
+            }
+        });
     }
 
     private void setupGymMembershipCard(View view) {

@@ -3,291 +3,306 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_gray">
+    android:fillViewport="true">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="wrap_content">
 
-        <!-- Weekly Summary Card -->
-        <androidx.cardview.widget.CardView
+        <!-- Content Container -->
+        <LinearLayout
+            android:id="@+id/contentContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <LinearLayout
+            <!-- Weekly Nutrition Summary Card -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Weekly Nutrition Summary"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_primary"/>
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                    <!-- Calories -->
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
+                        android:text="Weekly Nutrition Summary"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:layout_marginBottom="16dp"/>
 
-                        <TextView
-                            android:id="@+id/tvCalories"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/primary"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Calories"
-                            android:textSize="14sp"
-                            android:textColor="@color/text_secondary"/>
-                    </LinearLayout>
-
-                    <!-- Protein -->
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/tvWeeklySummary"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
+                        android:textAppearance="?attr/textAppearanceBody2"
+                        android:layout_marginBottom="16dp"/>
 
-                        <TextView
-                            android:id="@+id/tvProtein"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0g"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/primary"/>
+                    <!-- Weekly Nutrition Chart -->
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/weeklyChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginBottom="16dp"/>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Protein"
-                            android:textSize="14sp"
-                            android:textColor="@color/text_secondary"/>
-                    </LinearLayout>
-
-                    <!-- Carbs -->
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/tvCarbs"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="0g"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/primary"/>
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                            <TextView
+                                android:id="@+id/tvCalories"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceHeadline6"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Calories"
+                                android:textAppearance="?attr/textAppearanceCaption"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="Carbs"
-                            android:textSize="14sp"
-                            android:textColor="@color/text_secondary"/>
-                    </LinearLayout>
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
 
-                    <!-- Fat -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
+                            <TextView
+                                android:id="@+id/tvProtein"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceHeadline6"/>
 
-                        <TextView
-                            android:id="@+id/tvFat"
-                            android:layout_width="wrap_content"
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Protein"
+                                android:textAppearance="?attr/textAppearanceCaption"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="0g"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/primary"/>
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                            <TextView
+                                android:id="@+id/tvCarbs"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceHeadline6"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Carbs"
+                                android:textAppearance="?attr/textAppearanceCaption"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="Fat"
-                            android:textSize="14sp"
-                            android:textColor="@color/text_secondary"/>
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/tvFat"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceHeadline6"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Fat"
+                                android:textAppearance="?attr/textAppearanceCaption"/>
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-        <!-- Nutrient Status Card -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
-
-            <LinearLayout
+            <!-- Nutrient Status Card -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Nutrient Status"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_primary"/>
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                    <!-- Calories Status -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:orientation="horizontal">
+                        android:text="Nutrient Status"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:layout_marginBottom="16dp"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Calories"
-                            android:textColor="@color/text_secondary"/>
-
-                        <TextView
-                            android:id="@+id/tvCaloriesStatus"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Optimal"
-                            android:textColor="@color/green_500"/>
-                    </LinearLayout>
-
-                    <!-- Protein Status -->
-                    <LinearLayout
+                    <!-- Nutrient Progress Chart -->
+                    <com.github.mikephil.charting.charts.HorizontalBarChart
+                        android:id="@+id/nutrientProgressChart"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:orientation="horizontal">
+                        android:layout_height="200dp"
+                        android:layout_marginBottom="16dp"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Protein"
-                            android:textColor="@color/text_secondary"/>
-
-                        <TextView
-                            android:id="@+id/tvProteinStatus"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Optimal"
-                            android:textColor="@color/green_500"/>
-                    </LinearLayout>
-
-                    <!-- Carbs Status -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Carbs"
-                            android:textColor="@color/text_secondary"/>
-
-                        <TextView
-                            android:id="@+id/tvCarbsStatus"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Optimal"
-                            android:textColor="@color/green_500"/>
-                    </LinearLayout>
-
-                    <!-- Fat Status -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Fat"
-                            android:textColor="@color/text_secondary"/>
+                            android:orientation="vertical"
+                            android:gravity="center">
 
-                        <TextView
-                            android:id="@+id/tvFatStatus"
-                            android:layout_width="wrap_content"
+                            <TextView
+                                android:id="@+id/tvCaloriesStatus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceBody1"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Calories"
+                                android:textAppearance="?attr/textAppearanceCaption"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="Optimal"
-                            android:textColor="@color/green_500"/>
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/tvProteinStatus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceBody1"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Protein"
+                                android:textAppearance="?attr/textAppearanceCaption"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/tvCarbsStatus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceBody1"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Carbs"
+                                android:textAppearance="?attr/textAppearanceCaption"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/tvFatStatus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceBody1"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Fat"
+                                android:textAppearance="?attr/textAppearanceCaption"/>
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-        <!-- Recommendations Card -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
-
-            <LinearLayout
+            <!-- Recommendations Card -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Recommendations"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_primary"/>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvRecommendations"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:nestedScrollingEnabled="false"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-    </LinearLayout>
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Recommendations"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:layout_marginBottom="16dp"/>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvRecommendations"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- Loading Indicator -->
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+        <!-- Error State -->
+        <TextView
+            android:id="@+id/tvErrorState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="16dp"
+            android:textAlignment="center"
+            android:textAppearance="?attr/textAppearanceBody1"
+            android:visibility="gone"/>
+
+    </FrameLayout>
 </ScrollView> 

@@ -54,6 +54,30 @@
             android:textSize="14sp"
             android:textColor="@color/text_secondary" />
 
+        <!-- Recent Meals Section -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/light_gray"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/tvRecentMeals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Recent Meals"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvRecentMeals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:nestedScrollingEnabled="false" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

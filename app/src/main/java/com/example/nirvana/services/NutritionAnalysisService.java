@@ -11,8 +11,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class NutritionAnalysisService {
     private static final String TAG = "NutritionAnalysisService";
@@ -39,11 +41,13 @@ public class NutritionAnalysisService {
         this.currentCallback = callback;
         this.currentAnalysis = new NutritionAnalysis();
         
-        // Start listening to profile changes
+        // First set up profile to get goals
         setupProfileListener();
         
-        // Start listening to food log changes
-        setupFoodLogsListener();
+        // Then set up food logs after a short delay to ensure goals are set
+        new android.os.Handler().postDelayed(() -> {
+            setupFoodLogsListener();
+        }, 500);
     }
 
     public void stopRealtimeUpdates() {
@@ -64,43 +68,52 @@ public class NutritionAnalysisService {
         profileListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    // Add null checks for user profile data
-                    Double weight = dataSnapshot.child("weight").getValue(Double.class);
-                    Double height = dataSnapshot.child("height").getValue(Double.class);
-                    Integer age = dataSnapshot.child("age").getValue(Integer.class);
-                    String gender = dataSnapshot.child("gender").getValue(String.class);
-                    String activityLevel = dataSnapshot.child("activityLevel").getValue(String.class);
-                    
-                    // Use default values if data is missing
-                    double weightValue = weight != null ? weight : 70.0;
-                    double heightValue = height != null ? height : 170.0;
-                    int ageValue = age != null ? age : 30;
-                    String genderValue = gender != null ? gender : "Male";
-                    String activityLevelValue = activityLevel != null ? activityLevel : "Moderately Active";
-                    
-                    // Calculate BMR using Mifflin-St Jeor Equation
-                    double bmr;
-                    if (genderValue.equals("Male")) {
-                        bmr = (10 * weightValue) + (6.25 * heightValue) - (5 * ageValue) + 5;
+                try {
+                    if (dataSnapshot.exists()) {
+                        // Add null checks for user profile data
+                        Double weight = dataSnapshot.child("weight").getValue(Double.class);
+                        Double height = dataSnapshot.child("height").getValue(Double.class);
+                        Integer age = dataSnapshot.child("age").getValue(Integer.class);
+                        String gender = dataSnapshot.child("gender").getValue(String.class);
+                        String activityLevel = dataSnapshot.child("activityLevel").getValue(String.class);
+                        
+                        // Use default values if data is missing
+                        double weightValue = weight != null ? weight : 70.0;
+                        double heightValue = height != null ? height : 170.0;
+                        int ageValue = age != null ? age : 30;
+                        String genderValue = gender != null ? gender : "Male";
+                        String activityLevelValue = activityLevel != null ? activityLevel : "Moderately Active";
+                        
+                        // Calculate BMR using Mifflin-St Jeor Equation
+                        double bmr;
+                        if (genderValue.equals("Male")) {
+                            bmr = (10 * weightValue) + (6.25 * heightValue) - (5 * ageValue) + 5;
+                        } else {
+                            bmr = (10 * weightValue) + (6.25 * heightValue) - (5 * ageValue) - 161;
+                        }
+                        
+                        // Calculate TDEE based on activity level
+                        double tdee = calculateTDEE(bmr, activityLevelValue);
+                        
+                        // Set goals based on calculated values
+                        currentAnalysis.setCalorieGoal(tdee);
+                        currentAnalysis.setProteinGoal(weightValue * 1.6); // 1.6g protein per kg bodyweight
+                        currentAnalysis.setCarbsGoal(tdee * 0.45 / 4); // 45% of calories from carbs
+                        currentAnalysis.setFatGoal(tdee * 0.25 / 9); // 25% of calories from fat
+                        
+                        // Log the goals for debugging
+                        Log.d(TAG, String.format("Goals set - Calories: %.0f, Protein: %.0f, Carbs: %.0f, Fat: %.0f",
+                            tdee, weightValue * 1.6, tdee * 0.45 / 4, tdee * 0.25 / 9));
+                        
+                        // Update analysis with new goals
+                        updateAnalysis();
                     } else {
-                        bmr = (10 * weightValue) + (6.25 * heightValue) - (5 * ageValue) - 161;
+                        // Use default values if profile doesn't exist
+                        setDefaultGoals();
                     }
-                    
-                    // Calculate TDEE based on activity level
-                    double tdee = calculateTDEE(bmr, activityLevelValue);
-                    
-                    // Update recommended values
-                    currentAnalysis.setRecommendedCalories(tdee);
-                    currentAnalysis.setRecommendedProtein(weightValue * 1.6);
-                    currentAnalysis.setRecommendedCarbs(tdee * 0.45 / 4);
-                    currentAnalysis.setRecommendedFat(tdee * 0.25 / 9);
-                    
-                    // Update analysis with new recommendations
-                    updateAnalysis();
-                } else {
-                    // Use default values if profile doesn't exist
-                    setDefaultRecommendations();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error processing profile data: " + e.getMessage());
+                    setDefaultGoals();
                 }
             }
 
@@ -109,6 +122,7 @@ public class NutritionAnalysisService {
                 if (currentCallback != null) {
                     currentCallback.onError("Failed to load profile: " + databaseError.getMessage());
                 }
+                setDefaultGoals();
             }
         };
 
@@ -117,7 +131,7 @@ public class NutritionAnalysisService {
 
     private void setupFoodLogsListener() {
         List<String> dates = getLastSevenDays();
-        final double[] totals = {0, 0, 0, 0}; // calories, protein, carbs, fat
+        Map<String, double[]> dailyTotals = new HashMap<>();
 
         if (foodLogsListener != null) {
             userRef.child("food_logs").removeEventListener(foodLogsListener);
@@ -127,14 +141,24 @@ public class NutritionAnalysisService {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 try {
-                    // Reset totals
-                    for (int i = 0; i < totals.length; i++) {
-                        totals[i] = 0;
+                    // Reset daily totals but keep the current analysis object
+                    dailyTotals.clear();
+                    
+                    // Clear previous daily values
+                    currentAnalysis.getDailyCalories().clear();
+                    currentAnalysis.getDailyProtein().clear();
+                    currentAnalysis.getDailyCarbs().clear();
+                    currentAnalysis.getDailyFat().clear();
+                    
+                    for (String date : dates) {
+                        dailyTotals.put(date, new double[4]); // calories, protein, carbs, fat
                     }
 
                     // Calculate totals for each date
                     for (String date : dates) {
                         DataSnapshot dateSnapshot = dataSnapshot.child(date);
+                        double[] totals = dailyTotals.get(date);
+                        
                         if (dateSnapshot.exists()) {
                             for (DataSnapshot foodSnapshot : dateSnapshot.getChildren()) {
                                 Double calories = foodSnapshot.child("calories").getValue(Double.class);
@@ -148,24 +172,21 @@ public class NutritionAnalysisService {
                                 totals[3] += fat != null ? fat : 0;
                             }
                         }
+                        
+                        // Add daily values to analysis (even if zero)
+                        currentAnalysis.addDailyValues(totals[0], totals[1], totals[2], totals[3]);
+                        
+                        // Log the values for debugging
+                        Log.d(TAG, String.format("Date: %s, Calories: %.1f, Protein: %.1f, Carbs: %.1f, Fat: %.1f",
+                            date, totals[0], totals[1], totals[2], totals[3]));
                     }
 
-                    // Update analysis with new totals
-                    currentAnalysis.setTotalCalories(totals[0]);
-                    currentAnalysis.setTotalProtein(totals[1]);
-                    currentAnalysis.setTotalCarbs(totals[2]);
-                    currentAnalysis.setTotalFat(totals[3]);
-                    
-                    currentAnalysis.setAverageCalories(totals[0] / 7);
-                    currentAnalysis.setAverageProtein(totals[1] / 7);
-                    currentAnalysis.setAverageCarbs(totals[2] / 7);
-                    currentAnalysis.setAverageFat(totals[3] / 7);
-                    
                     // Update analysis with new values
                     updateAnalysis();
 
                 } catch (Exception e) {
                     Log.e(TAG, "Error processing food logs: " + e.getMessage());
+                    e.printStackTrace();
                     if (currentCallback != null) {
                         currentCallback.onError("Error processing food logs: " + e.getMessage());
                     }
@@ -174,6 +195,7 @@ public class NutritionAnalysisService {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "Food logs listener cancelled: " + databaseError.getMessage());
                 if (currentCallback != null) {
                     currentCallback.onError("Failed to load food logs: " + databaseError.getMessage());
                 }
@@ -185,19 +207,25 @@ public class NutritionAnalysisService {
 
     private void updateAnalysis() {
         if (currentAnalysis != null && currentCallback != null) {
-            generateStatusAndRecommendations(currentAnalysis);
-            currentCallback.onAnalysisComplete(currentAnalysis);
+            try {
+                generateRecommendations();
+                currentCallback.onAnalysisComplete(currentAnalysis);
+            } catch (Exception e) {
+                Log.e(TAG, "Error in updateAnalysis: " + e.getMessage());
+                e.printStackTrace();
+                currentCallback.onError("Error updating analysis: " + e.getMessage());
+            }
         }
     }
 
-    private void setDefaultRecommendations() {
+    private void setDefaultGoals() {
         double defaultWeight = 70.0;
         double defaultTDEE = 2000.0;
         
-        currentAnalysis.setRecommendedCalories(defaultTDEE);
-        currentAnalysis.setRecommendedProtein(defaultWeight * 1.6);
-        currentAnalysis.setRecommendedCarbs(defaultTDEE * 0.45 / 4);
-        currentAnalysis.setRecommendedFat(defaultTDEE * 0.25 / 9);
+        currentAnalysis.setCalorieGoal(defaultTDEE);
+        currentAnalysis.setProteinGoal(defaultWeight * 1.6);
+        currentAnalysis.setCarbsGoal(defaultTDEE * 0.45 / 4);
+        currentAnalysis.setFatGoal(defaultTDEE * 0.25 / 9);
         
         updateAnalysis();
     }
@@ -232,51 +260,35 @@ public class NutritionAnalysisService {
         }
     }
 
-    private void generateStatusAndRecommendations(NutritionAnalysis analysis) {
-        // Generate status for each nutrient
-        analysis.setCalorieStatus(generateStatus(analysis.getAverageCalories(), analysis.getRecommendedCalories()));
-        analysis.setProteinStatus(generateStatus(analysis.getAverageProtein(), analysis.getRecommendedProtein()));
-        analysis.setCarbsStatus(generateStatus(analysis.getAverageCarbs(), analysis.getRecommendedCarbs()));
-        analysis.setFatStatus(generateStatus(analysis.getAverageFat(), analysis.getRecommendedFat()));
-        
-        // Generate recommendations
+    private void generateRecommendations() {
         List<String> recommendations = new ArrayList<>();
         
-        // Calorie recommendations
-        if (analysis.getAverageCalories() < analysis.getRecommendedCalories() * 0.9) {
-            recommendations.add("Your calorie intake is below the recommended amount. Consider increasing your food intake.");
-        } else if (analysis.getAverageCalories() > analysis.getRecommendedCalories() * 1.1) {
-            recommendations.add("Your calorie intake is above the recommended amount. Consider reducing portion sizes.");
+        // Check calorie intake
+        if (currentAnalysis.getAverageCalories() < currentAnalysis.getCalorieGoal() * 0.9) {
+            recommendations.add("Increase your calorie intake by adding healthy snacks between meals.");
+        } else if (currentAnalysis.getAverageCalories() > currentAnalysis.getCalorieGoal() * 1.1) {
+            recommendations.add("Try to reduce your calorie intake by controlling portion sizes.");
         }
         
-        // Protein recommendations
-        if (analysis.getAverageProtein() < analysis.getRecommendedProtein() * 0.9) {
-            recommendations.add("Your protein intake is low. Include more lean meats, fish, or plant-based protein sources.");
+        // Check protein intake
+        if (currentAnalysis.getAverageProtein() < currentAnalysis.getProteinGoal() * 0.9) {
+            recommendations.add("Include more lean protein sources like chicken, fish, or legumes.");
         }
         
-        // Carbs recommendations
-        if (analysis.getAverageCarbs() < analysis.getRecommendedCarbs() * 0.9) {
-            recommendations.add("Your carbohydrate intake is low. Include more whole grains and vegetables.");
-        } else if (analysis.getAverageCarbs() > analysis.getRecommendedCarbs() * 1.1) {
-            recommendations.add("Your carbohydrate intake is high. Consider reducing refined carbs and sugars.");
+        // Check carbs intake
+        if (currentAnalysis.getAverageCarbs() < currentAnalysis.getCarbsGoal() * 0.9) {
+            recommendations.add("Add more complex carbohydrates like whole grains and vegetables.");
+        } else if (currentAnalysis.getAverageCarbs() > currentAnalysis.getCarbsGoal() * 1.1) {
+            recommendations.add("Consider reducing refined carbohydrates and sugary foods.");
         }
         
-        // Fat recommendations
-        if (analysis.getAverageFat() > analysis.getRecommendedFat() * 1.1) {
-            recommendations.add("Your fat intake is high. Focus on healthy fats and reduce saturated fats.");
+        // Check fat intake
+        if (currentAnalysis.getAverageFat() < currentAnalysis.getFatGoal() * 0.9) {
+            recommendations.add("Include healthy fats from sources like avocados, nuts, and olive oil.");
+        } else if (currentAnalysis.getAverageFat() > currentAnalysis.getFatGoal() * 1.1) {
+            recommendations.add("Try to reduce intake of saturated and processed fats.");
         }
         
-        // Add general recommendations
-        recommendations.add("Aim to eat a variety of foods to ensure you get all necessary nutrients.");
-        recommendations.add("Stay hydrated by drinking plenty of water throughout the day.");
-        
-        analysis.setRecommendations(recommendations.toArray(new String[0]));
-    }
-
-    private String generateStatus(double actual, double recommended) {
-        double percentage = (actual / recommended) * 100;
-        if (percentage < 90) return "Low";
-        if (percentage > 110) return "High";
-        return "Optimal";
+        currentAnalysis.setRecommendations(recommendations.toArray(new String[0]));
     }
 } 

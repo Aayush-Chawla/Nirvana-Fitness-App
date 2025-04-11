@@ -173,32 +173,39 @@ public class FirestoreHelper {
     public static void logFood(String mealType, FoodItem foodItem, String servingSize, OnCompleteListener listener) {
         DocumentReference userRef = getUserDocRef();
         if (userRef == null) {
-            if (listener != null) listener.onFailure("User not authenticated");
+            listener.onFailure("User not authenticated");
             return;
         }
 
         String today = getTodayDate();
+        String mealTypeLower = mealType.toLowerCase();
         
+        // Create a map with the food item data
         Map<String, Object> foodData = new HashMap<>();
+        foodData.put("id", foodItem.getId());
         foodData.put("name", foodItem.getName());
         foodData.put("calories", foodItem.getCalories());
+        foodData.put("servingSize", servingSize);
         foodData.put("protein", foodItem.getProtein());
         foodData.put("carbs", foodItem.getCarbs());
         foodData.put("fat", foodItem.getFat());
-        foodData.put("servingSize", servingSize);
-        foodData.put("timestamp", FieldValue.serverTimestamp());
+        foodData.put("timestamp", System.currentTimeMillis()); // Add timestamp
         
+        // Add to Firestore
         userRef.collection(MEALS_COLLECTION)
-            .document(today)
-            .collection(mealType.toLowerCase())
-            .add(foodData)
-            .addOnSuccessListener(documentReference -> {
-                Log.d(TAG, "Food logged successfully");
-                if (listener != null) listener.onSuccess();
-            })
-            .addOnFailureListener(e -> {
-                Log.e(TAG, "Error logging food", e);
-                if (listener != null) listener.onFailure(e.getMessage());
+                .document(today)
+                .collection(mealTypeLower)
+                .add(foodData)
+                .addOnSuccessListener(documentReference -> {
+                    // Update the food item with the document ID
+                    foodItem.setDocId(documentReference.getId());
+                    
+                    // Update daily calories
+                    updateDailyCalories(foodItem.getCalories(), listener);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error logging food: " + e.getMessage());
+                    listener.onFailure("Failed to log food: " + e.getMessage());
                 });
     }
 
@@ -208,11 +215,12 @@ public class FirestoreHelper {
     public static void logFood(String mealType, com.example.nirvana.data.models.FoodItem foodItem, String servingSize, OnCompleteListener listener) {
         DocumentReference userRef = getUserDocRef();
         if (userRef == null) {
-            if (listener != null) listener.onFailure("User not authenticated");
+            listener.onFailure("User not authenticated");
             return;
         }
 
         String today = getTodayDate();
+        String mealTypeLower = mealType.toLowerCase();
         
         // Get food name from either property
         String foodName = foodItem.getName() != null ? foodItem.getName() : foodItem.getFoodName();
@@ -227,20 +235,21 @@ public class FirestoreHelper {
         foodData.put("carbs", foodItem.getCarbs());
         foodData.put("fat", foodItem.getFat());
         foodData.put("servingSize", servingSize);
-        foodData.put("timestamp", FieldValue.serverTimestamp());
+        foodData.put("timestamp", System.currentTimeMillis()); // Use client timestamp instead of server timestamp
         
         userRef.collection(MEALS_COLLECTION)
             .document(today)
-            .collection(mealType.toLowerCase())
+            .collection(mealTypeLower)
             .add(foodData)
             .addOnSuccessListener(documentReference -> {
                 Log.d(TAG, "Food logged successfully");
-                if (listener != null) listener.onSuccess();
-                })
-                .addOnFailureListener(e -> {
-                Log.e(TAG, "Error logging food", e);
-                if (listener != null) listener.onFailure(e.getMessage());
-                });
+                // Update daily calories
+                updateDailyCalories((int)calories, listener);
+            })
+            .addOnFailureListener(e -> {
+                Log.e(TAG, "Error logging food: " + e.getMessage());
+                listener.onFailure("Failed to log food: " + e.getMessage());
+            });
     }
 
     /**
