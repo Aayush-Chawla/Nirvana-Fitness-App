@@ -1,24 +1,26 @@
+import kagglehub
 import os
-import urllib.request
+import shutil
 
-# Create directories if they don't exist
-os.makedirs("app/src/main/assets", exist_ok=True)
+def download_model():
+    # Download the model
+    print("Downloading model from Kaggle Hub...")
+    model_path = kagglehub.model_download("google/aiy/tfLite/vision-classifier-food-v1")
+    print(f"Model downloaded to: {model_path}")
+    
+    # Create assets directory if it doesn't exist
+    assets_dir = "app/src/main/assets"
+    os.makedirs(assets_dir, exist_ok=True)
+    
+    # Copy model files to assets directory
+    for file in os.listdir(model_path):
+        if file.endswith('.tflite') or file.endswith('.txt'):
+            src = os.path.join(model_path, file)
+            dst = os.path.join(assets_dir, file)
+            shutil.copy2(src, dst)
+            print(f"Copied {file} to {dst}")
+    
+    print("Model files copied to assets directory successfully!")
 
-# Download the model
-model_url = "https://tfhub.dev/tensorflow/lite-model/mobilenet_v2_1.0_224/1/metadata/1?lite-format=tflite"
-model_path = "app/src/main/assets/food_recognition_model.tflite"
-
-print(f"Downloading model from {model_url}...")
-
-# Add headers to mimic a browser request
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-}
-
-req = urllib.request.Request(model_url, headers=headers)
-with urllib.request.urlopen(req) as response:
-    with open(model_path, 'wb') as f:
-        f.write(response.read())
-
-print(f"Model downloaded to {model_path}")
-print("Download complete!") 
+if __name__ == "__main__":
+    download_model() 

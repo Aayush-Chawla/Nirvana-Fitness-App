@@ -1,8 +1,11 @@
 package com.example.nirvana.fragments;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -18,6 +21,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,6 +44,7 @@ public class MealRecognitionFragment extends Fragment {
     private static final String TAG = "MealRecognitionFragment";
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_PICK_IMAGE = 2;
+    private static final int REQUEST_CAMERA_PERMISSION = 3;
     
     private ImageView ivMealPreview;
     private Button btnTakePhoto, btnGallery, btnAnalyzeMeal;
@@ -89,17 +95,44 @@ public class MealRecognitionFragment extends Fragment {
         progressMealAnalysis.setVisibility(View.GONE);
         
         // Set up button listeners
-        btnTakePhoto.setOnClickListener(v -> takePhoto());
+        btnTakePhoto.setOnClickListener(v -> checkCameraPermissionAndOpen());
         btnGallery.setOnClickListener(v -> pickPhoto());
         btnAnalyzeMeal.setOnClickListener(v -> analyzeMeal());
     }
     
-    private void takePhoto() {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
-            startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+    private void checkCameraPermissionAndOpen() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
         } else {
-            Toast.makeText(requireContext(), "No camera app available", Toast.LENGTH_SHORT).show();
+            openCamera();
+        }
+    }
+    
+    private void openCamera() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        try {
+            if (takePictureIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            } else {
+                Toast.makeText(requireContext(), "No camera app found on your device", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error opening camera", e);
+            Toast.makeText(requireContext(), "Error opening camera: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                         @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openCamera();
+            } else {
+                Toast.makeText(requireContext(), "Camera permission is required to take photos",
+                        Toast.LENGTH_SHORT).show();
+            }
         }
     }
     
@@ -118,22 +151,77 @@ public class MealRecognitionFragment extends Fragment {
                 Bundle extras = data.getExtras();
                 if (extras != null) {
                     mealPhoto = (Bitmap) extras.get("data");
-                    ivMealPreview.setImageBitmap(mealPhoto);
-                    btnAnalyzeMeal.setEnabled(true);
+                    if (mealPhoto != null) {
+                        // Scale the bitmap to fit the ImageView while maintaining aspect ratio
+                        int targetWidth = ivMealPreview.getWidth();
+                        int targetHeight = ivMealPreview.getHeight();
+                        if (targetWidth > 0 && targetHeight > 0) {
+                            float scale = Math.min((float) targetWidth / mealPhoto.getWidth(),
+                                                 (float) targetHeight / mealPhoto.getHeight());
+                            int newWidth = Math.round(mealPhoto.getWidth() * scale);
+                            int newHeight = Math.round(mealPhoto.getHeight() * scale);
+                            mealPhoto = Bitmap.createScaledBitmap(mealPhoto, newWidth, newHeight, true);
+                        }
+                        ivMealPreview.setImageBitmap(mealPhoto);
+                        ivMealPreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        btnAnalyzeMeal.setEnabled(true);
+                    }
                 }
             } else if (requestCode == REQUEST_PICK_IMAGE && data != null) {
                 Uri selectedImage = data.getData();
                 try {
-                    mealPhoto = MediaStore.Images.Media.getBitmap(
-                            requireActivity().getContentResolver(), selectedImage);
-                    ivMealPreview.setImageBitmap(mealPhoto);
-                    btnAnalyzeMeal.setEnabled(true);
+                    // Get the dimensions of the ImageView
+                    int targetWidth = ivMealPreview.getWidth();
+                    int targetHeight = ivMealPreview.getHeight();
+                    
+                    // Load the image with proper scaling
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeStream(
+                            requireActivity().getContentResolver().openInputStream(selectedImage),
+                            null, options);
+                    
+                    // Calculate inSampleSize
+                    options.inSampleSize = calculateInSampleSize(options, targetWidth, targetHeight);
+                    options.inJustDecodeBounds = false;
+                    
+                    // Load the scaled bitmap
+                    mealPhoto = BitmapFactory.decodeStream(
+                            requireActivity().getContentResolver().openInputStream(selectedImage),
+                            null, options);
+                    
+                    if (mealPhoto != null) {
+                        ivMealPreview.setImageBitmap(mealPhoto);
+                        ivMealPreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        btnAnalyzeMeal.setEnabled(true);
+                    }
                 } catch (IOException e) {
                     Log.e(TAG, "Error loading image", e);
                     Toast.makeText(requireContext(), "Error loading image", Toast.LENGTH_SHORT).show();
                 }
             }
         }
+    }
+    
+    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
     
     private void analyzeMeal() {
